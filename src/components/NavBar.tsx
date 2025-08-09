@@ -4,27 +4,38 @@ import React from "react";
 import Image from "next/image";
 import logo from "../../public/Logo.png";
 import Button from "./Button";
+import { usePathname, useRouter } from "next/navigation";
 
 const NavBar = () => {
+    const router = useRouter();
+    const pathname = usePathname();
     return (
-        <div className="w-full bg-white shadow-lg flex items-center justify-center p-3">
-            <div className="flex items-center justify-between w-full max-w-[1300px]">
-                <div className="flex items-center gap-2">
+        <div
+            className={`w-full bg-white shadow-lg flex items-center justify-center p-3 fixed ${
+                pathname === "/signup" || pathname === "/login" ? "hidden" : ""
+            }`}
+        >
+            <div className="flex items-center justify-between w-full max-w-5xl">
+                <a href="/" className="flex items-center gap-2">
                     <Image src={logo} alt="logo" />
-                    <span className="text-2xl font-bold font-display">
+                    <span className="text-xl font-bold font-display">
                         SocialHub
                     </span>
-                </div>
+                </a>
                 <div className="flex items-center gap-2">
                     <Button
                         variant="ghost"
                         text="Login"
-                        onClick={() => {}}
+                        onClick={() => {
+                            router.push("/login");
+                        }}
                     />
                     <Button
                         variant="primary"
                         text="Sign up"
-                        onClick={() => {}}
+                        onClick={() => {
+                            router.push("/signup");
+                        }}
                     />
                 </div>
             </div>
