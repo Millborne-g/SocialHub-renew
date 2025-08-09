@@ -13,6 +13,8 @@ import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import LoadingScreen from "@/components/LoadingScreen";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { useAuthStore } from "@/store/authStore";
+import { decodeToken } from "@/lib/jwt";
 
 const schema = yup
     .object({
@@ -37,7 +39,7 @@ const SignupContent = ({ email }: { email: string }) => {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const [isPasswordMatch, setIsPasswordMatch] = useState(true);
-
+    const { signup } = useAuthStore();
     const getGoogleInfo = useGoogleLogin({
         onSuccess: (codeResponse) => {
             const apiUrl = `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${codeResponse.access_token}`;
@@ -63,19 +65,12 @@ const SignupContent = ({ email }: { email: string }) => {
     const onSubmit = async (data: any) => {
         try {
             setIsLoading(true);
-            const response = await fetch("/api/auth", {
-                method: "POST",
-                body: JSON.stringify({ ...data, userImage: "" }),
-            });
-            if (response.ok) {
-                console.log("User created successfully");
-                toast.success("User created successfully");
-                router.push("/home");
-            } else {
-                console.log("User creation failed");
-            }
-        } catch (Error) {
-            console.log(Error);
+            await signup(data.firstName, data.lastName, data.email, data.password);
+            toast.success("User created successfully");
+            // router.push("/home");
+        } catch (Error: any) {
+            toast.error("User creation failed");
+            console.log(Error.response.data.message, "test");
         } finally {
             setIsLoading(false);
         }
@@ -192,9 +187,14 @@ const SignupContent = ({ email }: { email: string }) => {
                 <div className="flex items-center justify-center">
                     <span className="text-sm text-gray-500">
                         Already have an account?{" "}
-                        <a href="/login" className="text-primary">
+                        <span
+                            className="text-primary"
+                            onClick={() => {
+                                router.push("/login");
+                            }}
+                        >
                             Login
-                        </a>
+                        </span>
                     </span>
                 </div>
             </div>

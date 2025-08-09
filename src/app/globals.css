@@ -1,10 +1,26 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Poppins", sans-serif;
-  --color-primary: #0066FF;
-  --color-secondary: #ffffff;
-  --color-tertiary: #f0f0f0;
+    --font-display: "Poppins", sans-serif;
+    --color-primary: #0066ff;
+    --color-secondary: #ffffff;
+    --color-tertiary: #f0f0f0;
+    --shadow-elevation-1: 0 4px 45px 0 rgba(9, 18, 39, 0.05);
+    --shadow-elevation-2: 0 4px 60px 0 rgba(9, 18, 39, 0.1);
+    --shadow-elevation-3: 0 0 25px rgba(0, 0, 0, 0.12);
+}
+
+/* Box Shadow Utility Classes */
+.shadow-elevation-1 {
+    box-shadow: var(--shadow-elevation-1);
+}
+
+.shadow-elevation-2 {
+    box-shadow: var(--shadow-elevation-2);
+}
+
+.shadow-elevation-3 {
+    box-shadow: var(--shadow-elevation-3);
 }
 
 /* 

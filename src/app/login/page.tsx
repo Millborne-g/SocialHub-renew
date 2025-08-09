@@ -10,6 +10,12 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Google } from "iconsax-reactjs";
+import { useRouter } from "next/navigation";
+
+import api from "@/lib/axios";
+import { toast } from "react-hot-toast";
+import { useAuthStore } from "@/store/authStore";
+import { decodeToken } from "@/lib/jwt";
 
 const schema = yup
     .object({
@@ -19,6 +25,8 @@ const schema = yup
     .required();
 
 const LoginContent = () => {
+    const router = useRouter();
+    const { login, accessToken } = useAuthStore();
     const {
         handleSubmit,
         formState: { errors },
@@ -27,8 +35,6 @@ const LoginContent = () => {
     } = useForm({
         resolver: yupResolver(schema),
     });
-
-    console.log(errors);
 
     const getGoogleInfo = useGoogleLogin({
         onSuccess: (codeResponse) => {
@@ -54,11 +60,11 @@ const LoginContent = () => {
 
     const onSubmit = async (data: any) => {
         try {
-            const response = await fetch(`/api/auth?email=${data.email}&password=${data.password}`);
-            const responseData = await response.json();
-            console.log(responseData);
+            await login(data.email, data.password);
+            toast.success("Login successful");
+            router.push("/home");
         } catch (error) {
-            console.log(error);
+            toast.error("Login failed");
         }
     };
 
@@ -73,7 +79,7 @@ const LoginContent = () => {
                 </a>
             </div>
 
-            <div className="flex flex-col items-center justify-center gap-4 w-full max-w-md shadow-xl rounded-xl p-5">
+            <div className="flex flex-col items-center justify-center gap-4 w-full max-w-md shadow-xl rounded-xl p-9">
                 <div className="flex flex-col items-center justify-center gap-4  w-full">
                     <h1 className="text-2xl font-bold">Welcome to SocialHub</h1>
                     <form
@@ -119,9 +125,14 @@ const LoginContent = () => {
                     <div className="flex items-center justify-center">
                         <span className="text-sm text-gray-500">
                             Don&apos;t have an account?{" "}
-                            <a href="/signup" className="text-primary">
+                            <span
+                                className="text-primary"
+                                onClick={() => {
+                                    router.push("/signup");
+                                }}
+                            >
                                 Signup
-                            </a>
+                            </span>
                         </span>
                     </div>
                 </div>

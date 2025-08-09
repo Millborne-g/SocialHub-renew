@@ -12,8 +12,12 @@
     "@google-cloud/local-auth": "^3.0.1",
     "@hookform/resolvers": "^5.2.1",
     "@react-oauth/google": "^0.12.2",
+    "@types/jsonwebtoken": "^9.0.10",
+    "axios": "^1.11.0",
+    "cookies": "^0.9.1",
     "googleapis": "^155.0.0",
     "iconsax-reactjs": "^0.0.8",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.17.1",
     "next": "15.4.5",
     "next-auth": "^5.0.0-beta.29",
@@ -21,7 +25,8 @@
     "react-dom": "19.1.0",
     "react-hook-form": "^7.62.0",
     "react-hot-toast": "^2.5.2",
-    "yup": "^1.7.0"
+    "yup": "^1.7.0",
+    "zustand": "^5.0.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

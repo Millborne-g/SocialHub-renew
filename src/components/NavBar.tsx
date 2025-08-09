@@ -12,7 +12,7 @@ const NavBar = () => {
     return (
         <div
             className={`w-full bg-white shadow-lg flex items-center justify-center p-3 fixed ${
-                pathname === "/signup" || pathname === "/login" ? "hidden" : ""
+                pathname === "/" || pathname === "" ? "" : "hidden"
             }`}
         >
             <div className="flex items-center justify-between w-full max-w-5xl">
