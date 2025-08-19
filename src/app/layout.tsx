@@ -46,8 +46,9 @@ export default function RootLayout({
                 <NavBar />
                 {children}
                 <Footer />
-                <Sidebar />
                 <Toaster position="bottom-right" />
+
+                {/* <Sidebar /> */}
             </body>
         </html>
     );

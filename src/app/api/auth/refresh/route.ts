@@ -3,9 +3,11 @@ import { generateAccessToken, verifyRefreshToken } from "@/lib/jwt";
 import connectMongo from "@/lib/mongodb";
 import User from "@/schema/Users";
 
+// ----------------- provide new access token -----------------
 export async function GET(request: NextRequest) {
     try {
         const refreshToken = request.cookies.get("refreshToken")?.value;
+
         if (!refreshToken) {
             return NextResponse.json(
                 { message: "No refresh token" },
@@ -13,12 +15,12 @@ export async function GET(request: NextRequest) {
             );
         } else {
             const decoded = verifyRefreshToken(refreshToken) as {
-                id: string;
+                user: string;
             };
 
             await connectMongo();
 
-            const user = await User.findById(decoded.id);
+            const user = await User.findById(decoded.user);
 
             if (!user) {
                 return NextResponse.json(

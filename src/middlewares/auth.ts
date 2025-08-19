@@ -1,26 +1,28 @@
 import { verifyAccessToken } from "@/lib/jwt";
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextRequest, NextResponse } from "next/server";
 
-interface AuthenticatedRequest extends NextApiRequest {
+interface AuthenticatedRequest extends NextRequest {
     user: any;
 }
 
-export function requireAuth(
-    req: AuthenticatedRequest,
-    res: NextApiResponse,
-    next: () => void
-) {
-    const authHeader = req.headers.authorization;
+export function requireAuth(req: AuthenticatedRequest): NextResponse | null {
+    const authHeader = req.headers.get("authorization");
     if (!authHeader)
-        return res.status(401).json({ message: "No token provided" });
+        return NextResponse.json(
+            { message: "No token provided" },
+            { status: 401 }
+        );
 
     const token = authHeader.split(" ")[1];
 
     try {
         const payload = verifyAccessToken(token); // contains { userId, email, name }
         req.user = payload; // Attach to request for DB usage
-        next();
+        return null; // Continue with the request
     } catch (err) {
-        return res.status(401).json({ message: "Token expired or invalid" });
+        return NextResponse.json(
+            { message: "Token expired or invalid" },
+            { status: 401 }
+        );
     }
 }

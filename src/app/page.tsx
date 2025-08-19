@@ -11,11 +11,14 @@ export default function Home() {
     const router = useRouter();
     return (
         <div className="flex items-center justify-center h-screen">
-            <div className="flex w-full max-w-5xl items-center gap-15">
+            {/* md:max-w-3xl xl:max-w-7xl */}
+            <div className="flex w-full md:max-w-3xl xl:max-w-7xl items-center gap-15">
                 <div className="flex-1 flex flex-col gap-4">
                     <span className="text-4xl font-bold font-display leading-tight">
                         Your One-Stop Link Storage Solution:{" "}
-                        <span className="bg-[#F9ED32]">Accessible and Shareable</span>
+                        <span className="bg-[#F9ED32]">
+                            Accessible and Shareable
+                        </span>
                     </span>
                     <span className="text-xl">
                         Elevate Your Link Management Experience as Store, Share,
@@ -31,9 +34,18 @@ export default function Home() {
                                 value={userEmail}
                                 onChange={(e) => setUserEmail(e.target.value)}
                             />
-                            <div className="flex items-center justify-center gap-2 col-span-3 cursor-pointer font-display" onClick={() =>{
-                                router.push(`/signup${userEmail? `?email=${userEmail}` : ""}`);
-                            }}>
+                            <div
+                                className="flex items-center justify-center gap-2 col-span-3 cursor-pointer font-display"
+                                onClick={() => {
+                                    router.push(
+                                        `/signup${
+                                            userEmail
+                                                ? `?email=${userEmail}`
+                                                : ""
+                                        }`
+                                    );
+                                }}
+                            >
                                 <span className="text-base text-white">
                                     Sign Up
                                 </span>
