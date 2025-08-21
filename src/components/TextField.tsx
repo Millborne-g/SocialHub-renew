@@ -22,6 +22,8 @@ const TextField = (props: {
     width?: "full" | "auto";
     helperText?: string;
     error?: boolean;
+    startIcon?: React.ReactNode;
+    endIcon?: React.ReactNode;
 }) => {
     const [showPassword, setShowPassword] = useState(false);
     return (
@@ -35,7 +37,9 @@ const TextField = (props: {
                     className={
                         props.className
                             ? props.className
-                            : `text-base w-full border border-gray-300 rounded-md p-2 peer placeholder-transparent focus:outline-none focus:border-primary`
+                            : `text-base w-full border border-gray-300 rounded-md p-2 peer focus:outline-none focus:border-primary ${
+                                  props.startIcon ? "pl-9" : " placeholder-transparent "
+                              }`
                     }
                     type={
                         props.type === "password" && showPassword
@@ -47,15 +51,30 @@ const TextField = (props: {
                     onChange={props.onChange}
                     id="floating-input"
                 />
-                <label
-                    htmlFor="floating-input"
-                    className="absolute left-2 -top-2 bg-white text-xs text-gray-600 px-0.5 
+                {/* Start Icon */}
+                {props.startIcon && (
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        {props.startIcon}
+                    </div>
+                )}
+                {!props.startIcon && (
+                    <label
+                        htmlFor="floating-input"
+                        className="absolute left-2 -top-2 bg-white text-xs text-gray-600 px-0.5 
                     transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-2 
                     peer-placeholder-shown:text-gray-400 peer-focus:-top-2 peer-focus:text-xs 
                     peer-focus:text-primary font-display peer-focus:bg-white"
-                >
-                    {props.placeholder}
-                </label>
+                    >
+                        {props.placeholder}
+                    </label>
+                )}
+
+                {/* End Icon */}
+                {props.endIcon && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        {props.endIcon}
+                    </div>
+                )}
 
                 {/* for password */}
                 {props.type === "password" && (
@@ -75,7 +94,13 @@ const TextField = (props: {
                 )}
             </div>
             {props.helperText && (
-                <p className={`text-sm ${props.error ? "text-red-500" : "text-gray-500"}`}>{props.helperText}</p>
+                <p
+                    className={`text-sm ${
+                        props.error ? "text-red-500" : "text-gray-500"
+                    }`}
+                >
+                    {props.helperText}
+                </p>
             )}
         </div>
     );

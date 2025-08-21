@@ -13,7 +13,7 @@ interface AuthStore {
         password: string
     ) => Promise<void>;
     logout: () => Promise<void>;
-    refreshToken: () => Promise<void>;
+    refreshToken: () => Promise<void> | any;
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
@@ -47,9 +47,27 @@ export const useAuthStore = create<AuthStore>((set) => ({
     },
 
     refreshToken: async () => {
-        const response = await api.get("/api/auth/refresh");
-        const { accessToken } = response.data;
-        set({ accessToken });
-        return accessToken;
+        try {
+            const response = await api.get("/api/auth/refresh");
+            const { accessToken } = response.data;
+            if (accessToken) {
+                set({ accessToken });
+                return accessToken;
+            } else {
+                return null;
+            }
+        } catch (error: any) {
+            console.log("Refresh token error:", error);
+
+            // If we get a 401 on refresh, it means the refresh token is invalid
+            // We should logout immediately to prevent infinite loops
+            if (error.response?.status === 401) {
+                set({ accessToken: null });
+                // Don't call logout() here to avoid potential infinite loops
+                // The interceptor will handle the logout
+            }
+
+            return null;
+        }
     },
 }));

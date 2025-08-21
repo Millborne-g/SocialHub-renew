@@ -7,7 +7,6 @@ import User from "@/schema/Users";
 export async function GET(request: NextRequest) {
     try {
         const refreshToken = request.cookies.get("refreshToken")?.value;
-
         if (!refreshToken) {
             return NextResponse.json(
                 { message: "No refresh token" },
@@ -40,5 +39,10 @@ export async function GET(request: NextRequest) {
             });
             return NextResponse.json({ accessToken: newAccessToken });
         }
-    } catch (error) {}
+    } catch (error) {
+        return NextResponse.json(
+            { message: "Failed to refresh token" },
+            { status: 500 }
+        );
+    }
 }

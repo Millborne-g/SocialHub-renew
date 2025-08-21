@@ -20,6 +20,10 @@ const urlSchema = new mongoose.Schema({
     image: {
         type: String,
     },
+    public: {
+        type: Boolean,
+        default: false,
+    },
     createdAt: {
         type: Date,
         default: Date.now,

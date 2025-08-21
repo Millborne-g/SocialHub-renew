@@ -28,7 +28,12 @@ api.interceptors.response.use(
         const originalRequest = error.config;
 
         // If error is 401 and we haven't already tried to refresh
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // AND this is not a refresh token request itself
+        if (
+            error.response?.status === 401 &&
+            !originalRequest._retry &&
+            !originalRequest.url?.includes("/api/auth/refresh")
+        ) {
             originalRequest._retry = true;
 
             try {
@@ -36,16 +41,23 @@ api.interceptors.response.use(
                 const { refreshToken } = useAuthStore.getState();
                 const newToken = await refreshToken();
 
-                // Update the original request with new token
-                originalRequest.headers.Authorization = `Bearer ${newToken}`;
-
-                // Retry the original request
-                return api(originalRequest);
+                // If refresh was successful and we got a new token
+                if (newToken) {
+                    // Update the original request with new token
+                    originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                    // Retry the original request
+                    return api(originalRequest);
+                } else {
+                    // No new token, logout and reject
+                    const { logout } = useAuthStore.getState();
+                    await logout();
+                    return Promise.reject(error);
+                }
             } catch (refreshError) {
-                // If refresh fails, redirect to login or handle accordingly
+                // If refresh fails, logout and reject
                 const { logout } = useAuthStore.getState();
                 await logout();
-                return Promise.reject(refreshError);
+                return Promise.reject(error);
             }
         }
 
