@@ -42,7 +42,13 @@ const ExternalUrl = (props: {
     };
 
     return (
-        <div ref={setNodeRef} style={style} className="relative cursor-move">
+        <div
+            ref={setNodeRef}
+            style={style}
+            className={`relative cursor-move ${
+                props.mode === "edit" ? "h-80" : ""
+            }`}
+        >
             {props.mode === "edit" && (
                 <div className="absolute -top-5 -right-2 rounded-full bg-white group cursor-pointer shadow-md h-9 w-fit px-2 gap-3 text-center flex justify-center items-center">
                     <span
@@ -59,7 +65,7 @@ const ExternalUrl = (props: {
                     </span>
                 </div>
             )}
-            <div className="shadow-sm rounded-lg overflow-auto">
+            <div className="shadow-sm rounded-lg overflow-auto h-full hover:shadow-md cursor-pointer transition-all duration-300 hover:scale-105">
                 <div className="bg-gray-100 w-full h-40 flex items-center justify-center">
                     <img
                         src={getFaviconUrl(props.url)}
@@ -67,31 +73,44 @@ const ExternalUrl = (props: {
                         className="w-full h-full object-cover"
                     />
                 </div>
-                <div className="flex flex-col gap-1 p-3">
-                    <span className="text-base font-bold">{props.title}</span>
-                    <span className="text-xs text-gray-600">{props.url}</span>
-                    {props.mode === "edit" && (
-                        <>
-                        <div className="w-full h-[1px] bg-gray-200 my-2"></div>
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1">
-                                <span className="text-xs text-gray-600">
-                                    {props.dateTime.split("T")[0]} at{" "}
-                                    {props.dateTime.split("T")[1].substring(0, 5)}
-                                </span>
-                            </div>
-    
-                            <span
-                                {...listeners}
-                                {...attributes}
-                                className="text-lg text-gray-600 hover:bg-gray-300 px-1 rounded-sm cursor-pointer"
-                            >
-                                ⋮⋮
-                            </span>
-                        </div>
-                        </>
+                <div
+                    className={`flex flex-col gap-1 p-3 justify-between  ${
+                        props.mode === "edit" ? "h-40" : ""
+                    }`}
+                >
+                    <div className="flex flex-col gap-1">
+                        <span className="text-base font-bold">
+                            {props.title}
+                        </span>
+                        <span className="text-xs text-gray-600 break-words">
+                            {props.url}
+                        </span>
+                    </div>
+                    <div>
+                        {props.mode === "edit" && (
+                            <>
+                                <div className="w-full h-[1px] bg-gray-200 my-2"></div>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-xs text-gray-600">
+                                            {props.dateTime.split("T")[0]} at{" "}
+                                            {props.dateTime
+                                                .split("T")[1]
+                                                .substring(0, 5)}
+                                        </span>
+                                    </div>
 
-                    )}
+                                    <span
+                                        {...listeners}
+                                        {...attributes}
+                                        className="text-lg text-gray-600 hover:bg-gray-300 px-1 rounded-sm cursor-pointer"
+                                    >
+                                        ⋮⋮
+                                    </span>
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

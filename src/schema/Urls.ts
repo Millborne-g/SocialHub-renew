@@ -1,13 +1,8 @@
 import mongoose from "mongoose";
 
 const urlSchema = new mongoose.Schema({
-    url: {
-        type: String,
-        required: true,
-    },
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        type: String,
         required: true,
     },
     title: {
@@ -34,6 +29,11 @@ const urlSchema = new mongoose.Schema({
     },
 });
 
-const Url = mongoose.models.Url || mongoose.model("Url", urlSchema);
+// Clear existing model to force schema update
+if (mongoose.models.Url) {
+    delete mongoose.models.Url;
+}
+
+const Url = mongoose.model("Url", urlSchema);
 
 export default Url;

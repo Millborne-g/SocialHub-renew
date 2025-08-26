@@ -10,23 +10,35 @@ const Button = (props: {
     icon?: React.ReactNode;
     rounded?: "sm" | "md" | "lg" | "full";
     size?: "sm" | "md" | "lg";
+    disabled?: boolean;
 }) => {
     return (
         <button
             type={props.type || "button"}
             onClick={props.onClick}
+            disabled={props.disabled}
             className={`${
                 props.className
                     ? props.className
                     : `py-2 px-4 font-display cursor-pointer text-base ${
-                          props.width === "full" ? "w-full" : "w-auto"
+                          props.width === "full"
+                              ? "w-full flex items-center justify-center"
+                              : "w-auto"
                       } ${
                           props.variant === "primary"
-                              ? "bg-primary hover:bg-primary/80 active:bg-primary/90 text-white"
+                              ? props.disabled
+                                  ? "bg-gray-400 cursor-not-allowed text-white"
+                                  : "bg-primary hover:bg-primary/80 active:bg-primary/90 text-white"
                               : props.variant === "secondary"
-                              ? "bg-gray-500 hover:bg-gray-500/80 active:bg-gray-500/90 text-white"
+                              ? props.disabled
+                                  ? "bg-gray-400 cursor-not-allowed text-white"
+                                  : "bg-gray-500 hover:bg-gray-500/80 active:bg-gray-500/90 text-white"
                               : props.variant === "tertiary"
-                              ? "bg-gray-500 hover:bg-gray-500/80 active:bg-gray-500/90 text-white"
+                              ? props.disabled
+                                  ? "bg-gray-400 cursor-not-allowed text-white"
+                                  : "bg-gray-500 hover:bg-gray-500/80 active:bg-gray-500/90 text-white"
+                              : props.disabled
+                              ? "bg-gray-200 cursor-not-allowed text-gray-500"
                               : "bg-transparent hover:bg-black/10 active:bg-black/20 text-black"
                       } ${
                           props.rounded === "sm"

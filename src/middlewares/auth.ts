@@ -18,7 +18,7 @@ export function requireAuth(req: AuthenticatedRequest): NextResponse | null {
     try {
         const payload = verifyAccessToken(token); // contains { userId, email, name }
         req.user = payload; // Attach to request for DB usage
-        return null; // Continue with the request
+        return req.user; // Continue with the request
     } catch (err) {
         return NextResponse.json(
             { message: "Token expired or invalid" },
