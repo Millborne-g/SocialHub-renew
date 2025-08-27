@@ -116,7 +116,7 @@ const NavBar = () => {
                                                 className="w-full h-full object-cover rounded-full"
                                             />
                                         ) : (
-                                            <User className="text-xl text-gray-500" />
+                                            <User className="w-6 h-6 text-gray-500" />
                                         )}
                                     </div>
                                     <span className="text-sm">

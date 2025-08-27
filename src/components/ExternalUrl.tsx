@@ -65,7 +65,11 @@ const ExternalUrl = (props: {
                     </span>
                 </div>
             )}
-            <div className="shadow-sm rounded-lg overflow-auto h-full hover:shadow-md cursor-pointer transition-all duration-300 hover:scale-105">
+            <div
+                className={`shadow-sm rounded-lg overflow-auto h-full hover:shadow-md cursor-pointer transition-all duration-300 ${
+                    props.mode !== "edit" ? "hover:scale-105" : ""
+                }`}
+            >
                 <div className="bg-gray-100 w-full h-40 flex items-center justify-center">
                     <img
                         src={getFaviconUrl(props.url)}

@@ -13,8 +13,47 @@ export async function GET(request: NextRequest) {
         }
 
         const userId = authResult.user.id;
-        const urls = await Url.find({ userId: userId });
-        return NextResponse.json(urls);
+
+        // Get query parameters for pagination and filtering
+        const { searchParams } = new URL(request.url);
+        const page = parseInt(searchParams.get("page") || "1");
+        const limit = parseInt(searchParams.get("limit") || "10");
+        const filter = searchParams.get("filter") || "all";
+
+        // Calculate skip value for pagination
+        const skip = (page - 1) * limit;
+
+        // Build query object
+        let query: any = { userId: userId };
+
+        // Apply filter for public/private
+        if (filter === "public") {
+            query.public = true;
+        } else if (filter === "private") {
+            query.public = false;
+        }
+        // If filter is "all", no additional filtering is applied
+
+        // Get total count of URLs for the user with filter
+        const total = await Url.countDocuments(query);
+
+        // Get paginated URLs with filter
+        const urls = await Url.find(query)
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 }); // Sort by creation date, newest first
+
+        return NextResponse.json({
+            urls,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+                hasNextPage: page < Math.ceil(total / limit),
+                hasPrevPage: page > 1,
+            },
+        });
     } catch (error) {
         return NextResponse.json(
             { message: "Error fetching urls" },

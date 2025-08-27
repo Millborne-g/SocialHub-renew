@@ -11,6 +11,7 @@ import {
     Save2,
     Share,
     Trash,
+    User,
 } from "iconsax-reactjs";
 import React, { useEffect, useState } from "react";
 import {
@@ -37,11 +38,12 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import { decodeToken } from "@/lib/jwt";
+import Image from "next/image";
 
 const Url = () => {
     const router = useRouter();
     const { id } = useParams();
-    const { accessToken, logout, refreshToken } = useAuthStore();
+    const { accessToken, refreshToken } = useAuthStore();
     const [userDetails, setUserDetails] = useState<any>(null);
 
     const [isFromUser, setIsFromUser] = useState<boolean>(false);
@@ -127,7 +129,6 @@ const Url = () => {
     const handleSave = async () => {
         try {
             if (id === "create") {
-
                 if (!title) {
                     toast.error("Please enter a title");
                     return;
@@ -406,9 +407,25 @@ const Url = () => {
                                             )}
                                         </div>
                                         <div className="flex items-center gap-1">
-                                            <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                                            {userDetails?.user?.userImage ? (
+                                                <Image
+                                                    src={
+                                                        userDetails?.user
+                                                            ?.userImage
+                                                    }
+                                                    alt="user image"
+                                                    className="w-4 h-4 rounded-full"
+                                                    width={16}
+                                                    height={16}
+                                                />
+                                            ) : (
+                                                <div className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">
+                                                    <User className="w-3 h-3 text-gray-500" />
+                                                </div>
+                                            )}
                                             <span className="text-sm text-gray-950">
-                                                Firstname Lastname
+                                                {userDetails?.user?.firstName}{" "}
+                                                {userDetails?.user?.lastName}
                                             </span>
                                         </div>
                                     </div>
@@ -600,10 +617,11 @@ const Url = () => {
                                     </DragOverlay> */}
                                         </SortableContext>
                                     </div>
-                                ):(
+                                ) : (
                                     <div className="flex justify-center items-center h-full">
                                         <span className="text-gray-500 italic">
-                                            No URLs found. Add some to get started.
+                                            No URLs found. Add some to get
+                                            started.
                                         </span>
                                     </div>
                                 )}
