@@ -17,6 +17,7 @@ const NavBar = () => {
     const [userDetails, setUserDetails] = useState<any>(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const isShareRoute = pathname.startsWith("/share");
 
     const navbarOptions = [
         {
@@ -56,8 +57,11 @@ const NavBar = () => {
             }
             setIsLoading(false);
         };
-        refreshUserToken();
-    }, [accessToken, refreshToken]);
+
+        if (!isShareRoute) {
+            refreshUserToken();
+        }
+    }, [accessToken, refreshToken, isShareRoute]);
 
     const handleLogout = async () => {
         try {
@@ -92,7 +96,9 @@ const NavBar = () => {
         <>
             <div
                 className={`w-full bg-white shadow-lg flex items-center justify-center flex-col p-3 gap-3 z-30 ${
-                    pathname === "/login" || pathname === "/signup"
+                    pathname === "/login" ||
+                    pathname === "/signup" ||
+                    isShareRoute
                         ? "hidden"
                         : ""
                 } ${userDetails ? "sticky top-0" : "fixed"}`}

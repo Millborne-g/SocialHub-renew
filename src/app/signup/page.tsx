@@ -204,7 +204,7 @@ const SignupContent = ({ email }: { email: string }) => {
                     <span className="text-sm text-gray-500">
                         Already have an account?{" "}
                         <span
-                            className="text-primary"
+                            className="text-primary cursor-pointer hover:underline"
                             onClick={() => {
                                 router.push("/login");
                             }}

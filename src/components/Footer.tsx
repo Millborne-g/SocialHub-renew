@@ -5,11 +5,13 @@ import { useAuthStore } from "@/store/authStore";
 
 const Footer = () => {
     const { accessToken } = useAuthStore();
-    
+    const pathname = usePathname();
+    const isShareRoute = pathname.startsWith("/share");
+
     return (
         <div
             className={`flex items-center justify-center bottom-0 w-full py-2 ${
-                accessToken ? "static" : "fixed"
+                accessToken || isShareRoute ? "static" : "fixed"
             }`}
         >
             <span className="font-display text-sm text-[#929292]">
