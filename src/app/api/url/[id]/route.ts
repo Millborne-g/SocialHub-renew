@@ -15,7 +15,6 @@ export async function GET(
         }
         const userId = (authResult as any).user.id;
         const { id } = params;
-        console.log(id);
         
         const url = await Url.findById(id);
         const externalUrls = await ExternalUrl.find({ urlParentId: id });
