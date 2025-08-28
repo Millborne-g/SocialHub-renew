@@ -39,7 +39,7 @@ const SignupContent = ({ email }: { email: string }) => {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const [isPasswordMatch, setIsPasswordMatch] = useState(true);
-    const { signup } = useAuthStore();
+    const { signup, accessToken, refreshToken } = useAuthStore();
     const getGoogleInfo = useGoogleLogin({
         onSuccess: (codeResponse) => {
             const apiUrl = `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${codeResponse.access_token}`;
@@ -65,7 +65,12 @@ const SignupContent = ({ email }: { email: string }) => {
     const onSubmit = async (data: any) => {
         try {
             setIsLoading(true);
-            await signup(data.firstName, data.lastName, data.email, data.password);
+            await signup(
+                data.firstName,
+                data.lastName,
+                data.email,
+                data.password
+            );
             toast.success("User created successfully");
             // router.push("/home");
         } catch (Error: any) {
@@ -75,6 +80,17 @@ const SignupContent = ({ email }: { email: string }) => {
             setIsLoading(false);
         }
     };
+
+    useEffect(() => {
+        const refreshUserToken = async () => {
+            if (accessToken) {
+                router.push("/home");
+            } else {
+                await refreshToken();
+            }
+        };
+        refreshUserToken();
+    }, [accessToken, refreshToken]);
 
     useEffect(() => {
         if (watch("password") && watch("confirmPassword")) {

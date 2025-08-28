@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { decodeToken } from "@/lib/jwt";
 import api from "@/lib/axios";
@@ -27,6 +27,7 @@ const Home = () => {
     const [pageSize, setPageSize] = useState(10);
     const [loading, setLoading] = useState(false);
     const [filter, setFilter] = useState("all");
+    const [search, setSearch] = useState("");
 
     useEffect(() => {
         if (accessToken) {
@@ -34,13 +35,30 @@ const Home = () => {
         }
     }, [accessToken]);
 
+    // Debounced search function
+    const debouncedSearch = useCallback(
+        (() => {
+            let timeoutId: NodeJS.Timeout;
+            return (searchTerm: string) => {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    setSearch(searchTerm);
+                    setCurrentPage(1); // Reset to first page when searching
+                }, 500); // 500ms delay
+            };
+        })(),
+        []
+    );
+
     useEffect(() => {
         if (accessToken) {
             const fetchUrls = async () => {
                 try {
                     setLoading(true);
                     const response = await api.get(
-                        `/api/url?page=${currentPage}&limit=${pageSize}&filter=${filter}`
+                        `/api/url?page=${currentPage}&limit=${pageSize}&filter=${filter}&search=${encodeURIComponent(
+                            search
+                        )}`
                     );
                     setUrls(response.data.urls);
                     setPagination(response.data.pagination);
@@ -52,7 +70,7 @@ const Home = () => {
             };
             fetchUrls();
         }
-    }, [accessToken, currentPage, pageSize, filter]);
+    }, [accessToken, currentPage, pageSize, filter, search]);
 
     const handlePageChange = (newPage: number) => {
         setCurrentPage(newPage);
@@ -66,6 +84,11 @@ const Home = () => {
     const handleFilterChange = (newFilter: string) => {
         setFilter(newFilter);
         setCurrentPage(1); // Reset to first page when changing filter
+    };
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const searchTerm = e.target.value;
+        debouncedSearch(searchTerm);
     };
 
     return (
@@ -90,7 +113,7 @@ const Home = () => {
                                 icon={<Add />}
                                 size="lg"
                                 onClick={() => {
-                                    router.push("/home/url");
+                                    router.push("/home/create");
                                 }}
                             />
                         </div>
@@ -99,17 +122,47 @@ const Home = () => {
                     <div className="flex flex-col gap-5 h-full ">
                         {/* Search & Filters */}
                         <div className="flex items-center w-full gap-5">
-                            <TextField
-                                placeholder="Search"
-                                startIcon={
-                                    <SearchNormal1 className="w-4 h-4" />
-                                }
-                                // endIcon={<Filter className="w-4 h-4" />}
-                                type="search"
-                                value={""}
-                                onChange={() => {}}
-                                width="full"
-                            />
+                            <div className="relative flex-1">
+                                <TextField
+                                    placeholder="Search URLs by title or description..."
+                                    startIcon={
+                                        <SearchNormal1 className="w-4 h-4" />
+                                    }
+                                    // endIcon={search && (
+                                    //     <button
+                                    //         onClick={() => {
+                                    //             setSearch("");
+                                    //             setCurrentPage(1);
+                                    //         }}
+                                    //         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                    //         title="Clear search"
+                                    //     >
+                                    //         ✕
+                                    //     </button>
+                                    // )}
+                                    type="search"
+                                    value={search}
+                                    onChange={handleSearchChange}
+                                    width="full"
+                                />
+                                {/* {search && (
+                                    <button
+                                        onClick={() => {
+                                            setSearch("");
+                                            setCurrentPage(1);
+                                        }}
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                        title="Clear search"
+                                    >
+                                        ✕
+                                    </button>
+                                )} */}
+                                {/* {loading && search && (
+                                    <div className="absolute right-12 top-1/2 transform -translate-y-1/2">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                                    </div>
+                                )} */}
+                            </div>
                             <div className="flex items-center gap-2">
                                 <select
                                     className="px-4 py-2 text-base border border-gray-300 rounded-md p-2 peer focus:outline-none focus:border-primary w-40"
@@ -125,6 +178,28 @@ const Home = () => {
                             </div>
                         </div>
 
+                        {/* Search Results Info */}
+                        {search && (
+                            <div className="flex items-center justify-between text-sm text-gray-600">
+                                <span>
+                                    {loading
+                                        ? "Searching..."
+                                        : `Found ${pagination.total} result${
+                                              pagination.total !== 1 ? "s" : ""
+                                          } for "${search}"`}
+                                </span>
+                                <button
+                                    onClick={() => {
+                                        setSearch("");
+                                        setCurrentPage(1);
+                                    }}
+                                    className="text-primary hover:text-primary-dark transition-colors"
+                                >
+                                    Clear search
+                                </button>
+                            </div>
+                        )}
+
                         {/* Url list */}
                         <div className="relative overflow-x-auto shadow-md sm:rounded-lg h-[500px] flex flex-col justify-between">
                             <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
@@ -138,6 +213,9 @@ const Home = () => {
                                         </th>
                                         <th scope="col" className="px-6 py-3">
                                             Status
+                                        </th>
+                                        <th scope="col" className="px-6 py-3">
+                                            URLs
                                         </th>
                                         <th scope="col" className="px-6 py-3">
                                             Date
@@ -171,7 +249,9 @@ const Home = () => {
                                                 colSpan={6}
                                                 className="px-6 py-4 text-center text-gray-500"
                                             >
-                                                No URLs found
+                                                {search
+                                                    ? `No URLs found matching "${search}"`
+                                                    : "No URLs found"}
                                             </td>
                                         </tr>
                                     ) : (
@@ -188,7 +268,7 @@ const Home = () => {
                                                 </th>
                                                 <td className="px-6 py-4">
                                                     {url.description ? (
-                                                        <span className="text-gray-500">
+                                                        <span className="text-gray-500 break-words line-clamp-2">
                                                             {url.description}
                                                         </span>
                                                     ) : (
@@ -203,8 +283,23 @@ const Home = () => {
                                                             Public
                                                         </span>
                                                     ) : (
-                                                        <span className="rounded-full bg-red-200 px-2 py-1 text-xs">
+                                                        <span className="rounded-full bg-blue-200 px-2 py-1 text-xs">
                                                             Private
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {url.externalUrls.length >
+                                                    0 ? (
+                                                        <span className="text-blue-600">
+                                                            {
+                                                                url.externalUrls
+                                                                    .length
+                                                            }
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-gray-500 italic">
+                                                            No URLs
                                                         </span>
                                                     )}
                                                 </td>
@@ -233,9 +328,22 @@ const Home = () => {
                                                     )}
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <span className="text-blue-600 hover:underline cursor-pointer">
-                                                        Edit
-                                                    </span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span
+                                                            className="text-blue-600 hover:underline cursor-pointer"
+                                                            onClick={() => {
+                                                                router.push(
+                                                                    `/home/${url._id}`
+                                                                );
+                                                            }}
+                                                        >
+                                                            Edit
+                                                        </span>
+                                                        <span className="text-red-600 hover:underline cursor-pointer"
+                                                        >
+                                                            Delete
+                                                        </span>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))

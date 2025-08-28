@@ -217,13 +217,13 @@ const Url = () => {
                 setEditMode(false);
                 setPreviewMode(true);
 
-                console.log(response.data.url.userId, userDetails?.user?.id);
-
                 if (response.data.url.userId === userDetails?.user?.id) {
                     setIsFromUser(true);
                 }
 
                 setIsUrlFound(true);
+
+                console.log( "userDetails?.user?.id");
             } else {
                 setIsUrlFound(true);
                 setEditMode(true);

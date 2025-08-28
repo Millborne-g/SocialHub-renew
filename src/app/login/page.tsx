@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import Image from "next/image";
 import logo from "../../../public/Logo.png";
@@ -26,7 +26,7 @@ const schema = yup
 
 const LoginContent = () => {
     const router = useRouter();
-    const { login, accessToken } = useAuthStore();
+    const { login, accessToken, refreshToken } = useAuthStore();
     const {
         handleSubmit,
         formState: { errors },
@@ -67,6 +67,17 @@ const LoginContent = () => {
             toast.error("Login failed");
         }
     };
+
+    useEffect(() => {
+        const refreshUserToken = async () => {
+            if (accessToken) {
+                router.push("/home");
+            } else {
+                await refreshToken();
+            }
+        };
+        refreshUserToken();
+    }, [accessToken, refreshToken]);
 
     return (
         <div className="flex items-center justify-center h-screen">

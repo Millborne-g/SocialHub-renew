@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
         const page = parseInt(searchParams.get("page") || "1");
         const limit = parseInt(searchParams.get("limit") || "10");
         const filter = searchParams.get("filter") || "all";
+        const search = searchParams.get("search") || "";
 
         // Calculate skip value for pagination
         const skip = (page - 1) * limit;
@@ -34,6 +35,14 @@ export async function GET(request: NextRequest) {
         }
         // If filter is "all", no additional filtering is applied
 
+        // Apply search filter if search term is provided
+        if (search.trim()) {
+            query.$or = [
+                { title: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } },
+            ];
+        }
+
         // Get total count of URLs for the user with filter
         const total = await Url.countDocuments(query);
 
@@ -43,8 +52,22 @@ export async function GET(request: NextRequest) {
             .limit(limit)
             .sort({ createdAt: -1 }); // Sort by creation date, newest first
 
+        // Fetch ExternalUrl data for each URL
+        const urlsWithExternalUrls = await Promise.all(
+            urls.map(async (url) => {
+                const externalUrls = await ExternalUrl.find({
+                    urlParentId: url._id.toString(),
+                }).sort({ sequence: 1 }); // Sort by sequence number
+
+                return {
+                    ...url.toObject(),
+                    externalUrls,
+                };
+            })
+        );
+
         return NextResponse.json({
-            urls,
+            urls: urlsWithExternalUrls,
             pagination: {
                 page,
                 limit,

@@ -46,8 +46,13 @@ const NavBar = () => {
             setIsLoading(true);
             if (accessToken && !userDetails) {
                 setUserDetails(decodeToken(accessToken));
+                router.push("/home");
             } else {
-                await refreshToken();
+                let res = await refreshToken();
+
+                if (res === null) {
+                    router.push("/");
+                }
             }
             setIsLoading(false);
         };
@@ -58,6 +63,7 @@ const NavBar = () => {
         try {
             await logout();
             setIsDropdownOpen(false);
+            setUserDetails(null);
             router.push("/login");
         } catch (error) {
             console.error("Logout failed:", error);

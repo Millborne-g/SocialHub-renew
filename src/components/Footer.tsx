@@ -4,9 +4,7 @@ import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 
 const Footer = () => {
-    const pathname = usePathname();
     const { accessToken } = useAuthStore();
-    console.log(accessToken);
     
     return (
         <div

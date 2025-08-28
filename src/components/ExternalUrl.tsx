@@ -46,7 +46,7 @@ const ExternalUrl = (props: {
             ref={setNodeRef}
             style={style}
             className={`relative cursor-move ${
-                props.mode === "edit" ? "h-80" : ""
+                props.mode === "edit" ? "h-75" : ""
             }`}
         >
             {props.mode === "edit" && (
@@ -79,14 +79,14 @@ const ExternalUrl = (props: {
                 </div>
                 <div
                     className={`flex flex-col gap-1 p-3 justify-between  ${
-                        props.mode === "edit" ? "h-40" : ""
+                        props.mode === "edit" ? "h-35" : ""
                     }`}
                 >
                     <div className="flex flex-col gap-1">
                         <span className="text-base font-bold">
                             {props.title}
                         </span>
-                        <span className="text-xs text-gray-600 break-words">
+                        <span className="text-xs text-gray-600 break-words line-clamp-2">
                             {props.url}
                         </span>
                     </div>
