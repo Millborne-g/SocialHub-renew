@@ -8,6 +8,8 @@ import Button from "@/components/Button";
 import { Add, Edit, Filter, SearchNormal1 } from "iconsax-reactjs";
 import TextField from "@/components/TextField";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
+import Modal from "@/components/Modal";
 
 const Home = () => {
     const { accessToken } = useAuthStore();
@@ -28,7 +30,9 @@ const Home = () => {
     const [loading, setLoading] = useState(false);
     const [filter, setFilter] = useState("all");
     const [search, setSearch] = useState("");
-
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+    const [onDelete, setOnDelete] = useState(false);
+    const [onDeleteId, setOnDeleteId] = useState("");
     useEffect(() => {
         if (accessToken) {
             setUserDetails(decodeToken(accessToken));
@@ -70,7 +74,7 @@ const Home = () => {
             };
             fetchUrls();
         }
-    }, [accessToken, currentPage, pageSize, filter, search]);
+    }, [accessToken, currentPage, pageSize, filter, search, refreshTrigger]);
 
     const handlePageChange = (newPage: number) => {
         setCurrentPage(newPage);
@@ -89,6 +93,20 @@ const Home = () => {
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const searchTerm = e.target.value;
         debouncedSearch(searchTerm);
+    };
+
+    const handleDeleteURL = async (id: string) => {
+        try {
+            const response = await api.delete(`/api/url/${id}`);
+
+            toast.success("URL deleted successfully");
+            // Trigger refetch by updating refreshTrigger
+            setRefreshTrigger((prev) => prev + 1);
+            setOnDelete(false);
+        } catch (error) {
+            console.error("Error deleting URL:", error);
+            toast.error("Error deleting URL");
+        }
     };
 
     return (
@@ -279,11 +297,11 @@ const Home = () => {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     {url.public ? (
-                                                        <span className="rounded-full bg-green-200 px-2 py-1 text-xs">
+                                                        <span className="rounded-full bg-green-200 px-2 py-1 text-xs text-green-600">
                                                             Public
                                                         </span>
                                                     ) : (
-                                                        <span className="rounded-full bg-blue-200 px-2 py-1 text-xs">
+                                                        <span className="rounded-full bg-blue-200 px-2 py-1 text-xs text-blue-600">
                                                             Private
                                                         </span>
                                                     )}
@@ -339,7 +357,16 @@ const Home = () => {
                                                         >
                                                             Edit
                                                         </span>
-                                                        <span className="text-red-600 hover:underline cursor-pointer"
+                                                        <span
+                                                            className="text-red-600 hover:underline cursor-pointer"
+                                                            onClick={() => {
+                                                                setOnDeleteId(
+                                                                    url._id
+                                                                );
+                                                                setOnDelete(
+                                                                    true
+                                                                );
+                                                            }}
                                                         >
                                                             Delete
                                                         </span>
@@ -556,6 +583,22 @@ const Home = () => {
                     </div>
                 </div>
             </div>
+
+            {/* delete modal */}
+            {onDelete && (
+                <Modal
+                    title="Confirm"
+                    onClose={() => setOnDelete(false)}
+                    onSave={() => handleDeleteURL(onDeleteId)}
+                    content={
+                        <div className="flex items-center justify-center flex-col gap-4">
+                            <span className="text-2xl text-center">
+                                Are you sure you want to delete?
+                            </span>
+                        </div>
+                    }
+                />
+            )}
         </div>
     );
 };

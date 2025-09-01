@@ -73,6 +73,53 @@ const Url = () => {
 
     const [externalURLs, setExternalUrls] = useState<any[]>([]);
 
+    // Add state variables to track original values for change detection
+    const [originalTitle, setOriginalTitle] = useState("");
+    const [originalDescription, setOriginalDescription] = useState("");
+    const [originalImage, setOriginalImage] = useState<File | null>(null);
+    const [originalIsPrivate, setOriginalIsPrivate] = useState(false);
+    const [originalExternalURLs, setOriginalExternalURLs] = useState<any[]>([]);
+
+    // Function to check if there are any changes
+    const hasChanges = () => {
+        if (id === "create") {
+            // For new items, check if any field has content
+            return (
+                title.trim() !== "" ||
+                description.trim() !== "" ||
+                image !== null ||
+                externalURLs.length > 0
+            );
+        }
+
+        // For existing items, compare with original values
+        const titleChanged = title !== originalTitle;
+        const descriptionChanged = description !== originalDescription;
+        const imageChanged = image !== originalImage;
+        const privacyChanged = isPrivate !== originalIsPrivate;
+
+        // Check if external URLs have changed (length, content, or order)
+        const urlsChanged =
+            externalURLs.length !== originalExternalURLs.length ||
+            externalURLs.some((url, index) => {
+                const originalUrl = originalExternalURLs[index];
+                return (
+                    !originalUrl ||
+                    url.title !== originalUrl.title ||
+                    url.url !== originalUrl.url ||
+                    url.sequence !== originalUrl.sequence
+                );
+            });
+
+        return (
+            titleChanged ||
+            descriptionChanged ||
+            imageChanged ||
+            privacyChanged ||
+            urlsChanged
+        );
+    };
+
     const handleAddURL = () => {
         if (newUrlTitle.trim() && newUrl.trim()) {
             const newURLItem = {
@@ -146,6 +193,7 @@ const Url = () => {
                 formData.append("title", title);
                 formData.append("description", description);
                 formData.append("externalURLs", JSON.stringify(externalURLs));
+                formData.append("public", (!isPrivate).toString());
 
                 // If image is a base64 string, convert it back to a file
                 if (image) {
@@ -159,10 +207,49 @@ const Url = () => {
                 });
                 toast.success("Url saved successfully!");
                 console.log("Save successful:", response.data);
+
+                // Update original values after successful save
+                setOriginalTitle(title);
+                setOriginalDescription(description);
+                setOriginalImage(image);
+                setOriginalIsPrivate(isPrivate);
+                setOriginalExternalURLs([...externalURLs]);
+
                 router.push(`${response.data._id}`);
                 setIsSaving(false);
             } else {
                 //---------------------------------- for update ----------------------------------
+                setIsSaving(true);
+
+                // Create FormData for file upload
+                const formData = new FormData();
+                formData.append("title", title);
+                formData.append("description", description);
+                formData.append("externalURLs", JSON.stringify(externalURLs));
+                formData.append("isPrivate", isPrivate.toString());
+
+                // If image is a base64 string, convert it back to a file
+                if (image) {
+                    formData.append("image", image);
+                }
+
+                const response = await api.put(`/api/url/${id}`, formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                });
+
+                toast.success("Url updated successfully!");
+                console.log("Update successful:", response.data);
+
+                // Update original values after successful update
+                setOriginalTitle(title);
+                setOriginalDescription(description);
+                setOriginalImage(image);
+                setOriginalIsPrivate(isPrivate);
+                setOriginalExternalURLs([...externalURLs]);
+
+                setIsSaving(false);
             }
         } catch (error) {
             console.log("Save error:", error);
@@ -208,14 +295,23 @@ const Url = () => {
         const fetchUrl = async () => {
             if (id !== "create") {
                 const response = await api.get(`/api/url/${id}`);
+                console.log(response);
+
                 setTitle(response.data.url.title);
                 setDescription(response.data.url.description);
                 setImage(response.data.url.image);
                 setImagePreview(response.data.url.image);
                 setExternalUrls(response.data.externalUrls);
-                setIsPrivate(response.data.url.isPrivate);
+                setIsPrivate(!response.data.url.public);
                 setEditMode(false);
                 setPreviewMode(true);
+
+                // Store original values for change detection
+                setOriginalTitle(response.data.url.title);
+                setOriginalDescription(response.data.url.description);
+                setOriginalImage(response.data.url.image);
+                setOriginalIsPrivate(!response.data.url.public);
+                setOriginalExternalURLs(response.data.externalUrls);
 
                 if (response.data.url.userId === userDetails?.user?.id) {
                     setIsFromUser(true);
@@ -223,12 +319,19 @@ const Url = () => {
 
                 setIsUrlFound(true);
 
-                console.log( "userDetails?.user?.id");
+                console.log("userDetails?.user?.id");
             } else {
                 setIsUrlFound(true);
                 setEditMode(true);
                 setPreviewMode(false);
                 setIsFromUser(true);
+                setIsPrivate(true);
+                // Initialize original values for new items
+                setOriginalTitle("");
+                setOriginalDescription("");
+                setOriginalImage(null);
+                setOriginalIsPrivate(false);
+                setOriginalExternalURLs([]);
             }
         };
         fetchUrl();
@@ -430,27 +533,48 @@ const Url = () => {
                                         </div>
                                     </div>
                                 </div>
-                                {/* {editMode && isFromUser ? (
-                                    <div className="flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary">
-                                        <span className="flex text-sm">
-                                            Edit
-                                        </span>
-                                        <span className="text-sm cursor-pointer">
-                                            <Edit />
-                                        </span>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary">
-                                        <span className="flex text-sm">
-                                            Share
-                                        </span>
-                                        <span className="text-sm cursor-pointer">
-                                            <Share />
-                                        </span>
-                                    </div>
-                                )} */}
                                 <div className="flex flex-col gap-2">
-                                    {!isPrivate && previewMode && (
+                                    {previewMode && (
+                                        <div className="flex justify-end items-center gap-2 y cursor-pointer hover:text-gray-400">
+                                            <span
+                                                className={`rounded-full ${
+                                                    isPrivate
+                                                        ? "bg-blue-200 px-2 py-1 text-xs text-blue-600"
+                                                        : "bg-green-200 px-2 py-1 text-xs text-green-600"
+                                                }`}
+                                            >
+                                                {isPrivate
+                                                    ? "Private"
+                                                    : "Public"}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {!previewMode && (
+                                        <div className="flex justify-end items-center gap-2 y cursor-pointer hover:text-gray-400">
+                                            <div className="flex items-center mb-4">
+                                                <div className="flex items-center mb-4">
+                                                    <input
+                                                        type="checkbox"
+                                                        value={isPrivate.toString()}
+                                                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 focus:ring-2"
+                                                        onChange={() =>
+                                                            setIsPrivate(
+                                                                !isPrivate
+                                                            )
+                                                        }
+                                                        defaultChecked={
+                                                            !isPrivate
+                                                        }
+                                                    />
+                                                    <label className="ms-2 text-sm font-medium text-gray-900">
+                                                        Public
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {previewMode && (
                                         <div className="flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary">
                                             <span className="flex text-sm">
                                                 Share
@@ -461,7 +585,7 @@ const Url = () => {
                                         </div>
                                     )}
 
-                                    {isFromUser && !editMode && !isPrivate && (
+                                    {isFromUser && !editMode && (
                                         <div
                                             className="flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary"
                                             onClick={() => {
@@ -731,8 +855,13 @@ const Url = () => {
                                         }
                                     }}
                                     width="full"
-                                    disabled={isSaving}
+                                    disabled={!hasChanges()}
                                 />
+                                {!hasChanges() && (
+                                    <p className="text-xs text-gray-500 text-center mt-2">
+                                        No changes to save
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>

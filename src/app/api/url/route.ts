@@ -95,6 +95,7 @@ export async function POST(request: NextRequest) {
         // Handle FormData for file uploads
         const formData = await request.formData();
         const title = formData.get("title") as string;
+        const isPublic = formData.get("public") as string;
         const description = formData.get("description") as string;
         const image = formData.get("image") as File | null;
         const externalURLs = formData.get("externalURLs") as string;
@@ -150,6 +151,7 @@ export async function POST(request: NextRequest) {
             title,
             description,
             image: imageUrl,
+            public: isPublic === "true",
         });
 
         const externalURLsArray = JSON.parse(externalURLs);

@@ -17,7 +17,6 @@ const urlSchema = new mongoose.Schema({
     },
     public: {
         type: Boolean,
-        default: false,
     },
     createdAt: {
         type: Date,
