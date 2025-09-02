@@ -39,11 +39,13 @@ import { toast } from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import { decodeToken } from "@/lib/jwt";
 import Image from "next/image";
+import { useUrlStore } from "@/store/UrlStore";
 
 const Url = () => {
     const router = useRouter();
     const { id } = useParams();
     const { accessToken, refreshToken } = useAuthStore();
+    const { setUrlPreviewMode } = useUrlStore();
     const [userDetails, setUserDetails] = useState<any>(null);
 
     const [isFromUser, setIsFromUser] = useState<boolean>(false);
@@ -121,10 +123,28 @@ const Url = () => {
     };
 
     const handleAddURL = () => {
-        if (newUrlTitle.trim() && newUrl.trim()) {
+        if (newUrl.trim()) {
+            let newUrlTitleString = "";
+            if (newUrlTitle.trim()) {
+                newUrlTitleString = newUrlTitle.trim();
+            } else {
+                newUrlTitleString = (() => {
+                    const url = new URL(newUrl.trim());
+                    const parts = url.hostname.split(".");
+                    // Handle localhost and similar single-part hostnames
+                    if (parts.length === 1) {
+                        return (
+                            parts[0].charAt(0).toUpperCase() + parts[0].slice(1)
+                        );
+                    }
+                    // Handle normal domains
+                    const domain = parts.slice(-2, -1)[0];
+                    return domain.charAt(0).toUpperCase() + domain.slice(1);
+                })();
+            }
             const newURLItem = {
                 _id: Date.now().toString(),
-                title: newUrlTitle.trim(),
+                title: newUrlTitleString,
                 url: newUrl.trim(),
                 updatedAt: new Date().toISOString(),
                 sequence: externalURLs.length + 1,
@@ -134,6 +154,8 @@ const Url = () => {
             setNewUrlTitle("");
             setNewUrl("");
             setAddURLModal(false);
+        } else {
+            toast.error("Please enter a URL");
         }
     };
 
@@ -217,39 +239,7 @@ const Url = () => {
 
                 router.push(`${response.data._id}`);
                 setIsSaving(false);
-            } else {
-                //---------------------------------- for update ----------------------------------
-                setIsSaving(true);
-
-                // Create FormData for file upload
-                const formData = new FormData();
-                formData.append("title", title);
-                formData.append("description", description);
-                formData.append("externalURLs", JSON.stringify(externalURLs));
-                formData.append("isPrivate", isPrivate.toString());
-
-                // If image is a base64 string, convert it back to a file
-                if (image) {
-                    formData.append("image", image);
-                }
-
-                const response = await api.put(`/api/url/${id}`, formData, {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                });
-
-                toast.success("Url updated successfully!");
-                console.log("Update successful:", response.data);
-
-                // Update original values after successful update
-                setOriginalTitle(title);
-                setOriginalDescription(description);
-                setOriginalImage(image);
-                setOriginalIsPrivate(isPrivate);
-                setOriginalExternalURLs([...externalURLs]);
-
-                setIsSaving(false);
+                setUrlPreviewMode(false);
             }
         } catch (error) {
             console.log("Save error:", error);
@@ -257,6 +247,54 @@ const Url = () => {
         } finally {
             setIsSaving(false);
             setOnSave(false);
+        }
+    };
+
+    const handleUpdate = async () => {
+        try {
+            if (!title) {
+                toast.error("Please enter a title");
+                return;
+            }
+
+            setIsSaving(true);
+
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append("title", title);
+            formData.append("description", description);
+            formData.append("externalURLs", JSON.stringify(externalURLs));
+            formData.append("public", (!isPrivate).toString());
+
+            // If image is a base64 string, convert it back to a file
+            if (image) {
+                formData.append("image", image);
+            }
+
+            const response = await api.put(`/api/url/${id}`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            toast.success("Url updated successfully!");
+            console.log("Update successful:", response.data);
+
+            // Update original values after successful update
+            setOriginalTitle(title);
+            setOriginalDescription(description);
+            setOriginalImage(image);
+            setOriginalIsPrivate(isPrivate);
+            setOriginalExternalURLs([...externalURLs]);
+
+            setIsSaving(false);
+            setUrlPreviewMode(false);
+            setOnSave(false);
+        } catch (error) {
+            console.log("Update error:", error);
+            toast.error("Failed to update URL. Please try again.");
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -295,7 +333,6 @@ const Url = () => {
         const fetchUrl = async () => {
             if (id !== "create") {
                 const response = await api.get(`/api/url/${id}`);
-                console.log(response);
 
                 setTitle(response.data.url.title);
                 setDescription(response.data.url.description);
@@ -303,8 +340,8 @@ const Url = () => {
                 setImagePreview(response.data.url.image);
                 setExternalUrls(response.data.externalUrls);
                 setIsPrivate(!response.data.url.public);
-                setEditMode(false);
-                setPreviewMode(true);
+                setEditMode(true);
+                setPreviewMode(false);
 
                 // Store original values for change detection
                 setOriginalTitle(response.data.url.title);
@@ -343,7 +380,10 @@ const Url = () => {
             if (accessToken && !userDetails) {
                 setUserDetails(decodeToken(accessToken));
             } else {
-                await refreshToken();
+                let res = await refreshToken();
+                if (res === null) {
+                    router.push("/");
+                }
             }
             // setIsLoading(false);
         };
@@ -351,8 +391,12 @@ const Url = () => {
     }, [accessToken, refreshToken]);
 
     return isUrlFound ? (
-        <div className="h-screen w-full flex justify-center relative overflow-auto">
-            <div className="w-full md:max-w-3xl xl:max-w-7xl pt-10 pb-10">
+        <div className="w-full flex justify-center relative">
+            <div
+                className={`w-full md:max-w-3xl xl:max-w-7xl ${
+                    previewMode ? "pt-35 pb-10 " : "pt-10 "
+                }`}
+            >
                 <div className="flex items-center justify-center ">
                     <div className="w-full max-w-xl ">
                         {/* header */}
@@ -534,7 +578,7 @@ const Url = () => {
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                    {previewMode && (
+                                    {/* {previewMode && (
                                         <div className="flex justify-end items-center gap-2 y cursor-pointer hover:text-gray-400">
                                             <span
                                                 className={`rounded-full ${
@@ -548,31 +592,7 @@ const Url = () => {
                                                     : "Public"}
                                             </span>
                                         </div>
-                                    )}
-                                    {!previewMode && (
-                                        <div className="flex justify-end items-center gap-2 y cursor-pointer hover:text-gray-400">
-                                            <div className="flex items-center mb-4">
-                                                <div className="flex items-center mb-4">
-                                                    <input
-                                                        type="checkbox"
-                                                        value={isPrivate.toString()}
-                                                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 focus:ring-2"
-                                                        onChange={() =>
-                                                            setIsPrivate(
-                                                                !isPrivate
-                                                            )
-                                                        }
-                                                        defaultChecked={
-                                                            !isPrivate
-                                                        }
-                                                    />
-                                                    <label className="ms-2 text-sm font-medium text-gray-900">
-                                                        Public
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
+                                    )} */}
 
                                     {previewMode && (
                                         <div className="flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary">
@@ -654,6 +674,7 @@ const Url = () => {
                                                 : !previewMode && (
                                                       <span className="text-gray-500 italic">
                                                           No Description
+                                                          (optional)
                                                       </span>
                                                   )}
                                         </span>
@@ -767,7 +788,7 @@ const Url = () => {
             {editMode && isFromUser && (
                 <div className="fixed bottom-5 right-0 h-full flex justify-center items-center">
                     <div className="w-fit bg-white rounded-xl shadow-md p-4">
-                        <div className="flex items-center justify-center flex-col gap-6">
+                        <div className="flex justify-center flex-col gap-4">
                             {/* {id === "create" ? (
                                 <div className="flex items-center gap-2 mr-4">
                                     <div className="flex items-center gap-3">
@@ -829,9 +850,10 @@ const Url = () => {
                                             type="checkbox"
                                             className="sr-only peer"
                                             checked={previewMode}
-                                            onChange={() =>
-                                                setPreviewMode(!previewMode)
-                                            }
+                                            onChange={() => {
+                                                setPreviewMode(!previewMode);
+                                                setUrlPreviewMode(!previewMode);
+                                            }}
                                         />
                                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                                         {/* <span className="ml-2 text-sm font-medium text-gray-900">
@@ -841,6 +863,25 @@ const Url = () => {
                                     <span className="text-sm font-medium text-gray-900">
                                         Preview
                                     </span>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-start gap-2 y cursor-pointer hover:text-gray-400">
+                                <div className="flex items-center">
+                                    <div className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            value={isPrivate.toString()}
+                                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 focus:ring-2"
+                                            onChange={() =>
+                                                setIsPrivate(!isPrivate)
+                                            }
+                                            defaultChecked={!isPrivate}
+                                        />
+                                        <label className="ms-2 text-sm font-medium text-gray-900">
+                                            Make Public
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
 
@@ -877,16 +918,16 @@ const Url = () => {
                     content={
                         <div className="flex flex-col gap-4">
                             <TextField
-                                placeholder="Title"
-                                type="text"
-                                value={newUrlTitle}
-                                onChange={(e) => setNewUrlTitle(e.target.value)}
-                            />
-                            <TextField
                                 placeholder="URL"
                                 type="text"
                                 value={newUrl}
                                 onChange={(e) => setNewUrl(e.target.value)}
+                            />
+                            <TextField
+                                placeholder="Title (Optional)"
+                                type="text"
+                                value={newUrlTitle}
+                                onChange={(e) => setNewUrlTitle(e.target.value)}
                             />
                         </div>
                     }
@@ -923,7 +964,13 @@ const Url = () => {
                 <Modal
                     title="Confirm"
                     onClose={() => setOnSave(false)}
-                    onSave={handleSave}
+                    onSave={() => {
+                        if (id === "create") {
+                            handleSave();
+                        } else {
+                            handleUpdate();
+                        }
+                    }}
                     content={
                         <div className="flex items-center justify-center flex-col gap-4">
                             <span className="text-2xl text-center">

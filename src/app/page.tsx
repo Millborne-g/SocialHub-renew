@@ -3,12 +3,32 @@
 import hero from "../../public/hero-page.png";
 import Image from "next/image";
 import { ArrowRight } from "iconsax-reactjs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/authStore";
 
 export default function Home() {
     const [userEmail, setUserEmail] = useState("");
     const router = useRouter();
+
+    const { accessToken, refreshToken } = useAuthStore();
+
+    useEffect(() => {
+        const refreshUserToken = async () => {
+            // setIsLoading(true);
+            if (accessToken) {
+                router.push("/home");
+            } else {
+                let res = await refreshToken();
+                if (res === null) {
+                    router.push("/");
+                }
+            }
+            // setIsLoading(false);
+        };
+        refreshUserToken();
+    }, [accessToken, refreshToken]);
+
     return (
         <div className="flex items-center justify-center h-screen">
             {/* md:max-w-3xl xl:max-w-7xl */}

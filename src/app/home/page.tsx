@@ -10,9 +10,12 @@ import TextField from "@/components/TextField";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import Modal from "@/components/Modal";
+import { useUrlStore } from "@/store/UrlStore";
 
 const Home = () => {
-    const { accessToken } = useAuthStore();
+    const { accessToken, refreshToken } = useAuthStore();
+    const { setUrlPreviewMode } = useUrlStore();
+
     const router = useRouter();
     const [userDetails, setUserDetails] = useState<any>(null);
 
@@ -108,6 +111,28 @@ const Home = () => {
             toast.error("Error deleting URL");
         }
     };
+
+    useEffect(() => {
+        if (setUrlPreviewMode) {
+            setUrlPreviewMode(false);
+        }
+    }, [setUrlPreviewMode]);
+
+    useEffect(() => {
+        const refreshUserToken = async () => {
+            // setIsLoading(true);
+            if (accessToken && !userDetails) {
+                setUserDetails(decodeToken(accessToken));
+            } else {
+                let res = await refreshToken();
+                if (res === null) {
+                    router.push("/");
+                }
+            }
+            // setIsLoading(false);
+        };
+        refreshUserToken();
+    }, [accessToken, refreshToken]);
 
     return (
         <div className="h-screen w-full flex justify-center">

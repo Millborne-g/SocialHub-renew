@@ -69,6 +69,11 @@ const ExternalUrl = (props: {
                 className={`shadow-sm rounded-lg overflow-auto h-full hover:shadow-md cursor-pointer transition-all duration-300 ${
                     props.mode !== "edit" ? "hover:scale-105" : ""
                 }`}
+                onClick={() => {
+                    if(props.mode !== "edit") {
+                        window.open(props.url, "_blank");
+                    }
+                }}
             >
                 <div className="bg-gray-100 w-full h-40 flex items-center justify-center">
                     <img
