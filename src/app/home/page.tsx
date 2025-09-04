@@ -36,6 +36,39 @@ const Home = () => {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [onDelete, setOnDelete] = useState(false);
     const [onDeleteId, setOnDeleteId] = useState("");
+
+    const greetingsRandom = [
+        "Hello",
+        "Hi",
+        "Hey",
+        "Howdy",
+        "What's up",
+        "What's good",
+        "Yo",
+        "Greetings",
+        "Hey there",
+        "Hiya",
+        "Sup",
+        "Welcome",
+    ];
+
+    const greetingsMessageRandom = [
+        "Good to see you!",
+        "Welcome back!",
+        "Glad to have you here!",
+        "Nice to see you!",
+        "Welcome to our platform!",
+        "Hope you're doing well!",
+        "Always a pleasure!",
+        "Happy to see you!",
+        "Thanks for dropping by!",
+        "We're glad you're here!",
+        "Hope your day's going great!",
+        "You're in the right place!",
+    ];
+    const [greeting, setGreeting] = useState("");
+    const [greetingsMessage, setGreetingsMessage] = useState("");
+
     useEffect(() => {
         if (accessToken) {
             setUserDetails(decodeToken(accessToken));
@@ -134,6 +167,17 @@ const Home = () => {
         refreshUserToken();
     }, [accessToken, refreshToken]);
 
+    useEffect(() => {
+        setGreeting(
+            greetingsRandom[Math.floor(Math.random() * greetingsRandom.length)]
+        );
+        setGreetingsMessage(
+            greetingsMessageRandom[
+                Math.floor(Math.random() * greetingsMessageRandom.length)
+            ]
+        );
+    }, []);
+
     return (
         <div className="h-screen w-full flex justify-center">
             <div className="w-full md:max-w-3xl xl:max-w-7xl pt-10">
@@ -141,11 +185,11 @@ const Home = () => {
                     <div className="flex items-center justify-between">
                         <div className="flex flex-col gap-2">
                             <span className="text-4xl font-medium">
-                                Welcome,{" "}
+                                {greeting},{" "}
                                 {userDetails?.user?.firstName || "none"}
                             </span>
                             <span className="text-base text-gray-500">
-                                Good to see you!
+                                {greetingsMessage}
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -372,6 +416,19 @@ const Home = () => {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-2">
+                                                        {url.public && (
+                                                            <span
+                                                                className="text-blue-600 hover:underline cursor-pointer"
+                                                                onClick={() => {
+                                                                    window.open(
+                                                                        `/share/${url._id}`,
+                                                                        "_blank"
+                                                                    );
+                                                                }}
+                                                            >
+                                                                View
+                                                            </span>
+                                                        )}
                                                         <span
                                                             className="text-blue-600 hover:underline cursor-pointer"
                                                             onClick={() => {

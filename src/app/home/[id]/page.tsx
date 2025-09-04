@@ -265,10 +265,15 @@ const Url = () => {
             formData.append("description", description);
             formData.append("externalURLs", JSON.stringify(externalURLs));
             formData.append("public", (!isPrivate).toString());
+            console.log(image);
 
             // If image is a base64 string, convert it back to a file
             if (image) {
                 formData.append("image", image);
+            } else {
+                if (image === null) {
+                    formData.append("image", null as any);
+                }
             }
 
             const response = await api.put(`/api/url/${id}`, formData, {
@@ -355,8 +360,6 @@ const Url = () => {
                 }
 
                 setIsUrlFound(true);
-
-                console.log("userDetails?.user?.id");
             } else {
                 setIsUrlFound(true);
                 setEditMode(true);
@@ -395,7 +398,7 @@ const Url = () => {
             <div
                 className={`w-full md:max-w-3xl xl:max-w-7xl ${
                     previewMode ? "pt-35 pb-10 " : "pt-10 "
-                }`}
+                } min-h-screen`}
             >
                 <div className="flex items-center justify-center ">
                     <div className="w-full max-w-xl ">
@@ -403,7 +406,15 @@ const Url = () => {
                         <div className="flex flex-col gap-3">
                             <div className="flex gap-5 justify-between items-start">
                                 <div className="flex gap-5">
-                                    <div className="relative">
+                                    <div
+                                        className={`${
+                                            previewMode
+                                                ? imagePreview === ""
+                                                    ? "hidden"
+                                                    : "relative"
+                                                : "relative"
+                                        }`}
+                                    >
                                         {!previewMode && (
                                             <div
                                                 className="absolute -top-5 -right-2 rounded-full bg-white group hover:bg-gray-200 cursor-pointer shadow-md h-9 w-9 text-center flex justify-center items-center"

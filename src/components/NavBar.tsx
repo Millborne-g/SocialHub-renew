@@ -59,9 +59,9 @@ const NavBar = () => {
             setIsLoading(false);
         };
 
-        if (!isShareRoute) {
-            refreshUserToken();
-        }
+        // if (!isShareRoute) {
+        refreshUserToken();
+        // }
     }, [accessToken, refreshToken, isShareRoute]);
 
     const handleLogout = async () => {

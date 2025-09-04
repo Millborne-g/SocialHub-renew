@@ -39,11 +39,13 @@ import { toast } from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import { decodeToken } from "@/lib/jwt";
 import Image from "next/image";
+import { useUrlStore } from "@/store/UrlStore";
 
 const Url = () => {
     const router = useRouter();
     const { id } = useParams();
     const { accessToken, refreshToken } = useAuthStore();
+    const { setUrlPreviewMode } = useUrlStore();
     const [userDetails, setUserDetails] = useState<any>(null);
 
     const [isFromUser, setIsFromUser] = useState<boolean>(false);
@@ -69,15 +71,82 @@ const Url = () => {
     const [onSave, setOnSave] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isUrlFound, setIsUrlFound] = useState(false);
+    const [shareModal, setShareModal] = useState(false);
+    const [shareUrl, setShareUrl] = useState("");
     // const [previewMode, setPreviewMode] = useState(false);
 
     const [externalURLs, setExternalUrls] = useState<any[]>([]);
 
+    // Add state variables to track original values for change detection
+    const [originalTitle, setOriginalTitle] = useState("");
+    const [originalDescription, setOriginalDescription] = useState("");
+    const [originalImage, setOriginalImage] = useState<File | null>(null);
+    const [originalIsPrivate, setOriginalIsPrivate] = useState(false);
+    const [originalExternalURLs, setOriginalExternalURLs] = useState<any[]>([]);
+    const [createdBy, setCreatedBy] = useState<any>(null);
+    // Function to check if there are any changes
+    const hasChanges = () => {
+        if (id === "create") {
+            // For new items, check if any field has content
+            return (
+                title.trim() !== "" ||
+                description.trim() !== "" ||
+                image !== null ||
+                externalURLs.length > 0
+            );
+        }
+
+        // For existing items, compare with original values
+        const titleChanged = title !== originalTitle;
+        const descriptionChanged = description !== originalDescription;
+        const imageChanged = image !== originalImage;
+        const privacyChanged = isPrivate !== originalIsPrivate;
+
+        // Check if external URLs have changed (length, content, or order)
+        const urlsChanged =
+            externalURLs.length !== originalExternalURLs.length ||
+            externalURLs.some((url, index) => {
+                const originalUrl = originalExternalURLs[index];
+                return (
+                    !originalUrl ||
+                    url.title !== originalUrl.title ||
+                    url.url !== originalUrl.url ||
+                    url.sequence !== originalUrl.sequence
+                );
+            });
+
+        return (
+            titleChanged ||
+            descriptionChanged ||
+            imageChanged ||
+            privacyChanged ||
+            urlsChanged
+        );
+    };
+
     const handleAddURL = () => {
-        if (newUrlTitle.trim() && newUrl.trim()) {
+        if (newUrl.trim()) {
+            let newUrlTitleString = "";
+            if (newUrlTitle.trim()) {
+                newUrlTitleString = newUrlTitle.trim();
+            } else {
+                newUrlTitleString = (() => {
+                    const url = new URL(newUrl.trim());
+                    const parts = url.hostname.split(".");
+                    // Handle localhost and similar single-part hostnames
+                    if (parts.length === 1) {
+                        return (
+                            parts[0].charAt(0).toUpperCase() + parts[0].slice(1)
+                        );
+                    }
+                    // Handle normal domains
+                    const domain = parts.slice(-2, -1)[0];
+                    return domain.charAt(0).toUpperCase() + domain.slice(1);
+                })();
+            }
             const newURLItem = {
                 _id: Date.now().toString(),
-                title: newUrlTitle.trim(),
+                title: newUrlTitleString,
                 url: newUrl.trim(),
                 updatedAt: new Date().toISOString(),
                 sequence: externalURLs.length + 1,
@@ -87,6 +156,8 @@ const Url = () => {
             setNewUrlTitle("");
             setNewUrl("");
             setAddURLModal(false);
+        } else {
+            toast.error("Please enter a URL");
         }
     };
 
@@ -146,6 +217,7 @@ const Url = () => {
                 formData.append("title", title);
                 formData.append("description", description);
                 formData.append("externalURLs", JSON.stringify(externalURLs));
+                formData.append("public", (!isPrivate).toString());
 
                 // If image is a base64 string, convert it back to a file
                 if (image) {
@@ -159,10 +231,17 @@ const Url = () => {
                 });
                 toast.success("Url saved successfully!");
                 console.log("Save successful:", response.data);
+
+                // Update original values after successful save
+                setOriginalTitle(title);
+                setOriginalDescription(description);
+                setOriginalImage(image);
+                setOriginalIsPrivate(isPrivate);
+                setOriginalExternalURLs([...externalURLs]);
+
                 router.push(`${response.data._id}`);
                 setIsSaving(false);
-            } else {
-                //---------------------------------- for update ----------------------------------
+                setUrlPreviewMode(false);
             }
         } catch (error) {
             console.log("Save error:", error);
@@ -170,6 +249,58 @@ const Url = () => {
         } finally {
             setIsSaving(false);
             setOnSave(false);
+        }
+    };
+
+    const handleUpdate = async () => {
+        try {
+            if (!title) {
+                toast.error("Please enter a title");
+                return;
+            }
+
+            setIsSaving(true);
+
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append("title", title);
+            formData.append("description", description);
+            formData.append("externalURLs", JSON.stringify(externalURLs));
+            formData.append("public", (!isPrivate).toString());
+
+            // If image is a base64 string, convert it back to a file
+            if (image) {
+                formData.append("image", image);
+            } else {
+                if (image === null) {
+                    formData.append("image", null as any);
+                }
+            }
+
+            const response = await api.put(`/api/url/${id}`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            toast.success("Url updated successfully!");
+            console.log("Update successful:", response.data);
+
+            // Update original values after successful update
+            setOriginalTitle(title);
+            setOriginalDescription(description);
+            setOriginalImage(image);
+            setOriginalIsPrivate(isPrivate);
+            setOriginalExternalURLs([...externalURLs]);
+
+            setIsSaving(false);
+            setUrlPreviewMode(false);
+            setOnSave(false);
+        } catch (error) {
+            console.log("Update error:", error);
+            toast.error("Failed to update URL. Please try again.");
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -206,57 +337,93 @@ const Url = () => {
 
     useEffect(() => {
         const fetchUrl = async () => {
+            setUrlPreviewMode(true);
             if (id !== "create") {
                 const response = await api.get(`/api/share/${id}`);
-                setTitle(response.data.url.title);
-                setDescription(response.data.url.description);
-                setImage(response.data.url.image);
-                setImagePreview(response.data.url.image);
-                setExternalUrls(response.data.externalUrls);
-                setIsPrivate(response.data.url.isPrivate);
-                setEditMode(false);
-                setPreviewMode(true);
+                if (response) {
+                    setTitle(response.data.url.title);
+                    setDescription(response.data.url.description);
+                    setImage(response.data.url.image);
+                    setImagePreview(response.data.url.image);
+                    setExternalUrls(response.data.externalUrls);
+                    setIsPrivate(!response.data.url.public);
+                    setEditMode(true);
+                    setPreviewMode(true);
 
-                if (response.data.url.userId === userDetails?.user?.id) {
-                    setIsFromUser(true);
+                    // Store original values for change detection
+                    setOriginalTitle(response.data.url.title);
+                    setOriginalDescription(response.data.url.description);
+                    setOriginalImage(response.data.url.image);
+                    setOriginalIsPrivate(!response.data.url.public);
+                    setOriginalExternalURLs(response.data.externalUrls);
+                    setCreatedBy(response.data.createdBy);
+
+                    if (response.data.url.userId === userDetails?.user?.id) {
+                        setIsFromUser(true);
+                    }
+
+                    setIsUrlFound(true);
+                } else {
+                    console.log(response);
+
+                    setIsUrlFound(true);
                 }
-
-                setIsUrlFound(true);
-
-                console.log( "userDetails?.user?.id");
             } else {
                 setIsUrlFound(true);
                 setEditMode(true);
                 setPreviewMode(false);
                 setIsFromUser(true);
+                setIsPrivate(true);
+                // Initialize original values for new items
+                setOriginalTitle("");
+                setOriginalDescription("");
+                setOriginalImage(null);
+                setOriginalIsPrivate(false);
+                setOriginalExternalURLs([]);
+                setCreatedBy(null);
             }
         };
         fetchUrl();
     }, [id, userDetails]);
 
-    useEffect(() => {
-        const refreshUserToken = async () => {
-            // setIsLoading(true);
-            if (accessToken && !userDetails) {
-                setUserDetails(decodeToken(accessToken));
-            } else {
-                await refreshToken();
-            }
-            // setIsLoading(false);
-        };
-        refreshUserToken();
-    }, [accessToken, refreshToken]);
+    // useEffect(() => {
+    //     const refreshUserToken = async () => {
+    //         // setIsLoading(true);
+    //         if (accessToken && !userDetails) {
+    //             setUserDetails(decodeToken(accessToken));
+    //         } else {
+    //             let res = await refreshToken();
+    //             if (res === null) {
+    //                 router.push("/");
+    //             }
+    //         }
+    //         // setIsLoading(false);
+    //     };
+    //     refreshUserToken();
+    // }, [accessToken, refreshToken]);
 
     return isUrlFound ? (
-        <div className="h-screen w-full flex justify-center relative overflow-auto">
-            <div className="w-full md:max-w-3xl xl:max-w-7xl pt-10 pb-10">
+        <div className="w-full flex justify-center relative">
+            <div
+                className={`w-full md:max-w-3xl xl:max-w-7xl ${
+                    previewMode ? "pt-35 pb-10 " : "pt-10 "
+                } min-h-screen`}
+            >
                 <div className="flex items-center justify-center ">
                     <div className="w-full max-w-xl ">
                         {/* header */}
                         <div className="flex flex-col gap-3">
                             <div className="flex gap-5 justify-between items-start">
                                 <div className="flex gap-5">
-                                    <div className="relative">
+                                    <div
+                                        className={`${
+                                            previewMode
+                                                ? imagePreview === ""
+                                                    ? "hidden"
+                                                    : "relative"
+                                                : "relative"
+                                        }`}
+                                    >
                                         {!previewMode && (
                                             <div
                                                 className="absolute -top-5 -right-2 rounded-full bg-white group hover:bg-gray-200 cursor-pointer shadow-md h-9 w-9 text-center flex justify-center items-center"
@@ -407,10 +574,10 @@ const Url = () => {
                                             )}
                                         </div>
                                         <div className="flex items-center gap-1">
-                                            {userDetails?.user?.userImage ? (
+                                            {createdBy?.userImage ? (
                                                 <Image
                                                     src={
-                                                        userDetails?.user
+                                                        createdBy?.userImage
                                                             ?.userImage
                                                     }
                                                     alt="user image"
@@ -424,34 +591,33 @@ const Url = () => {
                                                 </div>
                                             )}
                                             <span className="text-sm text-gray-950">
-                                                {userDetails?.user?.firstName}{" "}
-                                                {userDetails?.user?.lastName}
+                                                {createdBy?.fullName}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
-                                {/* {editMode && isFromUser ? (
-                                    <div className="flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary">
-                                        <span className="flex text-sm">
-                                            Edit
-                                        </span>
-                                        <span className="text-sm cursor-pointer">
-                                            <Edit />
-                                        </span>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary">
-                                        <span className="flex text-sm">
-                                            Share
-                                        </span>
-                                        <span className="text-sm cursor-pointer">
-                                            <Share />
-                                        </span>
-                                    </div>
-                                )} */}
                                 <div className="flex flex-col gap-2">
-                                    {!isPrivate && previewMode && (
-                                        <div className="flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary">
+                                    {/* {previewMode && (
+                                        <div className="flex justify-end items-center gap-2 y cursor-pointer hover:text-gray-400">
+                                            <span
+                                                className={`rounded-full ${
+                                                    isPrivate
+                                                        ? "bg-blue-200 px-2 py-1 text-xs text-blue-600"
+                                                        : "bg-green-200 px-2 py-1 text-xs text-green-600"
+                                                }`}
+                                            >
+                                                {isPrivate
+                                                    ? "Private"
+                                                    : "Public"}
+                                            </span>
+                                        </div>
+                                    )} */}
+
+                                    {previewMode && (
+                                        <div
+                                            className="flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary"
+                                            onClick={() => setShareModal(true)}
+                                        >
                                             <span className="flex text-sm">
                                                 Share
                                             </span>
@@ -461,7 +627,7 @@ const Url = () => {
                                         </div>
                                     )}
 
-                                    {isFromUser && !editMode && !isPrivate && (
+                                    {isFromUser && !editMode && (
                                         <div
                                             className="flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary"
                                             onClick={() => {
@@ -530,6 +696,7 @@ const Url = () => {
                                                 : !previewMode && (
                                                       <span className="text-gray-500 italic">
                                                           No Description
+                                                          (optional)
                                                       </span>
                                                   )}
                                         </span>
@@ -638,107 +805,7 @@ const Url = () => {
                     </div>
                 </div>
             </div>
-
             {/* menu */}
-            {editMode && isFromUser && (
-                <div className="fixed bottom-5 right-0 h-full flex justify-center items-center">
-                    <div className="w-fit bg-white rounded-xl shadow-md p-4">
-                        <div className="flex items-center justify-center flex-col gap-6">
-                            {/* {id === "create" ? (
-                                <div className="flex items-center gap-2 mr-4">
-                                    <div className="flex items-center gap-3">
-                                        <span className="ml-2 text-sm font-medium text-gray-900">
-                                            Edit
-                                        </span>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                className="sr-only peer"
-                                                checked={!editMode}
-                                                onChange={() =>
-                                                    setEditMode(!editMode)
-                                                }
-                                            />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                          
-                                        </label>
-                                        <span className="text-sm font-medium text-gray-900">
-                                            Preview
-                                        </span>
-                                    </div>
-                                </div>
-                            ) : (
-                                editMode &&
-                                isFromUser && (
-                                    <div className="flex items-center gap-2 mr-4">
-                                        <div className="flex items-center gap-3">
-                                            <span className="ml-2 text-sm font-medium text-gray-900">
-                                                Private View
-                                            </span>
-                                            <label className="relative inline-flex items-center cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    className="sr-only peer"
-                                                    checked={isPrivate}
-                                                    onChange={() =>
-                                                        setIsPrivate(!isPrivate)
-                                                    }
-                                                />
-                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                     
-                                            </label>
-                                            <span className="text-sm font-medium text-gray-900">
-                                                Public View
-                                            </span>
-                                        </div>
-                                    </div>
-                                )
-                            )} */}
-
-                            <div className="flex items-center gap-2 mr-4">
-                                <div className="flex items-center gap-3">
-                                    <span className="ml-2 text-sm font-medium text-gray-900">
-                                        Edit
-                                    </span>
-                                    <label className="relative inline-flex items-center cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            className="sr-only peer"
-                                            checked={previewMode}
-                                            onChange={() =>
-                                                setPreviewMode(!previewMode)
-                                            }
-                                        />
-                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                        {/* <span className="ml-2 text-sm font-medium text-gray-900">
-                                            {editMode ? "Edit" : "Preview"}
-                                        </span> */}
-                                    </label>
-                                    <span className="text-sm font-medium text-gray-900">
-                                        Preview
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="w-full">
-                                <Button
-                                    text={isSaving ? "Saving..." : "Save"}
-                                    variant="primary"
-                                    icon={isSaving ? null : <Save2 />}
-                                    onClick={() => {
-                                        if (!isSaving) {
-                                            setOnSave(true);
-                                        }
-                                    }}
-                                    width="full"
-                                    disabled={isSaving}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* add modal */}
             {addURLModal && (
                 <Modal
@@ -748,22 +815,21 @@ const Url = () => {
                     content={
                         <div className="flex flex-col gap-4">
                             <TextField
-                                placeholder="Title"
-                                type="text"
-                                value={newUrlTitle}
-                                onChange={(e) => setNewUrlTitle(e.target.value)}
-                            />
-                            <TextField
                                 placeholder="URL"
                                 type="text"
                                 value={newUrl}
                                 onChange={(e) => setNewUrl(e.target.value)}
                             />
+                            <TextField
+                                placeholder="Title (Optional)"
+                                type="text"
+                                value={newUrlTitle}
+                                onChange={(e) => setNewUrlTitle(e.target.value)}
+                            />
                         </div>
                     }
                 />
             )}
-
             {/* edit modal */}
             {editURLModal && (
                 <Modal
@@ -788,18 +854,48 @@ const Url = () => {
                     }
                 />
             )}
-
             {/* save modal */}
             {onSave && (
                 <Modal
                     title="Confirm"
                     onClose={() => setOnSave(false)}
-                    onSave={handleSave}
+                    onSave={() => {
+                        if (id === "create") {
+                            handleSave();
+                        } else {
+                            handleUpdate();
+                        }
+                    }}
                     content={
                         <div className="flex items-center justify-center flex-col gap-4">
                             <span className="text-2xl text-center">
                                 Are you sure you want to save?
                             </span>
+                        </div>
+                    }
+                />
+            )}
+            {/* Share modal */}
+            {shareModal && (
+                <Modal
+                    title="Share"
+                    onClose={() => setShareModal(false)}
+                    onSave={() => {
+                        setShareModal(false);
+                    }}
+                    content={
+                        <div className="flex flex-col gap-4">
+                            <TextField
+                                placeholder="Share URL"
+                                type="text"
+                                value={shareUrl}
+                                onChange={(e) => setShareUrl(e.target.value)}
+                            />
+                            <Button
+                                variant="primary"
+                                text="Share"
+                                onClick={() => {}}
+                            />
                         </div>
                     }
                 />

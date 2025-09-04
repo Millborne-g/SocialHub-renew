@@ -93,12 +93,8 @@ export async function PUT(
         const title = formData.get("title") as string;
         const isPublic = formData.get("public") as string;
         const description = formData.get("description") as string;
-        const image = formData.get("image") as File | null;
+        const image = formData.get("image") as File | null | string;
         const externalURLs = formData.get("externalURLs") as string;
-
-        console.log("*******************************************");
-        console.log(isPublic);
-        console.log("*******************************************");
 
         // Validate required fields
         if (!title || title.trim() === "") {
@@ -109,6 +105,10 @@ export async function PUT(
         }
 
         let imageUrl = existingUrl.image; // Keep existing image by default
+
+        if (image === "null") {
+            imageUrl = "";
+        }
 
         // Handle image upload if new image is provided
         if (image && image instanceof File) {
