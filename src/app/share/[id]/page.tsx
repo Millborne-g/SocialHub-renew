@@ -40,6 +40,55 @@ import { useAuthStore } from "@/store/authStore";
 import { decodeToken } from "@/lib/jwt";
 import Image from "next/image";
 import { useUrlStore } from "@/store/UrlStore";
+import {
+    EmailShareButton,
+    FacebookShareButton,
+    GabShareButton,
+    HatenaShareButton,
+    InstapaperShareButton,
+    LineShareButton,
+    LinkedinShareButton,
+    LivejournalShareButton,
+    MailruShareButton,
+    OKShareButton,
+    PinterestShareButton,
+    PocketShareButton,
+    RedditShareButton,
+    TelegramShareButton,
+    ThreadsShareButton,
+    TumblrShareButton,
+    TwitterShareButton,
+    ViberShareButton,
+    VKShareButton,
+    WhatsappShareButton,
+    WorkplaceShareButton,
+    EmailIcon,
+    FacebookIcon,
+    GabIcon,
+    HatenaIcon,
+    InstapaperIcon,
+    LineIcon,
+    LinkedinIcon,
+    LivejournalIcon,
+    MailruIcon,
+    OKIcon,
+    PinterestIcon,
+    PocketIcon,
+    RedditIcon,
+    TelegramIcon,
+    ThreadsIcon,
+    TumblrIcon,
+    TwitterIcon,
+    ViberIcon,
+    VKIcon,
+    WhatsappIcon,
+    WorkplaceIcon,
+    FacebookMessengerShareButton,
+    FacebookMessengerIcon,
+    
+} from "react-share";
+import QRCode from "qrcode";
+import { Copy } from "iconsax-reactjs";
 
 const Url = () => {
     const router = useRouter();
@@ -73,6 +122,7 @@ const Url = () => {
     const [isUrlFound, setIsUrlFound] = useState(false);
     const [shareModal, setShareModal] = useState(false);
     const [shareUrl, setShareUrl] = useState("");
+    const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
     // const [previewMode, setPreviewMode] = useState(false);
 
     const [externalURLs, setExternalUrls] = useState<any[]>([]);
@@ -84,6 +134,39 @@ const Url = () => {
     const [originalIsPrivate, setOriginalIsPrivate] = useState(false);
     const [originalExternalURLs, setOriginalExternalURLs] = useState<any[]>([]);
     const [createdBy, setCreatedBy] = useState<any>(null);
+
+    // Function to generate QR code
+    const generateQRCode = async (url: string) => {
+        try {
+            // Create a URL that will prompt user to click/confirm before opening
+            // Using a simple redirect service that shows a confirmation page
+            const qrUrl = `https://www.google.com/url?q=${encodeURIComponent(
+                url
+            )}&sa=D&source=qr`;
+
+            const qrCodeDataUrl = await QRCode.toDataURL(qrUrl, {
+                width: 200,
+                margin: 2,
+                color: {
+                    dark: "#000000",
+                    light: "#FFFFFF",
+                },
+            });
+            setQrCodeDataUrl(qrCodeDataUrl);
+        } catch (error) {
+            console.error("Error generating QR code:", error);
+        }
+    };
+
+    // Function to open share modal and generate QR code
+    const handleShareModalOpen = () => {
+        const currentUrl = window.location.href;
+        console.log("Current URL for sharing:", currentUrl);
+        setShareUrl(currentUrl);
+        generateQRCode(currentUrl);
+        setShareModal(true);
+    };
+
     // Function to check if there are any changes
     const hasChanges = () => {
         if (id === "create") {
@@ -616,7 +699,7 @@ const Url = () => {
                                     {previewMode && (
                                         <div
                                             className="flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary"
-                                            onClick={() => setShareModal(true)}
+                                            onClick={handleShareModalOpen}
                                         >
                                             <span className="flex text-sm">
                                                 Share
@@ -883,19 +966,370 @@ const Url = () => {
                     onSave={() => {
                         setShareModal(false);
                     }}
+                    noButtons={true}
                     content={
-                        <div className="flex flex-col gap-4">
-                            <TextField
-                                placeholder="Share URL"
-                                type="text"
-                                value={shareUrl}
-                                onChange={(e) => setShareUrl(e.target.value)}
-                            />
-                            <Button
-                                variant="primary"
-                                text="Share"
-                                onClick={() => {}}
-                            />
+                        <div className="flex flex-col gap-6">
+                            {/* QR Code */}
+                            <div className="flex flex-col items-center gap-2">
+                                {/* <label className="text-sm font-medium text-gray-700">
+                                    QR Code
+                                </label> */}
+                                {qrCodeDataUrl && (
+                                    <div className="p-4 bg-white border border-gray-200 rounded-lg">
+                                        <img
+                                            src={qrCodeDataUrl}
+                                            alt="QR Code"
+                                            className="w-48 h-48"
+                                        />
+                                    </div>
+                                )}
+                                <p className="text-xs text-gray-500 text-center">
+                                    Scan to open this page
+                                </p>
+                            </div>
+
+                            {/* URL Input */}
+                            <div className="flex flex-col gap-2">
+                                {/* <label className="text-sm font-medium text-gray-700">
+                                    Share URL
+                                </label> */}
+                                <TextField
+                                    placeholder="Share URL"
+                                    type="text"
+                                    value={shareUrl}
+                                    onChange={(e) =>
+                                        setShareUrl(e.target.value)
+                                    }
+                                    endIcon={
+                                        <div
+                                            className="cursor-pointer bg-white px-1 rounded-md hover:text-primary"
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(
+                                                    shareUrl
+                                                );
+                                                toast.success(
+                                                    "Copied to clipboard!"
+                                                );
+                                            }}
+                                        >
+                                            <Copy />
+                                        </div>
+                                    }
+                                />
+                            </div>
+
+                            {/* Share Buttons */}
+                            <div className="flex flex-col gap-3">
+                                {/* <label className="text-sm font-medium text-gray-700">
+                                    Share on Social Media
+                                </label> */}
+                                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                                    {/* Email */}
+                                    <EmailShareButton
+                                        url={shareUrl}
+                                        subject={title}
+                                        body={description}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <EmailIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                Email
+                                            </span>
+                                        </div>
+                                    </EmailShareButton>
+
+                                    {/* Facebook */}
+                                    <FacebookShareButton
+                                        url={shareUrl}
+                                        onClick={() =>
+                                            console.log(
+                                                "Facebook share clicked with URL:",
+                                                shareUrl
+                                            )
+                                        }
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <FacebookIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                Facebook
+                                            </span>
+                                        </div>
+                                    </FacebookShareButton>
+
+                                    {/* Facebook Messenger */}
+                                    <FacebookMessengerShareButton
+                                        url={shareUrl}
+                                        title={title}
+                                        appId={process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || ""}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <FacebookMessengerIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                Facebook Messenger
+                                            </span>
+                                        </div>
+                                    </FacebookMessengerShareButton>
+
+                                    {/* Twitter */}
+                                    <TwitterShareButton
+                                        url={shareUrl}
+                                        title={title}
+                                        onClick={() =>
+                                            console.log(
+                                                "Twitter share clicked with URL:",
+                                                shareUrl,
+                                                "Title:",
+                                                title
+                                            )
+                                        }
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <TwitterIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                Twitter
+                                            </span>
+                                        </div>
+                                    </TwitterShareButton>
+
+                                    {/* LinkedIn */}
+                                    <LinkedinShareButton
+                                        url={shareUrl}
+                                        title={title}
+                                        summary={description}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <LinkedinIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                LinkedIn
+                                            </span>
+                                        </div>
+                                    </LinkedinShareButton>
+
+                                    {/* WhatsApp */}
+                                    <WhatsappShareButton
+                                        url={shareUrl}
+                                        title={title}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <WhatsappIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                WhatsApp
+                                            </span>
+                                        </div>
+                                    </WhatsappShareButton>
+
+                                    {/* Telegram */}
+                                    <TelegramShareButton
+                                        url={shareUrl}
+                                        title={title}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <TelegramIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                Telegram
+                                            </span>
+                                        </div>
+                                    </TelegramShareButton>
+
+                                    {/* Reddit */}
+                                    <RedditShareButton
+                                        url={shareUrl}
+                                        title={title}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <RedditIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                Reddit
+                                            </span>
+                                        </div>
+                                    </RedditShareButton>
+
+                                    {/* Pinterest */}
+                                    <PinterestShareButton
+                                        url={shareUrl}
+                                        media={imagePreview}
+                                        description={description}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <PinterestIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                Pinterest
+                                            </span>
+                                        </div>
+                                    </PinterestShareButton>
+
+                                    {/* Tumblr */}
+                                    <TumblrShareButton
+                                        url={shareUrl}
+                                        title={title}
+                                        caption={description}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <TumblrIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                Tumblr
+                                            </span>
+                                        </div>
+                                    </TumblrShareButton>
+
+                                    {/* VK */}
+                                    <VKShareButton url={shareUrl} title={title}>
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <VKIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                VK
+                                            </span>
+                                        </div>
+                                    </VKShareButton>
+
+                                    {/* Line */}
+                                    <LineShareButton
+                                        url={shareUrl}
+                                        title={title}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <LineIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                Line
+                                            </span>
+                                        </div>
+                                    </LineShareButton>
+
+                                    {/* Viber */}
+                                    <ViberShareButton
+                                        url={shareUrl}
+                                        title={title}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <ViberIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                Viber
+                                            </span>
+                                        </div>
+                                    </ViberShareButton>
+
+                                    {/* Pocket */}
+                                    <PocketShareButton
+                                        url={shareUrl}
+                                        title={title}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <PocketIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                Pocket
+                                            </span>
+                                        </div>
+                                    </PocketShareButton>
+
+                                    {/* Instapaper */}
+                                    <InstapaperShareButton
+                                        url={shareUrl}
+                                        title={title}
+                                        description={description}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <InstapaperIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                Instapaper
+                                            </span>
+                                        </div>
+                                    </InstapaperShareButton>
+
+                                    {/* Threads */}
+                                    <ThreadsShareButton
+                                        url={shareUrl}
+                                        title={title}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <ThreadsIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                Threads
+                                            </span>
+                                        </div>
+                                    </ThreadsShareButton>
+
+                                    {/* Workplace */}
+                                    <WorkplaceShareButton
+                                        url={shareUrl}
+                                        quote={title}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <WorkplaceIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                Workplace
+                                            </span>
+                                        </div>
+                                    </WorkplaceShareButton>
+
+                                    {/* Gab */}
+                                    <GabShareButton
+                                        url={shareUrl}
+                                        title={title}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <GabIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                Gab
+                                            </span>
+                                        </div>
+                                    </GabShareButton>
+
+                                    {/* Hatena */}
+                                    <HatenaShareButton
+                                        url={shareUrl}
+                                        title={title}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <HatenaIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                Hatena
+                                            </span>
+                                        </div>
+                                    </HatenaShareButton>
+
+                                    {/* LiveJournal */}
+                                    <LivejournalShareButton
+                                        url={shareUrl}
+                                        title={title}
+                                        description={description}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <LivejournalIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                LiveJournal
+                                            </span>
+                                        </div>
+                                    </LivejournalShareButton>
+
+                                    {/* Mail.ru */}
+                                    <MailruShareButton
+                                        url={shareUrl}
+                                        title={title}
+                                        description={description}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <MailruIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                Mail.ru
+                                            </span>
+                                        </div>
+                                    </MailruShareButton>
+
+                                    {/* OK.ru */}
+                                    <OKShareButton
+                                        url={shareUrl}
+                                        title={title}
+                                        description={description}
+                                    >
+                                        <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
+                                            <OKIcon size={32} round />
+                                            <span className="text-xs text-gray-600">
+                                                OK.ru
+                                            </span>
+                                        </div>
+                                    </OKShareButton>
+                                </div>
+                            </div>
                         </div>
                     }
                 />

@@ -7,6 +7,7 @@ const Modal = (props: {
     onClose: () => void;
     onSave: () => void;
     content: ReactNode;
+    noButtons?: boolean;
 }) => {
     return (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
@@ -21,20 +22,22 @@ const Modal = (props: {
                     </span>
                 </div>
                 <div className="p-4">{props.content}</div>
-                <div className="flex justify-end p-4 border-t border-gray-200 gap-2">
-                    <Button
-                        variant="secondary"
-                        text="Cancel"
-                        size="sm"
-                        onClick={props.onClose}
-                    />
-                    <Button
-                        variant="primary"
-                        text="Save"
-                        size="sm"
-                        onClick={props.onSave}
-                    />
-                </div>
+                {!props.noButtons && (
+                    <div className="flex justify-end p-4 border-t border-gray-200 gap-2">
+                        <Button
+                            variant="secondary"
+                            text="Cancel"
+                            size="sm"
+                            onClick={props.onClose}
+                        />
+                        <Button
+                            variant="primary"
+                            text="Save"
+                            size="sm"
+                            onClick={props.onSave}
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );
