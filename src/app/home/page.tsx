@@ -180,9 +180,9 @@ const Home = () => {
 
     return (
         <div className="h-screen w-full flex justify-center">
-            <div className="w-full md:max-w-3xl xl:max-w-7xl pt-10">
+            <div className="w-full md:max-w-3xl xl:max-w-7xl pt-10 px-3 md:px-0">
                 <div className="flex flex-col gap-8 h-full ">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-start justify-start sm:justify-between sm:flex-row flex-col md:items-center gap-5">
                         <div className="flex flex-col gap-2">
                             <span className="text-4xl font-medium">
                                 {greeting},{" "}
@@ -192,7 +192,7 @@ const Home = () => {
                                 {greetingsMessage}
                             </span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-start justify-start md:items-center gap-2">
                             <Button
                                 text="Create"
                                 rounded="full"
@@ -208,7 +208,7 @@ const Home = () => {
 
                     <div className="flex flex-col gap-5 h-full ">
                         {/* Search & Filters */}
-                        <div className="flex items-center w-full gap-5">
+                        <div className="flex sm:justify-start sm:items-start w-full gap-5 sm:flex-row flex-col">
                             <div className="relative flex-1">
                                 <TextField
                                     placeholder="Search URLs by title or description..."
@@ -252,7 +252,7 @@ const Home = () => {
                             </div>
                             <div className="flex items-center gap-2">
                                 <select
-                                    className="px-4 py-2 text-base border border-gray-300 rounded-md p-2 peer focus:outline-none focus:border-primary w-40"
+                                    className=" w-full px-4 py-2 text-base border border-gray-300 rounded-md p-2 peer focus:outline-none focus:border-primary w-40"
                                     value={filter}
                                     onChange={(e) =>
                                         handleFilterChange(e.target.value)
@@ -416,19 +416,6 @@ const Home = () => {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-2">
-                                                        {url.public && (
-                                                            <span
-                                                                className="text-blue-600 hover:underline cursor-pointer"
-                                                                onClick={() => {
-                                                                    window.open(
-                                                                        `/share/${url._id}`,
-                                                                        "_blank"
-                                                                    );
-                                                                }}
-                                                            >
-                                                                View
-                                                            </span>
-                                                        )}
                                                         <span
                                                             className="text-blue-600 hover:underline cursor-pointer"
                                                             onClick={() => {
@@ -452,6 +439,19 @@ const Home = () => {
                                                         >
                                                             Delete
                                                         </span>
+                                                        {url.public && (
+                                                            <span
+                                                                className="text-blue-600 hover:underline cursor-pointer"
+                                                                onClick={() => {
+                                                                    window.open(
+                                                                        `/share/${url._id}`,
+                                                                        "_blank"
+                                                                    );
+                                                                }}
+                                                            >
+                                                                Visit
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>

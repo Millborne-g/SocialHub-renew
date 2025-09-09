@@ -30,32 +30,32 @@ export default function Home() {
     }, [accessToken, refreshToken]);
 
     return (
-        <div className="flex items-center justify-center h-screen">
+        <div className="flex items-center justify-center h-screen p-3">
             {/* md:max-w-3xl xl:max-w-7xl */}
-            <div className="flex w-full md:max-w-3xl xl:max-w-7xl items-center gap-15">
-                <div className="flex-1 flex flex-col gap-4">
-                    <span className="text-4xl font-bold font-display leading-tight">
+            <div className="flex w-full md:max-w-3xl xl:max-w-7xl items-center gap-15 ">
+                <div className="flex-1 flex flex-col gap-4 px-10 md:px-0">
+                    <span className="text-4xl font-bold font-display leading-tight text-center md:text-left">
                         Your One-Stop Link Storage Solution:{" "}
                         <span className="bg-[#F9ED32]">
                             Accessible and Shareable
                         </span>
                     </span>
-                    <span className="text-xl">
+                    <span className="text-xl text-center md:text-left">
                         Elevate Your Link Management Experience as Store, Share,
                         and Access Your Links with Our Cutting-Edge Storage
                         Solution.
                     </span>
-                    <div className="w-full">
+                    <div className="w-full text-center md:text-left">
                         <div className="bg-primary p-1 rounded-lg grid grid-cols-12 gap-2 hover:bg-primary/85 ">
                             <input
                                 type="text"
-                                className="text-base w-full p-3 rounded-lg bg-white col-span-9 font-display"
+                                className="text-base w-full p-3 rounded-lg bg-white font-display md:col-span-9 col-span-8"
                                 placeholder="Enter your email..."
                                 value={userEmail}
                                 onChange={(e) => setUserEmail(e.target.value)}
                             />
                             <div
-                                className="flex items-center justify-center gap-2 col-span-3 cursor-pointer font-display"
+                                className="flex items-center justify-center gap-2 md:col-span-3 col-span-4 cursor-pointer font-display"
                                 onClick={() => {
                                     router.push(
                                         `/signup${
@@ -77,7 +77,7 @@ export default function Home() {
                     </div>
                 </div>
 
-                <div className="flex-1">
+                <div className="flex-1 hidden md:block">
                     <Image src={hero} alt="hero" />
                 </div>
             </div>

@@ -181,10 +181,26 @@ const Url = () => {
     };
 
     const handleUpdateURL = () => {
+        let newUrlTitleString = "";
+        if (newUrlTitle.trim()) {
+            newUrlTitleString = newUrlTitle.trim();
+        } else {
+            newUrlTitleString = (() => {
+                const url = new URL(newUrl.trim());
+                const parts = url.hostname.split(".");
+                // Handle localhost and similar single-part hostnames
+                if (parts.length === 1) {
+                    return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+                }
+                // Handle normal domains
+                const domain = parts.slice(-2, -1)[0];
+                return domain.charAt(0).toUpperCase() + domain.slice(1);
+            })();
+        }
         setExternalUrls((prev) => {
             const updated = prev.map((url) =>
                 url._id === activeId
-                    ? { ...url, title: newUrlTitle, url: newUrl }
+                    ? { ...url, title: newUrlTitleString, url: newUrl }
                     : url
             );
             return updated;
@@ -393,8 +409,28 @@ const Url = () => {
         refreshUserToken();
     }, [accessToken, refreshToken]);
 
+    useEffect(() => {
+        const generateText = async () => {
+            const response = await fetch(
+                "https://api.deepai.org/api/text-generator",
+                {
+                    method: "POST",
+                    headers: {
+                        "Api-Key": "a0b73efa-c055-4f51-8103-cac0645e2b48",
+                    },
+                    body: JSON.stringify({
+                        text: "Generate a product title and description for a tech blog.",
+                    }),
+                }
+            );
+
+            console.log(response);
+        };
+        generateText();
+    }, []);
+
     return isUrlFound ? (
-        <div className="w-full flex justify-center relative">
+        <div className="w-full flex justify-center relative px-3 md:px-0">
             <div
                 className={`w-full md:max-w-3xl xl:max-w-7xl ${
                     previewMode ? "pt-35 pb-10 " : "pt-10 "
@@ -954,16 +990,16 @@ const Url = () => {
                     content={
                         <div className="flex flex-col gap-4">
                             <TextField
-                                placeholder="Title"
-                                type="text"
-                                value={newUrlTitle}
-                                onChange={(e) => setNewUrlTitle(e.target.value)}
-                            />
-                            <TextField
                                 placeholder="URL"
                                 type="text"
                                 value={newUrl}
                                 onChange={(e) => setNewUrl(e.target.value)}
+                            />
+                            <TextField
+                                placeholder="Title (Optional)"
+                                type="text"
+                                value={newUrlTitle}
+                                onChange={(e) => setNewUrlTitle(e.target.value)}
                             />
                         </div>
                     }

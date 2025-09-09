@@ -10,11 +10,11 @@ const Footer = () => {
 
     return (
         <div
-            className={`flex items-center justify-center bottom-0 w-full py-2 ${
+            className={`flex items-center justify-center bottom-0 w-full py-2 px-3 md:px-0 ${
                 accessToken || isShareRoute ? "static" : "fixed"
             }`}
         >
-            <span className="font-display text-sm text-[#929292]">
+            <span className="font-display text-sm text-[#929292] text-center">
                 © {new Date().getFullYear()} SocialHub |{" "}
                 <a
                     href="https://millborneportfolio.vercel.app/"

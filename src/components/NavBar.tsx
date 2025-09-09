@@ -96,7 +96,7 @@ const NavBar = () => {
     return (
         <>
             {urlPreviewMode ? (
-                <div className="w-full fixed top-0 flex justify-center items-center z-30">
+                <div className="w-full fixed top-0 flex justify-center items-center z-30 p-3">
                     <div className="py-5 bg-white flex items-center justify-between w-full md:max-w-3xl xl:max-w-7xl">
                         <a href="/" className="flex items-center gap-2">
                             <Image src={logo} alt="logo" />

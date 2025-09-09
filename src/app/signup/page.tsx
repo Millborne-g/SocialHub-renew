@@ -118,7 +118,7 @@ const SignupContent = ({ email }: { email: string }) => {
                     SocialHub
                 </span>
             </a>
-            <div className="flex flex-col items-center justify-center gap-4">
+            <div className="flex flex-col items-center justify-center gap-4 mx-3 md:mx-0">
                 <form
                     className="flex flex-col gap-4"
                     onSubmit={handleSubmit(onSubmit)}

@@ -70,7 +70,7 @@ const ExternalUrl = (props: {
                     props.mode !== "edit" ? "hover:scale-105" : ""
                 }`}
                 onClick={() => {
-                    if(props.mode !== "edit") {
+                    if (props.mode !== "edit") {
                         window.open(props.url, "_blank");
                     }
                 }}
@@ -109,13 +109,18 @@ const ExternalUrl = (props: {
                                         </span>
                                     </div>
 
-                                    <span
-                                        {...listeners}
-                                        {...attributes}
-                                        className="text-lg text-gray-600 hover:bg-gray-300 px-1 rounded-sm cursor-pointer"
-                                    >
-                                        ⋮⋮
-                                    </span>
+                                    <div className="relative group ">
+                                        <div className="w-[85px] absolute hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 -top-8 -right-9 transform -translate-x-1/2">
+                                            <span className="text-center">Click & drag</span>
+                                        </div>
+                                        <span
+                                            {...listeners}
+                                            {...attributes}
+                                            className="text-lg text-gray-600 hover:bg-gray-300 px-1 rounded-sm cursor-pointer"
+                                        >
+                                            ⋮⋮
+                                        </span>
+                                    </div>
                                 </div>
                             </>
                         )}
