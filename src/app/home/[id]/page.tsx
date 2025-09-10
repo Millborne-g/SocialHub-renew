@@ -103,6 +103,11 @@ const Url = () => {
     const [isGeneratingDescription, setIsGeneratingDescription] =
         useState(false);
 
+    // Panel puller state
+    const [isPanelOpen, setIsPanelOpen] = useState(true);
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStartY, setDragStartY] = useState(0);
+
     // Function to check if there are any changes
     const hasChanges = () => {
         if (id === "create") {
@@ -376,7 +381,7 @@ const Url = () => {
 
         const response = await api.post(`/api/gemini/text`, {
             method: "POST",
-            prompt: `Create 10 titles separated by commas (,) with no spaces on the separators. Titles may have spaces. ${
+            prompt: `Create 10 titles separated by commas (,,). Titles may have spaces. ${
                 externalURLs.length &&
                 `The titles must be related to ${externalURLs
                     .map((url) => `${url.title} (${url.url})`)
@@ -384,15 +389,31 @@ const Url = () => {
             }. Provide the answer directly with no extra text.`,
         });
 
-        const titles = response.data.split(",");
+        const titles = response.data.split(",,");
 
         setGeneratedTitles(titles);
         setIsGeneratingTitle(false);
 
-        // // test
-        // const response2 = await ai.models.generateImages({
-        //     model: "gemini-2.5-flash",
-        //     prompt: `Create an image of animated cat.`,
+        // --------------- For image generation ---------------
+        // const config = {
+        //     responseModalities: ["IMAGE", "TEXT"],
+        // };
+        // const model = "gemini-2.5-flash-image-preview";
+        // const contents = [
+        //     {
+        //         role: "user",
+        //         parts: [
+        //             {
+        //                 text: `Create an image of animated cat.`,
+        //             },
+        //         ],
+        //     },
+        // ];
+
+        // const response2 = await ai.models.generateContentStream({
+        //     model,
+        //     config,
+        //     contents,
         // });
 
         // console.log("Response 2:", response2);
@@ -403,30 +424,17 @@ const Url = () => {
 
         const response = await api.post(`/api/gemini/text`, {
             method: "POST",
-            prompt: `Create 10 descriptions 300 characters max each separated by commas (,) with no spaces on the separators. Descriptions may have spaces. ${
+            prompt: `Create 10 descriptions 300 characters max each separated by commas (,,). Descriptions may have spaces. ${
                 externalURLs.length &&
                 `The descriptions must be related to ${externalURLs
                     .map((url) => `${url.title} (${url.url})`)
                     .join(", ")}`
             }. Provide the answer directly with no extra text.`,
         });
-        const descriptions = response.data.split(",");
+        const descriptions = response.data.split(",,");
         setGeneratedDescriptions(descriptions);
         setIsGeneratingDescription(false);
     };
-
-    // const generateImage = async () => {
-    //     const response = await api.post(`/api/gemini/image`, {
-    //         method: "POST",
-    //         prompt: `Create an image of animated cat.`,
-    //     });
-    //     if (response) {
-    //         console.error("No response text received");
-    //         return;
-    //     }
-
-    //     console.log(response);
-    // };
 
     const setNewTitle = (title: string) => {
         console.log("Setting new title:", title);
@@ -517,11 +525,50 @@ const Url = () => {
         };
     }, [showTitleDropdown]);
 
+    // Panel puller drag handlers
+    const handlePanelDragStart = (e: React.MouseEvent) => {
+        setIsDragging(true);
+        setDragStartY(e.clientY);
+        e.preventDefault();
+    };
+
+    const handlePanelDragMove = (e: MouseEvent) => {
+        if (!isDragging) return;
+
+        const deltaY = e.clientY - dragStartY;
+        const threshold = 50; // Minimum drag distance to trigger toggle
+
+        if (Math.abs(deltaY) > threshold) {
+            setIsPanelOpen(deltaY < 0); // Open if dragged up, close if dragged down
+            setIsDragging(false);
+        }
+    };
+
+    const handlePanelDragEnd = () => {
+        setIsDragging(false);
+    };
+
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
+
+    // Add event listeners for drag
+    React.useEffect(() => {
+        if (isDragging) {
+            document.addEventListener("mousemove", handlePanelDragMove);
+            document.addEventListener("mouseup", handlePanelDragEnd);
+            return () => {
+                document.removeEventListener("mousemove", handlePanelDragMove);
+                document.removeEventListener("mouseup", handlePanelDragEnd);
+            };
+        }
+    }, [isDragging, dragStartY]);
+
     return isUrlFound ? (
         <div className="w-full flex justify-center relative px-3 md:px-0">
             <div
                 className={`w-full md:max-w-3xl xl:max-w-7xl ${
-                    previewMode ? "pt-35 pb-10 " : "pt-10 "
+                    previewMode ? "pt-30 pb-10 " : "pt-10 "
                 } min-h-screen`}
             >
                 <div className="flex items-center justify-center ">
@@ -1078,7 +1125,24 @@ const Url = () => {
 
             {/* menu */}
             {editMode && isFromUser && (
-                <div className="fixed bottom-5 right-0 h-full flex justify-center items-center">
+                <div
+                    className={`fixed top-1/2 -translate-y-1/2 right-0 transition-transform duration-300 ease-in-out ${
+                        isPanelOpen ? "translate-x-0" : "translate-x-full"
+                    }`}
+                >
+                    {/* Puller Handle */}
+                    <div
+                        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 w-6 h-16 bg-primary hover:bg-gray-300 rounded-l-lg cursor-pointer flex items-center justify-center group transition-colors duration-200"
+                        onMouseDown={handlePanelDragStart}
+                        onClick={togglePanel}
+                    >
+                        <div className="flex flex-col gap-1">
+                            <div className="w-1 h-1 bg-white rounded-full group-hover:bg-gray-700"></div>
+                            <div className="w-1 h-1 bg-white rounded-full group-hover:bg-gray-700"></div>
+                            <div className="w-1 h-1 bg-white rounded-full group-hover:bg-gray-700"></div>
+                        </div>
+                    </div>
+
                     <div className="w-fit bg-white rounded-xl shadow-md p-4">
                         <div className="flex justify-center flex-col gap-4">
                             {/* {id === "create" ? (
@@ -1148,7 +1212,13 @@ const Url = () => {
                                                 setTitleEdit(false);
                                                 setDescriptionEdit(false);
                                                 setShowTitleDropdown(false);
-                                                setShowDescriptionDropdown(false);
+                                                setShowDescriptionDropdown(
+                                                    false
+                                                );
+
+                                                if (!previewMode) {
+                                                    togglePanel();
+                                                }
                                             }}
                                         />
                                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>

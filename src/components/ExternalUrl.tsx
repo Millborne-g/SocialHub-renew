@@ -46,7 +46,7 @@ const ExternalUrl = (props: {
             ref={setNodeRef}
             style={style}
             className={`relative cursor-move ${
-                props.mode === "edit" ? "h-75" : ""
+                props.mode === "edit" ? "sm:h-75" : ""
             }`}
         >
             {props.mode === "edit" && (
@@ -75,7 +75,7 @@ const ExternalUrl = (props: {
                     }
                 }}
             >
-                <div className="bg-gray-100 w-full h-40 flex items-center justify-center">
+                <div className="bg-gray-100 w-full h-30 sm:h-40 flex items-center justify-center">
                     <img
                         src={getFaviconUrl(props.url)}
                         alt="image"

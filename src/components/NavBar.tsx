@@ -18,6 +18,7 @@ const NavBar = () => {
     const [userDetails, setUserDetails] = useState<any>(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
     const isShareRoute = pathname.startsWith("/share");
 
     const navbarOptions = [
@@ -93,11 +94,28 @@ const NavBar = () => {
         };
     }, [isDropdownOpen]);
 
+    // Handle scroll to show/hide shadow
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollTop = window.scrollY;
+            setIsScrolled(scrollTop > 0);
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+        };
+    }, []);
+
     return (
         <>
             {urlPreviewMode ? (
-                <div className="w-full fixed top-0 flex justify-center items-center z-30 p-3">
-                    <div className="py-5 bg-white flex items-center justify-between w-full md:max-w-3xl xl:max-w-7xl">
+                <div
+                    className={`w-full bg-white fixed top-0 flex justify-center items-center z-30 p-3 transition-shadow duration-200 ${
+                        isScrolled ? "shadow-lg" : ""
+                    }`}
+                >
+                    <div className="py-2 bg-white flex items-center justify-between w-full md:max-w-3xl xl:max-w-7xl">
                         <a href="/" className="flex items-center gap-2">
                             <Image src={logo} alt="logo" />
                             <span className="text-xl font-bold font-display">

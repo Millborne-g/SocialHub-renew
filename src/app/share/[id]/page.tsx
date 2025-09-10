@@ -486,10 +486,10 @@ const Url = () => {
     // }, [accessToken, refreshToken]);
 
     return isUrlFound ? (
-        <div className="w-full flex justify-center relative">
+        <div className="w-full flex justify-center relative px-3 md:px-0">
             <div
                 className={`w-full md:max-w-3xl xl:max-w-7xl ${
-                    previewMode ? "pt-35 pb-10 " : "pt-10 "
+                    previewMode ? "pt-30 pb-10 " : "pt-10 "
                 } min-h-screen`}
             >
                 <div className="flex items-center justify-center ">
