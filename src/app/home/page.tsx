@@ -252,7 +252,7 @@ const Home = () => {
                             </div>
                             <div className="flex items-center gap-2">
                                 <select
-                                    className=" w-full px-4 py-2 text-base border border-gray-300 rounded-md p-2 peer focus:outline-none focus:border-primary w-40"
+                                    className="w-full px-4 py-2 text-base border border-gray-300 rounded-md p-2 peer focus:outline-none focus:border-primary w-40"
                                     value={filter}
                                     onChange={(e) =>
                                         handleFilterChange(e.target.value)

@@ -5,9 +5,11 @@ import ExternalUrl from "@/components/ExternalUrl";
 import Modal from "@/components/Modal";
 import {
     Add,
+    ArrowRotateRight,
     Check,
     CloseCircle,
     Edit,
+    Magicpen,
     Save2,
     Share,
     Trash,
@@ -40,10 +42,15 @@ import { useAuthStore } from "@/store/authStore";
 import { decodeToken } from "@/lib/jwt";
 import Image from "next/image";
 import { useUrlStore } from "@/store/UrlStore";
+import { GoogleGenAI } from "@google/genai";
+const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
 const Url = () => {
     const router = useRouter();
     const { id } = useParams();
+    const ai = new GoogleGenAI({
+        apiKey: GEMINI_API_KEY,
+    });
     const { accessToken, refreshToken } = useAuthStore();
     const { setUrlPreviewMode } = useUrlStore();
     const [userDetails, setUserDetails] = useState<any>(null);
@@ -81,6 +88,20 @@ const Url = () => {
     const [originalImage, setOriginalImage] = useState<File | null>(null);
     const [originalIsPrivate, setOriginalIsPrivate] = useState(false);
     const [originalExternalURLs, setOriginalExternalURLs] = useState<any[]>([]);
+
+    // Dropdown state for title suggestions
+    const [showTitleDropdown, setShowTitleDropdown] = useState(false);
+    const [generatedTitles, setGeneratedTitles] = useState<string[]>([]);
+    const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
+
+    // Dropdown state for description suggestions
+    const [showDescriptionDropdown, setShowDescriptionDropdown] =
+        useState(false);
+    const [generatedDescriptions, setGeneratedDescriptions] = useState<
+        string[]
+    >([]);
+    const [isGeneratingDescription, setIsGeneratingDescription] =
+        useState(false);
 
     // Function to check if there are any changes
     const hasChanges = () => {
@@ -350,6 +371,76 @@ const Url = () => {
         }
     };
 
+    const generateTitle = async () => {
+        setIsGeneratingTitle(true);
+
+        const response = await api.post(`/api/gemini/text`, {
+            method: "POST",
+            prompt: `Create 10 titles separated by commas (,) with no spaces on the separators. Titles may have spaces. ${
+                externalURLs.length &&
+                `The titles must be related to ${externalURLs
+                    .map((url) => `${url.title} (${url.url})`)
+                    .join(", ")}`
+            }. Provide the answer directly with no extra text.`,
+        });
+
+        const titles = response.data.split(",");
+
+        setGeneratedTitles(titles);
+        setIsGeneratingTitle(false);
+
+        // // test
+        // const response2 = await ai.models.generateImages({
+        //     model: "gemini-2.5-flash",
+        //     prompt: `Create an image of animated cat.`,
+        // });
+
+        // console.log("Response 2:", response2);
+    };
+
+    const generateDescription = async () => {
+        setIsGeneratingDescription(true);
+
+        const response = await api.post(`/api/gemini/text`, {
+            method: "POST",
+            prompt: `Create 10 descriptions 300 characters max each separated by commas (,) with no spaces on the separators. Descriptions may have spaces. ${
+                externalURLs.length &&
+                `The descriptions must be related to ${externalURLs
+                    .map((url) => `${url.title} (${url.url})`)
+                    .join(", ")}`
+            }. Provide the answer directly with no extra text.`,
+        });
+        const descriptions = response.data.split(",");
+        setGeneratedDescriptions(descriptions);
+        setIsGeneratingDescription(false);
+    };
+
+    // const generateImage = async () => {
+    //     const response = await api.post(`/api/gemini/image`, {
+    //         method: "POST",
+    //         prompt: `Create an image of animated cat.`,
+    //     });
+    //     if (response) {
+    //         console.error("No response text received");
+    //         return;
+    //     }
+
+    //     console.log(response);
+    // };
+
+    const setNewTitle = (title: string) => {
+        console.log("Setting new title:", title);
+        setTitle(title);
+        setTitleEdit(false);
+        setShowTitleDropdown(false);
+    };
+
+    const setNewDescription = (description: string) => {
+        setDescription(description);
+        setDescriptionEdit(false);
+        setShowDescriptionDropdown(false);
+    };
+
     useEffect(() => {
         const fetchUrl = async () => {
             if (id !== "create") {
@@ -409,25 +500,22 @@ const Url = () => {
         refreshUserToken();
     }, [accessToken, refreshToken]);
 
+    // Close dropdown when clicking outside
     useEffect(() => {
-        const generateText = async () => {
-            const response = await fetch(
-                "https://api.deepai.org/api/text-generator",
-                {
-                    method: "POST",
-                    headers: {
-                        "Api-Key": "a0b73efa-c055-4f51-8103-cac0645e2b48",
-                    },
-                    body: JSON.stringify({
-                        text: "Generate a product title and description for a tech blog.",
-                    }),
+        const handleClickOutside = (event: MouseEvent) => {
+            if (showTitleDropdown) {
+                const target = event.target as Element;
+                if (!target.closest(".title-dropdown-container")) {
+                    setShowTitleDropdown(false);
                 }
-            );
-
-            console.log(response);
+            }
         };
-        generateText();
-    }, []);
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [showTitleDropdown]);
 
     return isUrlFound ? (
         <div className="w-full flex justify-center relative px-3 md:px-0">
@@ -539,7 +627,7 @@ const Url = () => {
                                     <div className="col-span-3 flex flex-col gap-2 justify-center">
                                         <div className="flex gap-4 items-center">
                                             {titleEdit ? (
-                                                <>
+                                                <div className="relative flex gap-4 title-dropdown-container">
                                                     <input
                                                         placeholder="Enter Title"
                                                         value={title}
@@ -565,6 +653,19 @@ const Url = () => {
                                                             }
                                                         }}
                                                     />
+
+                                                    <span
+                                                        className="text-gray-700 hover:text-gray-400 cursor-pointer"
+                                                        onClick={() => {
+                                                            generateTitle();
+                                                            setShowTitleDropdown(
+                                                                !showTitleDropdown
+                                                            );
+                                                        }}
+                                                    >
+                                                        <Magicpen />
+                                                    </span>
+
                                                     <span
                                                         className="text-gray-700 hover:text-gray-400 cursor-pointer"
                                                         onClick={() =>
@@ -573,7 +674,75 @@ const Url = () => {
                                                     >
                                                         <CloseCircle />
                                                     </span>
-                                                </>
+                                                    {showTitleDropdown && (
+                                                        <div className="absolute top-full left-0 mt-1 w-full bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-lg shadow-xl z-10 backdrop-blur-sm">
+                                                            <div className="p-2">
+                                                                <div className="flex items-center justify-between gap-2 px-3 py-2 text-xs text-purple-600 font-medium border-b border-purple-100 mb-1">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full animate-pulse"></div>
+                                                                        AI
+                                                                        Generated
+                                                                        Titles
+                                                                    </div>
+                                                                    <span
+                                                                        className="text-gray-700 hover:text-gray-400 cursor-pointer"
+                                                                        onClick={() => {
+                                                                            generateTitle();
+                                                                        }}
+                                                                    >
+                                                                        <ArrowRotateRight />
+                                                                    </span>
+                                                                </div>
+                                                                {isGeneratingTitle ? (
+                                                                    <div className="flex items-center justify-center gap-3 px-3 py-4 text-sm text-purple-600 font-medium">
+                                                                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-400 border-t-transparent"></div>
+                                                                        <span>
+                                                                            Generating
+                                                                            AI
+                                                                            Titles...
+                                                                        </span>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="space-y-1 max-h-48 overflow-y-auto">
+                                                                        {generatedTitles.map(
+                                                                            (
+                                                                                generatedTitle,
+                                                                                index
+                                                                            ) => (
+                                                                                <div
+                                                                                    key={
+                                                                                        index
+                                                                                    }
+                                                                                    className="px-3 py-2 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-purple-100 hover:to-blue-100 cursor-pointer rounded-md transition-all duration-200 hover:shadow-sm border border-transparent hover:border-purple-200"
+                                                                                    onClick={() => {
+                                                                                        console.log(
+                                                                                            "Title clicked:",
+                                                                                            generatedTitle
+                                                                                        );
+                                                                                        setNewTitle(
+                                                                                            generatedTitle
+                                                                                        );
+                                                                                    }}
+                                                                                >
+                                                                                    <div className="flex items-center gap-2">
+                                                                                        <div className="w-1.5 h-1.5 bg-purple-400 rounded-full"></div>
+                                                                                        {
+                                                                                            generatedTitle
+                                                                                        }
+                                                                                    </div>
+                                                                                </div>
+                                                                            )
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                                <div className="mt-2 px-3 py-1 text-xs text-gray-500 italic border-t border-purple-100">
+                                                                    Powered by
+                                                                    Gemini
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             ) : (
                                                 <>
                                                     <span className="text-2xl font-bold">
@@ -671,7 +840,7 @@ const Url = () => {
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2">
-                                {!previewMode && (
+                                {!previewMode && !descriptionEdit && (
                                     <div className="flex justify-end">
                                         <span
                                             className="text-gray-700 hover:text-gray-400 cursor-pointer text-sm"
@@ -684,7 +853,7 @@ const Url = () => {
                                     </div>
                                 )}
                                 {descriptionEdit ? (
-                                    <div className="flex">
+                                    <div className="flex gap-4 relative">
                                         <textarea
                                             placeholder="Enter Description"
                                             value={description}
@@ -703,7 +872,20 @@ const Url = () => {
                                                     setDescriptionEdit(false);
                                                 }
                                             }}
+                                            rows={3}
                                         />
+
+                                        <span
+                                            className="text-gray-700 hover:text-gray-400 cursor-pointer"
+                                            onClick={() => {
+                                                generateDescription();
+                                                setShowDescriptionDropdown(
+                                                    !showDescriptionDropdown
+                                                );
+                                            }}
+                                        >
+                                            <Magicpen />
+                                        </span>
                                         <span
                                             className="text-gray-700 hover:text-gray-400 cursor-pointer text-sm"
                                             onClick={() =>
@@ -712,18 +894,81 @@ const Url = () => {
                                         >
                                             <CloseCircle />
                                         </span>
+                                        {showDescriptionDropdown && (
+                                            <div className="absolute top-full left-0 mt-1 w-full bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-lg shadow-xl z-10 backdrop-blur-sm">
+                                                <div className="p-2">
+                                                    <div className="flex items-center justify-between gap-2 px-3 py-2 text-xs text-purple-600 font-medium border-b border-purple-100 mb-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full animate-pulse"></div>
+                                                            AI Generated
+                                                            Descriptions
+                                                        </div>
+                                                        <span
+                                                            className="text-gray-700 hover:text-gray-400 cursor-pointer"
+                                                            onClick={() => {
+                                                                generateDescription();
+                                                            }}
+                                                        >
+                                                            <ArrowRotateRight />
+                                                        </span>
+                                                    </div>
+                                                    {isGeneratingDescription ? (
+                                                        <div className="flex items-center justify-center gap-3 px-3 py-4 text-sm text-purple-600 font-medium">
+                                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-400 border-t-transparent"></div>
+                                                            <span>
+                                                                Generating AI
+                                                                Descriptions...
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="space-y-1 max-h-48 overflow-y-auto">
+                                                            {generatedDescriptions.map(
+                                                                (
+                                                                    generatedDescription,
+                                                                    index
+                                                                ) => (
+                                                                    <div
+                                                                        key={
+                                                                            index
+                                                                        }
+                                                                        className="px-3 py-2 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-purple-100 hover:to-blue-100 cursor-pointer rounded-md transition-all duration-200 hover:shadow-sm border border-transparent hover:border-purple-200"
+                                                                        onClick={() => {
+                                                                            setNewDescription(
+                                                                                generatedDescription
+                                                                            );
+                                                                        }}
+                                                                    >
+                                                                        <div className="flex items-center gap-2">
+                                                                            <div className="w-1.5 min-w-1.5 h-1.5 min-h-1.5 bg-purple-400 rounded-full"></div>
+                                                                            {
+                                                                                generatedDescription
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                )
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    <div className="mt-2 px-3 py-1 text-xs text-gray-500 italic border-t border-purple-100">
+                                                        Powered by Gemini
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 ) : (
                                     <>
                                         <span className="text-sm text-gray-700 break-words whitespace-pre-wrap">
-                                            {description
-                                                ? description
-                                                : !previewMode && (
-                                                      <span className="text-gray-500 italic">
-                                                          No Description
-                                                          (optional)
-                                                      </span>
-                                                  )}
+                                            {description ? (
+                                                <>{description}</>
+                                            ) : (
+                                                !previewMode && (
+                                                    <span className="text-gray-500 italic">
+                                                        No Description
+                                                        (optional)
+                                                    </span>
+                                                )
+                                            )}
                                         </span>
                                         {/* <span
                                         className="text-gray-700 hover:text-gray-400 cursor-pointer text-sm"
@@ -900,6 +1145,10 @@ const Url = () => {
                                             onChange={() => {
                                                 setPreviewMode(!previewMode);
                                                 setUrlPreviewMode(!previewMode);
+                                                setTitleEdit(false);
+                                                setDescriptionEdit(false);
+                                                setShowTitleDropdown(false);
+                                                setShowDescriptionDropdown(false);
                                             }}
                                         />
                                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
