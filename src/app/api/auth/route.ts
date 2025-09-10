@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
             password,
             firstName,
             lastName,
-            userImage,
+            userImage: userImage ?? null,
         });
         await newUser.save();
 
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
                 email: newUser.email,
                 firstName: newUser.firstName,
                 lastName: newUser.lastName,
-                userImage: newUser.userImage,
+                userImage: newUser.userImage ?? null,
             },
         });
         const refreshToken = generateRefreshToken({ user: newUser._id });

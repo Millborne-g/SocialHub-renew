@@ -134,13 +134,15 @@ const NavBar = () => {
                                     >
                                         <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                                             {userDetails.user.userImage ? (
-                                                <Image
+                                                <img
                                                     src={
                                                         userDetails.user
                                                             .userImage
                                                     }
                                                     alt="user image"
                                                     className="w-full h-full object-cover rounded-full"
+                                                    width={32}
+                                                    height={32}
                                                 />
                                             ) : (
                                                 <User className="w-6 h-6 text-gray-500" />
@@ -217,13 +219,15 @@ const NavBar = () => {
                                     >
                                         <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                                             {userDetails.user.userImage ? (
-                                                <Image
+                                                <img
                                                     src={
                                                         userDetails.user
                                                             .userImage
                                                     }
                                                     alt="user image"
                                                     className="w-full h-full object-cover rounded-full"
+                                                    width={32}
+                                                    height={32}
                                                 />
                                             ) : (
                                                 <User className="w-6 h-6 text-gray-500" />

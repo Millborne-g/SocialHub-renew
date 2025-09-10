@@ -85,7 +85,6 @@ import {
     WorkplaceIcon,
     FacebookMessengerShareButton,
     FacebookMessengerIcon,
-    
 } from "react-share";
 import QRCode from "qrcode";
 import { Copy } from "iconsax-reactjs";
@@ -658,11 +657,8 @@ const Url = () => {
                                         </div>
                                         <div className="flex items-center gap-1">
                                             {createdBy?.userImage ? (
-                                                <Image
-                                                    src={
-                                                        createdBy?.userImage
-                                                            ?.userImage
-                                                    }
+                                                <img
+                                                    src={createdBy?.userImage}
                                                     alt="user image"
                                                     className="w-4 h-4 rounded-full"
                                                     width={16}
@@ -1060,10 +1056,17 @@ const Url = () => {
                                     <FacebookMessengerShareButton
                                         url={shareUrl}
                                         title={title}
-                                        appId={process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || ""}
+                                        appId={
+                                            process.env
+                                                .NEXT_PUBLIC_FACEBOOK_APP_ID ||
+                                            ""
+                                        }
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
-                                            <FacebookMessengerIcon size={32} round />
+                                            <FacebookMessengerIcon
+                                                size={32}
+                                                round
+                                            />
                                             <span className="text-xs text-gray-600">
                                                 Facebook Messenger
                                             </span>

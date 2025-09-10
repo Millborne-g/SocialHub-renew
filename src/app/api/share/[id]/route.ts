@@ -22,6 +22,7 @@ export async function GET(
         let createdBy = null;
         if (url?.userId) {
             const user = await User.findById(url.userId);
+
             createdBy = {
                 fullName: user?.firstName + " " + user?.lastName,
                 userImage: user?.userImage ? user?.userImage : null,

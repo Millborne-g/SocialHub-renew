@@ -10,7 +10,8 @@ interface AuthStore {
         firstName: string,
         lastName: string,
         email: string,
-        password: string
+        password: string,
+        userImage: string | null
     ) => Promise<void>;
     logout: () => Promise<void>;
     refreshToken: () => Promise<void> | any;
@@ -30,13 +31,15 @@ export const useAuthStore = create<AuthStore>((set) => ({
         firstName: string,
         lastName: string,
         email: string,
-        password: string
+        password: string,
+        userImage: string | null
     ) => {
         const response = await api.post("/api/auth", {
             firstName,
             lastName,
             email,
             password,
+            userImage,
         });
         const { accessToken } = response.data;
         set({ accessToken });

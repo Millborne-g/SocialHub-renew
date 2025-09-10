@@ -69,7 +69,8 @@ const SignupContent = ({ email }: { email: string }) => {
                 data.firstName,
                 data.lastName,
                 data.email,
-                data.password
+                data.password,
+                data.userImage
             );
             toast.success("User created successfully");
             // router.push("/home");

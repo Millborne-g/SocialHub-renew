@@ -576,7 +576,7 @@ const Url = () => {
                         {/* header */}
                         <div className="flex flex-col gap-3">
                             <div className="flex gap-5 justify-between items-start">
-                                <div className="flex gap-5">
+                                <div className="flex gap-5 relative">
                                     <div
                                         className={`${
                                             previewMode
@@ -674,7 +674,7 @@ const Url = () => {
                                     <div className="col-span-3 flex flex-col gap-2 justify-center">
                                         <div className="flex gap-4 items-center">
                                             {titleEdit ? (
-                                                <div className="relative flex gap-4 title-dropdown-container">
+                                                <div className="md:relative flex gap-4 title-dropdown-container">
                                                     <input
                                                         placeholder="Enter Title"
                                                         value={title}
@@ -818,7 +818,7 @@ const Url = () => {
                                         </div>
                                         <div className="flex items-center gap-1">
                                             {userDetails?.user?.userImage ? (
-                                                <Image
+                                                <img
                                                     src={
                                                         userDetails?.user
                                                             ?.userImage
@@ -1279,7 +1279,11 @@ const Url = () => {
             {addURLModal && (
                 <Modal
                     title="Add URL"
-                    onClose={() => setAddURLModal(false)}
+                    onClose={() => {
+                        setNewUrl("");
+                        setNewUrlTitle("");
+                        setAddURLModal(false);
+                    }}
                     onSave={handleAddURL}
                     content={
                         <div className="flex flex-col gap-4">
@@ -1304,7 +1308,11 @@ const Url = () => {
             {editURLModal && (
                 <Modal
                     title="Edit URL"
-                    onClose={() => setEditURLModal(false)}
+                    onClose={() => {
+                        setNewUrl("");
+                        setNewUrlTitle("");
+                        setEditURLModal(false);
+                    }}
                     onSave={handleUpdateURL}
                     content={
                         <div className="flex flex-col gap-4">
