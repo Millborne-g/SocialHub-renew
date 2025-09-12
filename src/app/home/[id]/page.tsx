@@ -575,8 +575,8 @@ const Url = () => {
                     <div className="w-full max-w-xl ">
                         {/* header */}
                         <div className="flex flex-col gap-3">
-                            <div className="flex gap-5 justify-between items-start">
-                                <div className="flex gap-5 relative">
+                            <div className="flex gap-5 justify-between items-start relative">
+                                <div className="flex gap-5 relative sm:flex-row flex-col items-center">
                                     <div
                                         className={`${
                                             previewMode
@@ -671,7 +671,7 @@ const Url = () => {
                                             )}
                                         </div>
                                     </div>
-                                    <div className="col-span-3 flex flex-col gap-2 justify-center">
+                                    <div className="col-span-3 flex flex-col gap-2 justify-center sm:text-left text-center">
                                         <div className="flex gap-4 items-center">
                                             {titleEdit ? (
                                                 <div className="md:relative flex gap-4 title-dropdown-container">
@@ -816,7 +816,7 @@ const Url = () => {
                                                 </>
                                             )}
                                         </div>
-                                        <div className="flex items-center gap-1">
+                                        <div className="flex items-center gap-1 sm:justify-start justify-center">
                                             {userDetails?.user?.userImage ? (
                                                 <img
                                                     src={
@@ -840,25 +840,9 @@ const Url = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex flex-col gap-2">
-                                    {/* {previewMode && (
-                                        <div className="flex justify-end items-center gap-2 y cursor-pointer hover:text-gray-400">
-                                            <span
-                                                className={`rounded-full ${
-                                                    isPrivate
-                                                        ? "bg-blue-200 px-2 py-1 text-xs text-blue-600"
-                                                        : "bg-green-200 px-2 py-1 text-xs text-green-600"
-                                                }`}
-                                            >
-                                                {isPrivate
-                                                    ? "Private"
-                                                    : "Public"}
-                                            </span>
-                                        </div>
-                                    )} */}
-
+                                <div className="flex-col gap-2 sm:flex absolute top-0 right-0">
                                     {previewMode && (
-                                        <div className="flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary">
+                                        <div className="flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary sm:flex absolute top-0 right-0">
                                             <span className="flex text-sm">
                                                 Share
                                             </span>
@@ -870,7 +854,7 @@ const Url = () => {
 
                                     {isFromUser && !editMode && (
                                         <div
-                                            className="flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary"
+                                            className="items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary sm:flex absolute top-0 right-0"
                                             onClick={() => {
                                                 setPreviewMode(false);
                                                 setEditMode(true);
@@ -1005,7 +989,7 @@ const Url = () => {
                                     </div>
                                 ) : (
                                     <>
-                                        <span className="text-sm text-gray-700 break-words whitespace-pre-wrap">
+                                        <span className="text-sm text-gray-700 break-words whitespace-pre-wrap sm:text-left text-center">
                                             {description ? (
                                                 <>{description}</>
                                             ) : (
@@ -1047,7 +1031,7 @@ const Url = () => {
                                 onDragStart={handleDragStart}
                             >
                                 {externalURLs.length > 0 ? (
-                                    <div className="grid grid-cols-3 gap-x-2 gap-y-10">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-2 gap-y-10">
                                         <SortableContext
                                             items={externalURLs
                                                 .sort(

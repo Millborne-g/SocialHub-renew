@@ -83,16 +83,22 @@ const LoginContent = () => {
         <div className="flex items-center justify-center h-screen">
             <div className="fixed top-5 w-full max-w-5xl px-3">
                 <a href="/" className="flex items-center gap-2">
-                    <Image src={logo} alt="logo" />
+                    {/* <Image src={logo} alt="logo" />
                     <span className="text-xl font-bold font-display">
                         SocialHub
+                    </span> */}
+                    <span className="text-2xl font-black font-display">
+                        Link
+                        <span className="text-primary">LET</span>
                     </span>
                 </a>
             </div>
 
             <div className="flex flex-col items-center justify-center gap-4 w-full max-w-md shadow-xl rounded-xl md:p-9 py-9 px-6 mx-3 md:mx-0">
                 <div className="flex flex-col items-center justify-center gap-4  w-full">
-                    <h1 className="text-2xl font-bold text-center">Welcome to SocialHub</h1>
+                    <h1 className="text-2xl font-bold text-center">
+                        Welcome to LinkLET
+                    </h1>
                     <form
                         className="flex flex-col items-center justify-center gap-4 w-full"
                         onSubmit={handleSubmit(onSubmit)}

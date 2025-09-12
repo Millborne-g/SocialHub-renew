@@ -32,6 +32,17 @@ const ExternalUrl = (props: {
         }
     };
 
+    // Function to extract domain from URL
+    const getDomain = (url: string): string => {
+        try {
+            const urlObj = new URL(url);
+            return urlObj.hostname;
+        } catch (error) {
+            // Fallback if URL is invalid
+            return url;
+        }
+    };
+
     const style = {
         transform: transform
             ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
@@ -75,7 +86,7 @@ const ExternalUrl = (props: {
                     }
                 }}
             >
-                <div className="bg-gray-100 w-full h-30 sm:h-40 flex items-center justify-center">
+                <div className="bg-gray-100 w-full h-60 sm:h-40 flex items-center justify-center">
                     <img
                         src={getFaviconUrl(props.url)}
                         alt="image"
@@ -88,11 +99,11 @@ const ExternalUrl = (props: {
                     }`}
                 >
                     <div className="flex flex-col gap-1">
-                        <span className="text-base font-bold">
+                        <span className="text-base font-bold break-words line-clamp-2">
                             {props.title}
                         </span>
                         <span className="text-xs text-gray-600 break-words line-clamp-2">
-                            {props.url}
+                            {getDomain(props.url)}/...
                         </span>
                     </div>
                     <div>
@@ -111,7 +122,9 @@ const ExternalUrl = (props: {
 
                                     <div className="relative group ">
                                         <div className="w-[85px] absolute hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 -top-8 -right-9 transform -translate-x-1/2">
-                                            <span className="text-center">Click & drag</span>
+                                            <span className="text-center">
+                                                Click & drag
+                                            </span>
                                         </div>
                                         <span
                                             {...listeners}

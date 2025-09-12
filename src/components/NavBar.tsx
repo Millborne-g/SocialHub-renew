@@ -29,6 +29,13 @@ const NavBar = () => {
                 router.push("/home");
             },
         },
+        // {
+        //     label: "Templates",
+        //     path: "/templates",
+        //     onClick: () => {
+        //         router.push("/templates");
+        //     },
+        // },
     ];
 
     const { accessToken, logout, refreshToken } = useAuthStore();
@@ -115,11 +122,14 @@ const NavBar = () => {
                         isScrolled ? "shadow-lg" : ""
                     }`}
                 >
-                    <div className="py-2 bg-white flex items-center justify-between w-full md:max-w-3xl xl:max-w-7xl">
+                    <div className="flex items-center justify-between w-full md:max-w-3xl xl:max-w-7xl">
                         <a href="/" className="flex items-center gap-2">
-                            <Image src={logo} alt="logo" />
-                            <span className="text-xl font-bold font-display">
-                                SocialHub
+                            {/* <Image src={logo} alt="logo" /> */}
+                            <span className="text-2xl font-black font-display">
+                                Link
+                                <span className="text-primary">
+                                    LET
+                                </span>
                             </span>
                         </a>
                         <div className="flex items-center gap-2">
@@ -148,7 +158,7 @@ const NavBar = () => {
                                                 <User className="w-6 h-6 text-gray-500" />
                                             )}
                                         </div>
-                                        <span className="text-sm">
+                                        <span className="text-sm hidden sm:block">
                                             {userDetails.user.firstName}{" "}
                                             {userDetails.user.lastName}
                                         </span>
@@ -202,9 +212,16 @@ const NavBar = () => {
                 >
                     <div className="flex items-center justify-between w-full md:max-w-3xl xl:max-w-7xl">
                         <a href="/" className="flex items-center gap-2">
-                            <Image src={logo} alt="logo" />
-                            <span className="text-xl font-bold font-display">
+                            {/* <Image src={logo} alt="logo" /> */}
+                            {/* <span className="text-xl font-bold font-display">
                                 SocialHub
+                            </span> */}
+
+                            <span className="text-2xl font-black font-display">
+                                Link
+                                <span className="text-primary">
+                                    LET
+                                </span>
                             </span>
                         </a>
                         <div className="flex items-center gap-2">
@@ -233,7 +250,7 @@ const NavBar = () => {
                                                 <User className="w-6 h-6 text-gray-500" />
                                             )}
                                         </div>
-                                        <span className="text-sm">
+                                        <span className="text-sm hidden sm:block">
                                             {userDetails.user.firstName}{" "}
                                             {userDetails.user.lastName}
                                         </span>
@@ -280,7 +297,7 @@ const NavBar = () => {
                     )}
 
                     {userDetails && (
-                        <div className="flex items-center justify-between w-full md:max-w-3xl xl:max-w-7xl">
+                        <div className="flex items-center w-full md:max-w-3xl xl:max-w-7xl">
                             {navbarOptions.map((item) => {
                                 const isActive = pathname.startsWith(item.path);
                                 return (
