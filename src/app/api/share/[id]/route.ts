@@ -1,6 +1,5 @@
 import Url from "@/schema/Urls";
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/middlewares/auth";
 import ExternalUrl from "@/schema/ExternalUrl";
 import User from "@/schema/Users";
 
@@ -33,7 +32,7 @@ export async function GET(
         return NextResponse.json({ url, externalUrls, createdBy });
     } catch (error) {
         return NextResponse.json(
-            { message: "Error fetching url" },
+            { message: "Error fetching url", error },
             { status: 500 }
         );
     }

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Url from "@/schema/Urls";
 import { requireAuth } from "@/middlewares/auth";
-import { verifyAccessToken } from "@/lib/jwt";
 import ExternalUrl from "@/schema/ExternalUrl";
 
 export async function GET(request: NextRequest) {

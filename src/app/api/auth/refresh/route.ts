@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         }
     } catch (error) {
         return NextResponse.json(
-            { message: "Failed to refresh token" },
+            { message: "Failed to refresh token", error },
             { status: 500 }
         );
     }

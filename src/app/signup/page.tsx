@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import logo from "../../../public/Logo.png";
 import TextField from "@/components/TextField";
 import Button from "@/components/Button";
@@ -220,15 +220,21 @@ const SignupContent = ({ email }: { email: string }) => {
     );
 };
 
-const Signup = () => {
+const SignupWithSearchParams = () => {
     const searchParams = useSearchParams();
     const email = searchParams.get("email");
 
+    return <SignupContent email={email || ""} />;
+};
+
+const Signup = () => {
     return (
         <GoogleOAuthProvider
             clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}
         >
-            <SignupContent email={email || ""} />
+            <Suspense fallback={<LoadingScreen />}>
+                <SignupWithSearchParams />
+            </Suspense>
         </GoogleOAuthProvider>
     );
 };
