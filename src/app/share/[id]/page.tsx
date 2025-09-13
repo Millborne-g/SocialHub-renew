@@ -88,6 +88,7 @@ import {
 } from "react-share";
 import QRCode from "qrcode";
 import { Copy } from "iconsax-reactjs";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const Url = () => {
     const router = useRouter();
@@ -133,6 +134,8 @@ const Url = () => {
     const [originalIsPrivate, setOriginalIsPrivate] = useState(false);
     const [originalExternalURLs, setOriginalExternalURLs] = useState<any[]>([]);
     const [createdBy, setCreatedBy] = useState<any>(null);
+
+    const [isLoading, setIsLoading] = useState(false);
 
     // Function to generate QR code
     const generateQRCode = async (url: string) => {
@@ -280,6 +283,7 @@ const Url = () => {
     };
 
     const handleSave = async () => {
+        setIsLoading(true);
         try {
             if (id === "create") {
                 if (!title) {
@@ -331,11 +335,13 @@ const Url = () => {
         } finally {
             setIsSaving(false);
             setOnSave(false);
+            setIsLoading(false);
         }
     };
 
     const handleUpdate = async () => {
         try {
+            setIsLoading(true);
             if (!title) {
                 toast.error("Please enter a title");
                 return;
@@ -383,6 +389,7 @@ const Url = () => {
             toast.error("Failed to update URL. Please try again.");
         } finally {
             setIsSaving(false);
+            setIsLoading(false);
         }
     };
 
@@ -421,6 +428,7 @@ const Url = () => {
         const fetchUrl = async () => {
             setUrlPreviewMode(true);
             if (id !== "create") {
+                setIsLoading(true); 
                 const response = await api.get(`/api/share/${id}`);
                 if (response) {
                     setTitle(response.data.url.title);
@@ -464,6 +472,7 @@ const Url = () => {
                 setOriginalExternalURLs([]);
                 setCreatedBy(null);
             }
+            setIsLoading(false);
         };
         fetchUrl();
     }, [id, userDetails]);
@@ -1321,6 +1330,7 @@ const Url = () => {
                     }
                 />
             )}
+            {isLoading && <LoadingScreen />}
         </div>
     ) : (
         <div className="h-screen w-full flex justify-center items-center">

@@ -38,7 +38,9 @@ const TextField = (props: {
                         props.className
                             ? props.className
                             : `text-base w-full border border-gray-300 rounded-md p-2 peer focus:outline-none focus:border-primary ${
-                                  props.startIcon ? "pl-9" : " placeholder-transparent "
+                                  props.startIcon
+                                      ? "pl-9"
+                                      : " placeholder-transparent "
                               }`
                     }
                     type={
@@ -63,7 +65,7 @@ const TextField = (props: {
                         className="absolute left-2 -top-2 bg-white text-xs text-gray-600 px-0.5 
                     transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-2 
                     peer-placeholder-shown:text-gray-400 peer-focus:-top-2 peer-focus:text-xs 
-                    peer-focus:text-primary font-display peer-focus:bg-white"
+                    peer-focus:text-primary font-display peer-focus:bg-white cursor-text pointer-events-none"
                     >
                         {props.placeholder}
                     </label>

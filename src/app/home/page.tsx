@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import Modal from "@/components/Modal";
 import { useUrlStore } from "@/store/UrlStore";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const Home = () => {
     const { accessToken, refreshToken } = useAuthStore();
@@ -36,7 +37,7 @@ const Home = () => {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [onDelete, setOnDelete] = useState(false);
     const [onDeleteId, setOnDeleteId] = useState("");
-
+    const [isLoading, setIsLoading] = useState(false);
     const greetingsRandom = [
         "Hello",
         "Hi",
@@ -133,6 +134,7 @@ const Home = () => {
 
     const handleDeleteURL = async (id: string) => {
         try {
+            setIsLoading(true);
             const response = await api.delete(`/api/url/${id}`);
 
             toast.success("URL deleted successfully");
@@ -142,6 +144,8 @@ const Home = () => {
         } catch (error) {
             console.error("Error deleting URL:", error);
             toast.error("Error deleting URL");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -153,7 +157,7 @@ const Home = () => {
 
     useEffect(() => {
         const refreshUserToken = async () => {
-            // setIsLoading(true);
+            setIsLoading(true);
             if (accessToken && !userDetails) {
                 setUserDetails(decodeToken(accessToken));
             } else {
@@ -162,7 +166,7 @@ const Home = () => {
                     router.push("/");
                 }
             }
-            // setIsLoading(false);
+            setIsLoading(false);
         };
         refreshUserToken();
     }, [accessToken, refreshToken]);
@@ -681,6 +685,8 @@ const Home = () => {
                     }
                 />
             )}
+
+            {isLoading && <LoadingScreen />}
         </div>
     );
 };

@@ -44,6 +44,7 @@ import Image from "next/image";
 import { useUrlStore } from "@/store/UrlStore";
 import { GoogleGenAI } from "@google/genai";
 const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+import LoadingScreen from "@/components/LoadingScreen";
 
 const Url = () => {
     const router = useRouter();
@@ -108,6 +109,7 @@ const Url = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [dragStartY, setDragStartY] = useState(0);
 
+    const [isLoading, setIsLoading] = useState(false);
     // Function to check if there are any changes
     const hasChanges = () => {
         if (id === "create") {
@@ -238,6 +240,7 @@ const Url = () => {
     };
 
     const handleSave = async () => {
+        setIsLoading(true);
         try {
             if (id === "create") {
                 if (!title) {
@@ -289,10 +292,12 @@ const Url = () => {
         } finally {
             setIsSaving(false);
             setOnSave(false);
+            setIsLoading(false);
         }
     };
 
     const handleUpdate = async () => {
+        setIsLoading(true);
         try {
             if (!title) {
                 toast.error("Please enter a title");
@@ -342,6 +347,7 @@ const Url = () => {
             toast.error("Failed to update URL. Please try again.");
         } finally {
             setIsSaving(false);
+            setIsLoading(false);
         }
     };
 
@@ -452,6 +458,7 @@ const Url = () => {
     useEffect(() => {
         const fetchUrl = async () => {
             if (id !== "create") {
+                setIsLoading(true);
                 const response = await api.get(`/api/url/${id}`);
 
                 setTitle(response.data.url.title);
@@ -488,6 +495,7 @@ const Url = () => {
                 setOriginalIsPrivate(false);
                 setOriginalExternalURLs([]);
             }
+            setIsLoading(false);
         };
         fetchUrl();
     }, [id, userDetails]);
@@ -1338,6 +1346,7 @@ const Url = () => {
                     }
                 />
             )}
+            {isLoading && <LoadingScreen />}
         </div>
     ) : (
         <div className="h-screen w-full flex justify-center items-center">
