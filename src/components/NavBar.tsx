@@ -54,6 +54,8 @@ const NavBar = () => {
 
     useEffect(() => {
         const refreshUserToken = async () => {
+            console.log("Navbar refreshUserToken");
+            
             setIsLoading(true);
             if (accessToken && !userDetails) {
                 setUserDetails(decodeToken(accessToken));
