@@ -61,7 +61,7 @@ const NavBar = () => {
                 setUserDetails(decodeToken(accessToken));
                 // router.push("/home");
             } else {
-                let res = await refreshToken();
+                // let res = await refreshToken();
                 // if (res === null) {
                 //     router.push("/");
                 // }
