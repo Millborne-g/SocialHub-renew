@@ -31,8 +31,8 @@ export default function Home() {
 
     return (
         <div className="flex items-center justify-center h-screen p-3">
-            {/* md:max-w-3xl xl:max-w-7xl */}
-            <div className="flex w-full md:max-w-3xl xl:max-w-7xl items-center gap-15 ">
+            {/* lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem]  */}
+            <div className="flex w-full lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem] items-center gap-15 ">
                 <div className="flex-1 flex flex-col gap-4 px-10 md:px-0">
                     <span className="text-4xl font-bold font-display leading-tight text-center md:text-left">
                         Your One-Stop Link Storage Solution:{" "}

@@ -55,7 +55,7 @@ const NavBar = () => {
     useEffect(() => {
         const refreshUserToken = async () => {
             console.log("Navbar refreshUserToken");
-            
+
             setIsLoading(true);
             if (accessToken && !userDetails) {
                 setUserDetails(decodeToken(accessToken));
@@ -126,14 +126,12 @@ const NavBar = () => {
                         isScrolled ? "shadow-lg" : ""
                     }`}
                 >
-                    <div className="flex items-center justify-between w-full md:max-w-3xl xl:max-w-7xl">
+                    <div className="flex items-center justify-between w-full lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem] ">
                         <a href="/" className="flex items-center gap-2">
                             {/* <Image src={logo} alt="logo" /> */}
                             <span className="text-2xl font-black font-display">
                                 Link
-                                <span className="text-primary">
-                                    LET
-                                </span>
+                                <span className="text-primary">LET</span>
                             </span>
                         </a>
                         <div className="flex items-center gap-2">
@@ -214,7 +212,7 @@ const NavBar = () => {
                             : ""
                     } ${userDetails ? "sticky top-0" : "fixed"}`}
                 >
-                    <div className="flex items-center justify-between w-full md:max-w-3xl xl:max-w-7xl">
+                    <div className="flex items-center justify-between w-full lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem] ">
                         <a href="/" className="flex items-center gap-2">
                             {/* <Image src={logo} alt="logo" /> */}
                             {/* <span className="text-xl font-bold font-display">
@@ -223,9 +221,7 @@ const NavBar = () => {
 
                             <span className="text-2xl font-black font-display">
                                 Link
-                                <span className="text-primary">
-                                    LET
-                                </span>
+                                <span className="text-primary">LET</span>
                             </span>
                         </a>
                         <div className="flex items-center gap-2">
@@ -301,7 +297,7 @@ const NavBar = () => {
                     )}
 
                     {userDetails && (
-                        <div className="flex items-center w-full md:max-w-3xl xl:max-w-7xl">
+                        <div className="flex items-center w-full lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem] ">
                             {navbarOptions.map((item) => {
                                 const isActive = pathname.startsWith(item.path);
                                 return (

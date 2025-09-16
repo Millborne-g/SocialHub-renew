@@ -185,7 +185,7 @@ const Home = () => {
 
     return (
         <div className="h-[750px] w-full flex justify-center">
-            <div className="w-full md:max-w-3xl xl:max-w-7xl pt-10 px-3 md:px-0">
+            <div className="w-full lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem] pt-10 px-3 md:px-0">
                 <div className="flex flex-col gap-8 h-full ">
                     <div className="flex items-start justify-start sm:justify-between sm:flex-row flex-col md:items-center gap-5">
                         <div className="flex flex-col gap-2">
@@ -307,6 +307,9 @@ const Home = () => {
                                             Status
                                         </th>
                                         <th scope="col" className="px-6 py-3">
+                                            Views
+                                        </th>
+                                        <th scope="col" className="px-6 py-3">
                                             URLs
                                         </th>
                                         <th scope="col" className="px-6 py-3">
@@ -379,6 +382,9 @@ const Home = () => {
                                                             Private
                                                         </span>
                                                     )}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {url.views}
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     {url.externalUrls.length >

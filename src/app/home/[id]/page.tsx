@@ -5,6 +5,9 @@ import ExternalUrl from "@/components/ExternalUrl";
 import Modal from "@/components/Modal";
 import {
     Add,
+    ArrowLeft,
+    ArrowLeft2,
+    ArrowRight2,
     ArrowRotateRight,
     Check,
     CloseCircle,
@@ -383,22 +386,30 @@ const Url = () => {
     };
 
     const generateTitle = async () => {
-        setIsGeneratingTitle(true);
+        try {
+            setIsGeneratingTitle(true);
 
-        const response = await api.post(`/api/gemini/text`, {
-            method: "POST",
-            prompt: `Create 10 titles separated by commas (,,). Titles may have spaces. ${
-                externalURLs.length &&
-                `The titles must be related to ${externalURLs
-                    .map((url) => `${url.title} (${url.url})`)
-                    .join(", ")}`
-            }. Provide the answer directly with no extra text.`,
-        });
+            const response = await api.post(`/api/gemini/text`, {
+                method: "POST",
+                prompt: `Create 10 titles separated by commas (,,). Titles may have spaces. ${
+                    externalURLs.length &&
+                    `The titles must be related to ${externalURLs
+                        .map((url) => `${url.title} (${url.url})`)
+                        .join(", ")}`
+                }. Provide the answer directly with no extra text.`,
+            });
 
-        const titles = response.data.split(",,");
+            const titles = response.data.split(",,");
 
-        setGeneratedTitles(titles);
-        setIsGeneratingTitle(false);
+            setGeneratedTitles(titles);
+            setIsGeneratingTitle(false);
+        } catch (error) {
+            setIsGeneratingTitle(false);
+            console.log("Error generating title:", error);
+            toast.error("Failed to generate title. Please try again.");
+        } finally {
+            setIsGeneratingTitle(false);
+        }
 
         // --------------- For image generation ---------------
         // const config = {
@@ -426,20 +437,27 @@ const Url = () => {
     };
 
     const generateDescription = async () => {
-        setIsGeneratingDescription(true);
-
-        const response = await api.post(`/api/gemini/text`, {
-            method: "POST",
-            prompt: `Create 10 descriptions 300 characters max each separated by commas (,,). Descriptions may have spaces. ${
-                externalURLs.length &&
-                `The descriptions must be related to ${externalURLs
-                    .map((url) => `${url.title} (${url.url})`)
-                    .join(", ")}`
-            }. Provide the answer directly with no extra text.`,
-        });
-        const descriptions = response.data.split(",,");
-        setGeneratedDescriptions(descriptions);
-        setIsGeneratingDescription(false);
+        try {
+            setIsGeneratingDescription(true);
+            const response = await api.post(`/api/gemini/text`, {
+                method: "POST",
+                prompt: `Create 10 descriptions 300 characters max each separated by commas (,,). Descriptions may have spaces. ${
+                    externalURLs.length &&
+                    `The descriptions must be related to ${externalURLs
+                        .map((url) => `${url.title} (${url.url})`)
+                        .join(", ")}`
+                }. Provide the answer directly with no extra text.`,
+            });
+            const descriptions = response.data.split(",,");
+            setGeneratedDescriptions(descriptions);
+            setIsGeneratingDescription(false);
+        } catch (error) {
+            setIsGeneratingDescription(false);
+            console.log("Error generating description:", error);
+            toast.error("Failed to generate description. Please try again.");
+        } finally {
+            setIsGeneratingDescription(false);
+        }
     };
 
     const setNewTitle = (title: string) => {
@@ -575,7 +593,7 @@ const Url = () => {
     return isUrlFound ? (
         <div className="w-full flex justify-center relative px-3 md:px-0">
             <div
-                className={`w-full md:max-w-3xl xl:max-w-7xl ${
+                className={`w-full lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem]  ${
                     previewMode ? "pt-30 pb-10 " : "pt-10 "
                 } min-h-screen`}
             >
@@ -583,7 +601,7 @@ const Url = () => {
                     <div className="w-full max-w-xl ">
                         {/* header */}
                         <div className="flex flex-col gap-3">
-                            <div className="flex gap-5 justify-center items-start relative">
+                            <div className="flex gap-5 sm:justify-between justify-center items-start relative">
                                 <div className="flex gap-5 relative sm:flex-row flex-col items-center">
                                     <div
                                         className={`${
@@ -863,7 +881,13 @@ const Url = () => {
 
                                     {/* ----- for small screen ----- */}
                                     {previewMode && (
-                                        <div className={`absolute ${imagePreview === "" ? "-top-10" : "top-0"}  right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}>
+                                        <div
+                                            className={`absolute ${
+                                                imagePreview === ""
+                                                    ? "-top-10"
+                                                    : "top-0"
+                                            }  right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}
+                                        >
                                             <span className="flex text-sm">
                                                 Share
                                             </span>
@@ -1141,66 +1165,15 @@ const Url = () => {
                         onMouseDown={handlePanelDragStart}
                         onClick={togglePanel}
                     >
-                        <div className="flex flex-col gap-1">
-                            <div className="w-1 h-1 bg-white rounded-full group-hover:bg-gray-700"></div>
-                            <div className="w-1 h-1 bg-white rounded-full group-hover:bg-gray-700"></div>
-                            <div className="w-1 h-1 bg-white rounded-full group-hover:bg-gray-700"></div>
-                        </div>
+                        {isPanelOpen ? (
+                            <ArrowRight2 className="text-white" />
+                        ) : (
+                            <ArrowLeft2 className="text-white" />
+                        )}
                     </div>
 
                     <div className="w-fit bg-white rounded-xl shadow-md p-4">
                         <div className="flex justify-center flex-col gap-4">
-                            {/* {id === "create" ? (
-                                <div className="flex items-center gap-2 mr-4">
-                                    <div className="flex items-center gap-3">
-                                        <span className="ml-2 text-sm font-medium text-gray-900">
-                                            Edit
-                                        </span>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                className="sr-only peer"
-                                                checked={!editMode}
-                                                onChange={() =>
-                                                    setEditMode(!editMode)
-                                                }
-                                            />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                          
-                                        </label>
-                                        <span className="text-sm font-medium text-gray-900">
-                                            Preview
-                                        </span>
-                                    </div>
-                                </div>
-                            ) : (
-                                editMode &&
-                                isFromUser && (
-                                    <div className="flex items-center gap-2 mr-4">
-                                        <div className="flex items-center gap-3">
-                                            <span className="ml-2 text-sm font-medium text-gray-900">
-                                                Private View
-                                            </span>
-                                            <label className="relative inline-flex items-center cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    className="sr-only peer"
-                                                    checked={isPrivate}
-                                                    onChange={() =>
-                                                        setIsPrivate(!isPrivate)
-                                                    }
-                                                />
-                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                     
-                                            </label>
-                                            <span className="text-sm font-medium text-gray-900">
-                                                Public View
-                                            </span>
-                                        </div>
-                                    </div>
-                                )
-                            )} */}
-
                             <div className="flex items-center gap-2 mr-4">
                                 <div className="flex items-center gap-3">
                                     <span className="ml-2 text-sm font-medium text-gray-900">
@@ -1279,6 +1252,9 @@ const Url = () => {
                     </div>
                 </div>
             )}
+
+            {/* templates */}
+            
 
             {/* add modal */}
             {addURLModal && (

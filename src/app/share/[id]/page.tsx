@@ -493,10 +493,22 @@ const Url = () => {
         refreshUserToken();
     }, [accessToken]);
 
+    useEffect(() => {
+        const incrementViews = async () => {
+            const response = await api.post(`/api/share/${id}`, { id });
+            if (response) {
+                console.log(response);
+            }
+        };
+        if (isUrlFound) {
+            incrementViews();
+        }
+    }, [id, isUrlFound]);
+
     return isUrlFound ? (
         <div className="w-full flex justify-center relative px-3 md:px-0">
             <div
-                className={`w-full md:max-w-3xl xl:max-w-7xl ${
+                className={`w-full lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem]  ${
                     previewMode ? "pt-30 pb-10 " : "pt-10 "
                 } min-h-screen`}
             >
@@ -687,7 +699,10 @@ const Url = () => {
                                 <div className=" flex-col gap-2 flex ">
                                     {/* ----- share button for large screen ----- */}
                                     {previewMode && (
-                                        <div className="hidden sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary flex" onClick={handleShareModalOpen}>
+                                        <div
+                                            className="hidden sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary flex"
+                                            onClick={handleShareModalOpen}
+                                        >
                                             <span className="flex text-sm">
                                                 Share
                                             </span>

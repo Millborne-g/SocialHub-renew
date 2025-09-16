@@ -114,9 +114,9 @@ const SignupContent = ({ email }: { email: string }) => {
     return (
         <div className="flex flex-col gap-4 items-center justify-center h-screen">
             <a href="/" className="flex items-center gap-2">
-                <Image src={logo} alt="logo" />
-                <span className="text-xl font-bold font-display">
-                    SocialHub
+                <span className="text-2xl font-black font-display">
+                    Link
+                    <span className="text-primary">LET</span>
                 </span>
             </a>
             <div className="flex flex-col items-center justify-center gap-4 mx-3 md:mx-0">
