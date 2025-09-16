@@ -31,6 +31,7 @@ export async function GET(
         const externalUrls = await ExternalUrl.find({ urlParentId: id });
         return NextResponse.json({ url, externalUrls, createdBy });
     } catch (error) {
+        console.log(error);
         return NextResponse.json(
             { message: "Error fetching url", error },
             { status: 500 }
