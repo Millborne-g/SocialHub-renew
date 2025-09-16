@@ -321,7 +321,7 @@ const NavBar = () => {
                 </div>
             )}
 
-            {isLoading && <LoadingScreen />}
+            {/* {isLoading && <LoadingScreen />} */}
         </>
     );
 };
