@@ -9,6 +9,7 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        await connectMongo();
         // Check authentication
         const authResult: any = requireAuth(request as any);
         if (authResult?.status === 401) {

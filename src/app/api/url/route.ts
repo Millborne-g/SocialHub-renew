@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import Url from "@/schema/Urls";
 import { requireAuth } from "@/middlewares/auth";
 import ExternalUrl from "@/schema/ExternalUrl";
+import connectMongo from "@/lib/mongodb";
 
 export async function GET(request: NextRequest) {
     try {
+        await connectMongo();
         // Check authentication
         const authResult: any = requireAuth(request as any);
         if (authResult?.status === 401) {

@@ -2,12 +2,16 @@ import Url from "@/schema/Urls";
 import { NextRequest, NextResponse } from "next/server";
 import ExternalUrl from "@/schema/ExternalUrl";
 import User from "@/schema/Users";
+import connectMongo from "@/lib/mongodb";
+import mongoose from "mongoose";
 
 export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        await connectMongo();
+
         const { id } = await params;
 
         const url = await Url.findById(id);
