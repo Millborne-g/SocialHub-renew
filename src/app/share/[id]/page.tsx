@@ -428,7 +428,7 @@ const Url = () => {
         const fetchUrl = async () => {
             setUrlPreviewMode(true);
             if (id !== "create") {
-                setIsLoading(true); 
+                setIsLoading(true);
                 const response = await api.get(`/api/share/${id}`);
                 if (response) {
                     setTitle(response.data.url.title);
@@ -1333,9 +1333,12 @@ const Url = () => {
             {isLoading && <LoadingScreen />}
         </div>
     ) : (
-        <div className="h-screen w-full flex justify-center items-center">
-            <span className="text-2xl text-center">URL not found</span>
-        </div>
+        <>
+            <div className="h-screen w-full flex justify-center items-center">
+                <span className="text-2xl text-center">URL not found</span>
+            </div>
+            {isLoading && <LoadingScreen />}
+        </>
     );
 };
 
