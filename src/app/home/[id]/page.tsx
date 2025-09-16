@@ -583,7 +583,7 @@ const Url = () => {
                     <div className="w-full max-w-xl ">
                         {/* header */}
                         <div className="flex flex-col gap-3">
-                            <div className="flex gap-5 justify-between items-start relative">
+                            <div className="flex gap-5 justify-center items-start relative">
                                 <div className="flex gap-5 relative sm:flex-row flex-col items-center">
                                     <div
                                         className={`${
@@ -848,9 +848,22 @@ const Url = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex-col gap-2 sm:flex absolute top-0 right-0">
+                                <div className="flex-col gap-2 flex">
+                                    {/* ----- for large screen ----- */}
                                     {previewMode && (
-                                        <div className="flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary sm:flex absolute top-0 right-0">
+                                        <div className="hidden sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary flex">
+                                            <span className="flex text-sm">
+                                                Share
+                                            </span>
+                                            <span className="text-sm cursor-pointer">
+                                                <Share />
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* ----- for small screen ----- */}
+                                    {previewMode && (
+                                        <div className={`absolute ${imagePreview === "" ? "-top-10" : "top-0"}  right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}>
                                             <span className="flex text-sm">
                                                 Share
                                             </span>

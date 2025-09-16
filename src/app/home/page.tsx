@@ -184,7 +184,7 @@ const Home = () => {
     }, []);
 
     return (
-        <div className="h-screen w-full flex justify-center">
+        <div className="h-[750px] w-full flex justify-center">
             <div className="w-full md:max-w-3xl xl:max-w-7xl pt-10 px-3 md:px-0">
                 <div className="flex flex-col gap-8 h-full ">
                     <div className="flex items-start justify-start sm:justify-between sm:flex-row flex-col md:items-center gap-5">

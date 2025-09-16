@@ -61,10 +61,12 @@ const NavBar = () => {
                 setUserDetails(decodeToken(accessToken));
                 // router.push("/home");
             } else {
-                // let res = await refreshToken();
-                // if (res === null) {
-                //     router.push("/");
-                // }
+                if (!isShareRoute) {
+                    let res = await refreshToken();
+                    if (res === null) {
+                        router.push("/");
+                    }
+                }
             }
             setIsLoading(false);
         };
@@ -72,7 +74,7 @@ const NavBar = () => {
         // if (!isShareRoute) {
         refreshUserToken();
         // }
-    }, [accessToken, refreshToken, isShareRoute]);
+    }, [accessToken, isShareRoute]);
 
     const handleLogout = async () => {
         try {

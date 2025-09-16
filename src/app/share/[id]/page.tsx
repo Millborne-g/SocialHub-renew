@@ -477,21 +477,21 @@ const Url = () => {
         fetchUrl();
     }, [id, userDetails]);
 
-    // useEffect(() => {
-    //     const refreshUserToken = async () => {
-    //         // setIsLoading(true);
-    //         if (accessToken && !userDetails) {
-    //             setUserDetails(decodeToken(accessToken));
-    //         } else {
-    //             let res = await refreshToken();
-    //             if (res === null) {
-    //                 router.push("/");
-    //             }
-    //         }
-    //         // setIsLoading(false);
-    //     };
-    //     refreshUserToken();
-    // }, [accessToken, refreshToken]);
+    useEffect(() => {
+        const refreshUserToken = async () => {
+            setIsLoading(true);
+            if (accessToken && !userDetails) {
+                setUserDetails(decodeToken(accessToken));
+            } else {
+                let res = await refreshToken();
+                // if (res === null) {
+                //     router.push("/");
+                // }
+            }
+            setIsLoading(false);
+        };
+        refreshUserToken();
+    }, [accessToken]);
 
     return isUrlFound ? (
         <div className="w-full flex justify-center relative px-3 md:px-0">
@@ -504,7 +504,7 @@ const Url = () => {
                     <div className="w-full max-w-xl ">
                         {/* header */}
                         <div className="flex flex-col gap-3">
-                            <div className="flex gap-5 justify-between items-start relative">
+                            <div className="flex gap-5 justify-center items-start relative">
                                 <div className="flex gap-5 sm:flex-row flex-col items-center">
                                     <div
                                         className={`${
@@ -684,10 +684,27 @@ const Url = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className=" flex-col gap-2 sm:flex absolute top-0 right-0">
+                                <div className=" flex-col gap-2 flex ">
+                                    {/* ----- share button for large screen ----- */}
+                                    {previewMode && (
+                                        <div className="hidden sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary flex" onClick={handleShareModalOpen}>
+                                            <span className="flex text-sm">
+                                                Share
+                                            </span>
+                                            <span className="text-sm cursor-pointer">
+                                                <Share />
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* ----- share button for small screen ----- */}
                                     {previewMode && (
                                         <div
-                                            className="flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary"
+                                            className={`absolute ${
+                                                imagePreview === ""
+                                                    ? "-top-10"
+                                                    : "top-0"
+                                            }  right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}
                                             onClick={handleShareModalOpen}
                                         >
                                             <span className="flex text-sm">
