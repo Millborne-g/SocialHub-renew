@@ -93,6 +93,8 @@ export async function POST(request: NextRequest) {
             return authResult; // Return error response if authentication fails
         }
 
+        await connectMongo();
+
         // Handle FormData for file uploads
         const formData = await request.formData();
         const title = formData.get("title") as string;
