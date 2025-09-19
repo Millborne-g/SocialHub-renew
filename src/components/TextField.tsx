@@ -24,6 +24,8 @@ const TextField = (props: {
     error?: boolean;
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
+    backgroundColor?: string;
+    textColor?: string;
 }) => {
     const [showPassword, setShowPassword] = useState(false);
     return (
@@ -66,6 +68,12 @@ const TextField = (props: {
                     transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-2 
                     peer-placeholder-shown:text-gray-400 peer-focus:-top-2 peer-focus:text-xs 
                     peer-focus:text-primary font-display peer-focus:bg-white cursor-text pointer-events-none"
+                        style={{
+                            background:
+                                `color-mix(in srgb, ${props.backgroundColor} 80%, white 20%)` ||
+                                "#FFFFFF",
+                            color: props.textColor || "#99a1af",
+                        }}
                     >
                         {props.placeholder}
                     </label>
@@ -73,7 +81,7 @@ const TextField = (props: {
 
                 {/* End Icon */}
                 {props.endIcon && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
                         {props.endIcon}
                     </div>
                 )}

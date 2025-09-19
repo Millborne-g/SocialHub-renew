@@ -31,6 +31,10 @@ const urlSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
+    template: {
+        type: Object,
+        default: null,
+    },
 });
 
 // Clear existing model to force schema update

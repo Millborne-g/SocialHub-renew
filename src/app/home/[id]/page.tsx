@@ -56,7 +56,7 @@ const Url = () => {
         apiKey: GEMINI_API_KEY,
     });
     const { accessToken, refreshToken } = useAuthStore();
-    const { setUrlPreviewMode } = useUrlStore();
+    const { setUrlPreviewMode, setUrlTemplate } = useUrlStore();
     const [userDetails, setUserDetails] = useState<any>(null);
 
     const [isFromUser, setIsFromUser] = useState<boolean>(false);
@@ -92,7 +92,7 @@ const Url = () => {
     const [originalImage, setOriginalImage] = useState<File | null>(null);
     const [originalIsPrivate, setOriginalIsPrivate] = useState(false);
     const [originalExternalURLs, setOriginalExternalURLs] = useState<any[]>([]);
-
+    const [originalTemplate, setOriginalTemplate] = useState<any>(null);
     // Dropdown state for title suggestions
     const [showTitleDropdown, setShowTitleDropdown] = useState(false);
     const [generatedTitles, setGeneratedTitles] = useState<string[]>([]);
@@ -113,6 +113,58 @@ const Url = () => {
     const [dragStartY, setDragStartY] = useState(0);
 
     const [isLoading, setIsLoading] = useState(false);
+
+    const [template, setTemplate] = useState<any>(null);
+    const [templates, setTemplates] = useState<any[]>([
+        {
+            id: "1",
+            background: "#000000",
+            text: "#ffffff",
+            primary: "#fe2c55",
+            secondary: "#de8c9d",
+            accent: "#2af0ea",
+        },
+
+        {
+            id: "2",
+            background: "#ffffff",
+            text: "#000000",
+            primary: "#4267B2",
+            secondary: "#898F9C",
+            accent: "#1877F2",
+        },
+        {
+            id: "3",
+            background: "#1DA1F2",
+            text: "#ffffff",
+            primary: "#71C9F8",
+            secondary: "#AAB8C2",
+            accent: "#E1E8ED",
+        },
+        {
+            id: "4",
+            background: "#833AB4",
+            text: "#ffffff",
+            primary: "#C13584",
+            secondary: "#E1306C",
+            accent: "#FCAF45",
+        },
+        {
+            background: "#2C2F33",
+            text: "#ffffff",
+            primary: "#7289DA",
+            secondary: "#99AAB5",
+            accent: "#43B581",
+        },
+        {
+            id: "5",
+            background: "#FF0000",
+            text: "#ffffff",
+            primary: "#282828",
+            secondary: "#606060",
+            accent: "#CC0000",
+        },
+    ]);
     // Function to check if there are any changes
     const hasChanges = () => {
         if (id === "create") {
@@ -130,7 +182,7 @@ const Url = () => {
         const descriptionChanged = description !== originalDescription;
         const imageChanged = image !== originalImage;
         const privacyChanged = isPrivate !== originalIsPrivate;
-
+        const templateChanged = template !== originalTemplate;
         // Check if external URLs have changed (length, content, or order)
         const urlsChanged =
             externalURLs.length !== originalExternalURLs.length ||
@@ -149,6 +201,7 @@ const Url = () => {
             descriptionChanged ||
             imageChanged ||
             privacyChanged ||
+            templateChanged ||
             urlsChanged
         );
     };
@@ -264,6 +317,7 @@ const Url = () => {
                 formData.append("description", description);
                 formData.append("externalURLs", JSON.stringify(externalURLs));
                 formData.append("public", (!isPrivate).toString());
+                formData.append("template", JSON.stringify(template));
 
                 // If image is a base64 string, convert it back to a file
                 if (image) {
@@ -284,6 +338,7 @@ const Url = () => {
                 setOriginalImage(image);
                 setOriginalIsPrivate(isPrivate);
                 setOriginalExternalURLs([...externalURLs]);
+                setOriginalTemplate(template);
 
                 router.push(`${response.data._id}`);
                 setIsSaving(false);
@@ -315,7 +370,7 @@ const Url = () => {
             formData.append("description", description);
             formData.append("externalURLs", JSON.stringify(externalURLs));
             formData.append("public", (!isPrivate).toString());
-            console.log(image);
+            formData.append("template", JSON.stringify(template));
 
             // If image is a base64 string, convert it back to a file
             if (image) {
@@ -341,9 +396,10 @@ const Url = () => {
             setOriginalImage(image);
             setOriginalIsPrivate(isPrivate);
             setOriginalExternalURLs([...externalURLs]);
-
+            setOriginalTemplate(template);
             setIsSaving(false);
             setUrlPreviewMode(false);
+            setPreviewMode(false);
             setOnSave(false);
         } catch (error) {
             console.log("Update error:", error);
@@ -473,6 +529,11 @@ const Url = () => {
         setShowDescriptionDropdown(false);
     };
 
+    const selectNewTemplate = (template: any) => {
+        setUrlTemplate(template);
+        setTemplate(template);
+    };
+
     useEffect(() => {
         const fetchUrl = async () => {
             if (id !== "create") {
@@ -487,6 +548,7 @@ const Url = () => {
                 setIsPrivate(!response.data.url.public);
                 setEditMode(true);
                 setPreviewMode(false);
+                setTemplate(response.data.url.template);
 
                 // Store original values for change detection
                 setOriginalTitle(response.data.url.title);
@@ -494,7 +556,7 @@ const Url = () => {
                 setOriginalImage(response.data.url.image);
                 setOriginalIsPrivate(!response.data.url.public);
                 setOriginalExternalURLs(response.data.externalUrls);
-
+                setOriginalTemplate(response.data.url.template);
                 if (response.data.url.userId === userDetails?.user?.id) {
                     setIsFromUser(true);
                 }
@@ -512,6 +574,7 @@ const Url = () => {
                 setOriginalImage(null);
                 setOriginalIsPrivate(false);
                 setOriginalExternalURLs([]);
+                setOriginalTemplate(null);
             }
             setIsLoading(false);
         };
@@ -591,7 +654,13 @@ const Url = () => {
     }, [isDragging, dragStartY]);
 
     return isUrlFound ? (
-        <div className="w-full flex justify-center relative px-3 md:px-0">
+        <div
+            className="w-full flex justify-center relative px-3 md:px-0"
+            style={{
+                backgroundColor: template?.background || "#ffffff",
+                color: template?.text || "#000000",
+            }}
+        >
             <div
                 className={`w-full lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem]  ${
                     previewMode ? "pt-30 pb-10 " : "pt-10 "
@@ -628,7 +697,7 @@ const Url = () => {
                                                     }
                                                 }}
                                             >
-                                                <span className="text-xs">
+                                                <span className="text-xs text-gray-800">
                                                     {image ? (
                                                         <CloseCircle />
                                                     ) : (
@@ -818,11 +887,25 @@ const Url = () => {
                                                 </div>
                                             ) : (
                                                 <>
-                                                    <span className="text-2xl font-bold">
+                                                    <span
+                                                        className="text-2xl font-bold"
+                                                        style={{
+                                                            color:
+                                                                template?.text ||
+                                                                "#000000",
+                                                        }}
+                                                    >
                                                         {title ? (
                                                             title
                                                         ) : (
-                                                            <span className="text-gray-500 italic">
+                                                            <span
+                                                                className="italic"
+                                                                style={{
+                                                                    color:
+                                                                        template?.secondary ||
+                                                                        "#6b7280",
+                                                                }}
+                                                            >
                                                                 No Title
                                                             </span>
                                                         )}
@@ -859,7 +942,14 @@ const Url = () => {
                                                     <User className="w-3 h-3 text-gray-500" />
                                                 </div>
                                             )}
-                                            <span className="text-sm text-gray-950">
+                                            <span
+                                                className="text-sm"
+                                                style={{
+                                                    color:
+                                                        template?.secondary ||
+                                                        "#111827",
+                                                }}
+                                            >
                                                 {userDetails?.user?.firstName}{" "}
                                                 {userDetails?.user?.lastName}
                                             </span>
@@ -869,7 +959,25 @@ const Url = () => {
                                 <div className="flex-col gap-2 flex">
                                     {/* ----- for large screen ----- */}
                                     {previewMode && (
-                                        <div className="hidden sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary flex">
+                                        <div
+                                            className="hidden sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400 text-primary transition-all duration-300 hover:drop-shadow-lg hover:shadow-lg"
+                                            style={{
+                                                color:
+                                                    template?.accent ||
+                                                    "#6b7280",
+                                                filter: "drop-shadow(0 0 0 transparent)",
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.filter = `drop-shadow(0 0 8px ${
+                                                    template?.accent ||
+                                                    "#6b7280"
+                                                })`;
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.filter =
+                                                    "drop-shadow(0 0 0 transparent)";
+                                            }}
+                                        >
                                             <span className="flex text-sm">
                                                 Share
                                             </span>
@@ -887,6 +995,11 @@ const Url = () => {
                                                     ? "-top-10"
                                                     : "top-0"
                                             }  right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}
+                                            style={{
+                                                color:
+                                                    template?.accent ||
+                                                    "#6b7280",
+                                            }}
                                         >
                                             <span className="flex text-sm">
                                                 Share
@@ -1034,12 +1147,26 @@ const Url = () => {
                                     </div>
                                 ) : (
                                     <>
-                                        <span className="text-sm text-gray-700 break-words whitespace-pre-wrap sm:text-left text-center">
+                                        <span
+                                            className="text-sm break-words whitespace-pre-wrap sm:text-left text-center"
+                                            style={{
+                                                color: template?.text
+                                                    ? `${template.text}CC`
+                                                    : "#374151CC",
+                                            }}
+                                        >
                                             {description ? (
                                                 <>{description}</>
                                             ) : (
                                                 !previewMode && (
-                                                    <span className="text-gray-500 italic">
+                                                    <span
+                                                        className="italic"
+                                                        style={{
+                                                            color:
+                                                                template?.secondary ||
+                                                                "#6b7280",
+                                                        }}
+                                                    >
                                                         No Description
                                                         (optional)
                                                     </span>
@@ -1056,7 +1183,12 @@ const Url = () => {
                                 )}
                             </div>
                         </div>
-                        <div className="w-full h-[1px] bg-gray-200 my-5"></div>
+                        <div
+                            className="w-full h-[1px] my-5"
+                            style={{
+                                backgroundColor: template?.accent || "#e5e7eb",
+                            }}
+                        ></div>
                         <div className="flex flex-col gap-10 py-5">
                             {!previewMode && (
                                 <div className="flex justify-end">
@@ -1115,6 +1247,7 @@ const Url = () => {
                                                                 ? "preview"
                                                                 : "edit"
                                                         }
+                                                        template={template}
                                                     />
                                                 ))}
                                             {/* <DragOverlay>
@@ -1132,7 +1265,14 @@ const Url = () => {
                                     </div>
                                 ) : (
                                     <div className="flex justify-center items-center h-full">
-                                        <span className="text-gray-500 italic">
+                                        <span
+                                            className="italic"
+                                            style={{
+                                                color:
+                                                    template?.secondary ||
+                                                    "#6b7280",
+                                            }}
+                                        >
                                             No URLs found. Add some to get
                                             started.
                                         </span>
@@ -1172,7 +1312,10 @@ const Url = () => {
                         )}
                     </div>
 
-                    <div className="w-fit bg-white rounded-xl shadow-md p-4">
+                    <div
+                        className="w-fit bg-white rounded-xl shadow-md p-4"
+                        style={{ backgroundColor: "#ffffff" }}
+                    >
                         <div className="flex justify-center flex-col gap-4">
                             <div className="flex items-center gap-2 mr-4">
                                 <div className="flex items-center gap-3">
@@ -1254,7 +1397,132 @@ const Url = () => {
             )}
 
             {/* templates */}
-            
+            {editMode && isFromUser && (
+                <div
+                    className={`fixed h-[75vh] bottom-0 left-0 transition-transform duration-300 ease-in-out`}
+                >
+                    {/* Puller Handle */}
+                    <div
+                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 w-6 h-16 bg-primary hover:bg-gray-300 rounded-r-lg cursor-pointer flex items-center justify-center group transition-colors duration-200"
+                        onMouseDown={handlePanelDragStart}
+                        onClick={togglePanel}
+                    >
+                        {isPanelOpen ? (
+                            <ArrowRight2 className="text-white" />
+                        ) : (
+                            <ArrowLeft2 className="text-white" />
+                        )}
+                    </div>
+
+                    <div
+                        className="w-fit h-full bg-white rounded-xl shadow-md p-4 flex flex-col"
+                        style={{ backgroundColor: "#ffffff" }}
+                    >
+                        <div className="text-sm font-medium text-center text-gray-500 border-b border-gray-200 mb-3 flex-shrink-0">
+                            <ul className="flex flex-wrap -mb-px">
+                                <li className="me-2">
+                                    <a
+                                        href="#"
+                                        className="inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active"
+                                        aria-current="page"
+                                    >
+                                        Templates
+                                    </a>
+                                </li>
+
+                                <li className="me-2">
+                                    <a
+                                        href="#"
+                                        className="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300"
+                                    >
+                                        Customize
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div className="flex flex-col gap-4 overflow-y-auto">
+                            <div
+                                className={`rounded-lg shadow-lg p-1 hover:shadow-xl transition-all duration-300 cursor-pointer ${
+                                    template ? "bg-white" : "bg-primary"
+                                }`}
+                                onClick={() => {
+                                    selectNewTemplate(null);
+                                    setUrlTemplate(null);
+                                }}
+                            >
+                                <div className="rounded-lg flex h-[100px] justify-center items-center bg-gray-200">
+                                    {/* <div className="border-2 border-gray-400 rounded-full w-12 h-12">
+                                        <div >
+
+                                        </div>
+                                    </div> */}
+
+                                    <span>
+                                        <CloseCircle className="text-gray-400 w-12 h-12" />
+                                    </span>
+                                </div>
+                            </div>
+                            {templates.map((templateItem, index) => (
+                                <div
+                                    key={index}
+                                    className={`rounded-lg shadow-lg p-1 hover:shadow-xl transition-all duration-300 cursor-pointer ${
+                                        template
+                                            ? template.id === templateItem.id
+                                                ? "bg-primary"
+                                                : "bg-white"
+                                            : "bg-white"
+                                    }`}
+                                    onClick={() =>
+                                        selectNewTemplate(templateItem)
+                                    }
+                                >
+                                    <div
+                                        className="rounded-lg flex h-[100px] justify-center items-center"
+                                        style={{
+                                            backgroundColor:
+                                                templateItem.background,
+                                        }}
+                                    >
+                                        <div className="flex items-center justify-center">
+                                            <div
+                                                className="w-12 h-12 rounded-full"
+                                                style={{
+                                                    backgroundColor:
+                                                        templateItem.text,
+                                                }}
+                                            ></div>
+
+                                            <div
+                                                className="w-12 h-12 rounded-full -ml-3"
+                                                style={{
+                                                    backgroundColor:
+                                                        templateItem.primary,
+                                                }}
+                                            ></div>
+
+                                            <div
+                                                className="w-12 h-12 rounded-full -ml-3"
+                                                style={{
+                                                    backgroundColor:
+                                                        templateItem.secondary,
+                                                }}
+                                            ></div>
+
+                                            <div
+                                                className="w-12 h-12 rounded-full -ml-3"
+                                                style={{
+                                                    backgroundColor:
+                                                        templateItem.accent,
+                                                }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* add modal */}
             {addURLModal && (

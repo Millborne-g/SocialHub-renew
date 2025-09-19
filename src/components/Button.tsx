@@ -11,6 +11,8 @@ const Button = (props: {
     rounded?: "sm" | "md" | "lg" | "full";
     size?: "sm" | "md" | "lg";
     disabled?: boolean;
+    textColor?: string;
+    backgroundColor?: string;
 }) => {
     return (
         <button
@@ -59,6 +61,21 @@ const Button = (props: {
                       } ${props.icon ? "flex items-center gap-2" : ""}`
             }
             } `}
+            style={{
+                color: props.textColor || "",
+                background: props.backgroundColor || "",
+                transition: "opacity 0.2s ease-in-out",
+            }}
+            onMouseEnter={(e) => {
+                if (props.textColor || props.backgroundColor) {
+                    e.currentTarget.style.opacity = "0.8";
+                }
+            }}
+            onMouseLeave={(e) => {
+                if (props.textColor || props.backgroundColor) {
+                    e.currentTarget.style.opacity = "1";
+                }
+            }}
         >
             {props.icon && props.icon}
             {props.text}

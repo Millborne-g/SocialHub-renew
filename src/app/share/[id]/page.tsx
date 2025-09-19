@@ -5,6 +5,8 @@ import ExternalUrl from "@/components/ExternalUrl";
 import Modal from "@/components/Modal";
 import {
     Add,
+    ArrowLeft2,
+    ArrowRight2,
     Check,
     CloseCircle,
     Edit,
@@ -94,7 +96,7 @@ const Url = () => {
     const router = useRouter();
     const { id } = useParams();
     const { accessToken, refreshToken } = useAuthStore();
-    const { setUrlPreviewMode } = useUrlStore();
+    const { setUrlPreviewMode, setUrlTemplate } = useUrlStore();
     const [userDetails, setUserDetails] = useState<any>(null);
 
     const [isFromUser, setIsFromUser] = useState<boolean>(false);
@@ -133,9 +135,66 @@ const Url = () => {
     const [originalImage, setOriginalImage] = useState<File | null>(null);
     const [originalIsPrivate, setOriginalIsPrivate] = useState(false);
     const [originalExternalURLs, setOriginalExternalURLs] = useState<any[]>([]);
+    const [originalTemplate, setOriginalTemplate] = useState<any>(null);
     const [createdBy, setCreatedBy] = useState<any>(null);
 
     const [isLoading, setIsLoading] = useState(false);
+    const [template, setTemplate] = useState<any>(null);
+
+    // Panel puller state
+    const [isPanelOpen, setIsPanelOpen] = useState(true);
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStartY, setDragStartY] = useState(0);
+    const [templates, setTemplates] = useState<any[]>([
+        {
+            id: "1",
+            background: "#000000",
+            text: "#ffffff",
+            primary: "#fe2c55",
+            secondary: "#de8c9d",
+            accent: "#2af0ea",
+        },
+
+        {
+            id: "2",
+            background: "#ffffff",
+            text: "#000000",
+            primary: "#4267B2",
+            secondary: "#898F9C",
+            accent: "#1877F2",
+        },
+        {
+            id: "3",
+            background: "#1DA1F2",
+            text: "#ffffff",
+            primary: "#71C9F8",
+            secondary: "#AAB8C2",
+            accent: "#E1E8ED",
+        },
+        {
+            id: "4",
+            background: "#833AB4",
+            text: "#ffffff",
+            primary: "#C13584",
+            secondary: "#E1306C",
+            accent: "#FCAF45",
+        },
+        {
+            background: "#2C2F33",
+            text: "#ffffff",
+            primary: "#7289DA",
+            secondary: "#99AAB5",
+            accent: "#43B581",
+        },
+        {
+            id: "5",
+            background: "#FF0000",
+            text: "#ffffff",
+            primary: "#282828",
+            secondary: "#606060",
+            accent: "#CC0000",
+        },
+    ]);
 
     // Function to generate QR code
     const generateQRCode = async (url: string) => {
@@ -169,6 +228,38 @@ const Url = () => {
         setShareModal(true);
     };
 
+    const selectNewTemplate = (template: any) => {
+        setUrlTemplate(template);
+        setTemplate(template);
+    };
+
+    // Panel puller drag handlers
+    const handlePanelDragStart = (e: React.MouseEvent) => {
+        setIsDragging(true);
+        setDragStartY(e.clientY);
+        e.preventDefault();
+    };
+
+    const handlePanelDragMove = (e: MouseEvent) => {
+        if (!isDragging) return;
+
+        const deltaY = e.clientY - dragStartY;
+        const threshold = 50; // Minimum drag distance to trigger toggle
+
+        if (Math.abs(deltaY) > threshold) {
+            setIsPanelOpen(deltaY < 0); // Open if dragged up, close if dragged down
+            setIsDragging(false);
+        }
+    };
+
+    const handlePanelDragEnd = () => {
+        setIsDragging(false);
+    };
+
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
+
     // Function to check if there are any changes
     const hasChanges = () => {
         if (id === "create") {
@@ -186,7 +277,7 @@ const Url = () => {
         const descriptionChanged = description !== originalDescription;
         const imageChanged = image !== originalImage;
         const privacyChanged = isPrivate !== originalIsPrivate;
-
+        const templateChanged = template !== originalTemplate;
         // Check if external URLs have changed (length, content, or order)
         const urlsChanged =
             externalURLs.length !== originalExternalURLs.length ||
@@ -205,6 +296,7 @@ const Url = () => {
             descriptionChanged ||
             imageChanged ||
             privacyChanged ||
+            templateChanged ||
             urlsChanged
         );
     };
@@ -304,6 +396,7 @@ const Url = () => {
                 formData.append("description", description);
                 formData.append("externalURLs", JSON.stringify(externalURLs));
                 formData.append("public", (!isPrivate).toString());
+                formData.append("template", JSON.stringify(template));
 
                 // If image is a base64 string, convert it back to a file
                 if (image) {
@@ -324,6 +417,7 @@ const Url = () => {
                 setOriginalImage(image);
                 setOriginalIsPrivate(isPrivate);
                 setOriginalExternalURLs([...externalURLs]);
+                setOriginalTemplate(template);
 
                 router.push(`${response.data._id}`);
                 setIsSaving(false);
@@ -355,6 +449,7 @@ const Url = () => {
             formData.append("description", description);
             formData.append("externalURLs", JSON.stringify(externalURLs));
             formData.append("public", (!isPrivate).toString());
+            formData.append("template", JSON.stringify(template));
 
             // If image is a base64 string, convert it back to a file
             if (image) {
@@ -380,6 +475,7 @@ const Url = () => {
             setOriginalImage(image);
             setOriginalIsPrivate(isPrivate);
             setOriginalExternalURLs([...externalURLs]);
+            setOriginalTemplate(template);
 
             setIsSaving(false);
             setUrlPreviewMode(false);
@@ -439,6 +535,8 @@ const Url = () => {
                     setIsPrivate(!response.data.url.public);
                     setEditMode(true);
                     setPreviewMode(true);
+                    setTemplate(response.data.url.template);
+                    setUrlTemplate(response.data.url.template);
 
                     // Store original values for change detection
                     setOriginalTitle(response.data.url.title);
@@ -446,6 +544,7 @@ const Url = () => {
                     setOriginalImage(response.data.url.image);
                     setOriginalIsPrivate(!response.data.url.public);
                     setOriginalExternalURLs(response.data.externalUrls);
+                    setOriginalTemplate(response.data.url.template);
                     setCreatedBy(response.data.createdBy);
 
                     if (response.data.url.userId === userDetails?.user?.id) {
@@ -470,6 +569,7 @@ const Url = () => {
                 setOriginalImage(null);
                 setOriginalIsPrivate(false);
                 setOriginalExternalURLs([]);
+                setOriginalTemplate(null);
                 setCreatedBy(null);
             }
             setIsLoading(false);
@@ -505,8 +605,26 @@ const Url = () => {
         }
     }, [id, isUrlFound]);
 
+    // Add event listeners for drag
+    React.useEffect(() => {
+        if (isDragging) {
+            document.addEventListener("mousemove", handlePanelDragMove);
+            document.addEventListener("mouseup", handlePanelDragEnd);
+            return () => {
+                document.removeEventListener("mousemove", handlePanelDragMove);
+                document.removeEventListener("mouseup", handlePanelDragEnd);
+            };
+        }
+    }, [isDragging, dragStartY]);
+
     return isUrlFound ? (
-        <div className="w-full flex justify-center relative px-3 md:px-0">
+        <div
+            className="w-full flex justify-center relative px-3 md:px-0"
+            style={{
+                backgroundColor: template?.background || "#ffffff",
+                color: template?.text || "#000000",
+            }}
+        >
             <div
                 className={`w-full lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem]  ${
                     previewMode ? "pt-30 pb-10 " : "pt-10 "
@@ -516,8 +634,8 @@ const Url = () => {
                     <div className="w-full max-w-xl ">
                         {/* header */}
                         <div className="flex flex-col gap-3">
-                            <div className="flex gap-5 justify-center items-start relative">
-                                <div className="flex gap-5 sm:flex-row flex-col items-center">
+                            <div className="flex gap-5 sm:justify-between justify-center items-start relative">
+                                <div className="flex gap-5 relative sm:flex-row flex-col items-center">
                                     <div
                                         className={`${
                                             previewMode
@@ -652,11 +770,25 @@ const Url = () => {
                                                 </>
                                             ) : (
                                                 <>
-                                                    <span className="text-2xl font-bold">
+                                                    <span
+                                                        className="text-2xl font-bold"
+                                                        style={{
+                                                            color:
+                                                                template?.text ||
+                                                                "#000000",
+                                                        }}
+                                                    >
                                                         {title ? (
                                                             title
                                                         ) : (
-                                                            <span className="text-gray-500 italic">
+                                                            <span
+                                                                className="italic"
+                                                                style={{
+                                                                    color:
+                                                                        template?.secondary ||
+                                                                        "#6b7280",
+                                                                }}
+                                                            >
                                                                 No Title
                                                             </span>
                                                         )}
@@ -690,7 +822,14 @@ const Url = () => {
                                                     <User className="w-3 h-3 text-gray-500" />
                                                 </div>
                                             )}
-                                            <span className="text-sm text-gray-950">
+                                            <span
+                                                className="text-sm"
+                                                style={{
+                                                    color:
+                                                        template?.secondary ||
+                                                        "#111827",
+                                                }}
+                                            >
                                                 {createdBy?.fullName}
                                             </span>
                                         </div>
@@ -700,7 +839,23 @@ const Url = () => {
                                     {/* ----- share button for large screen ----- */}
                                     {previewMode && (
                                         <div
-                                            className="hidden sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary flex"
+                                            className="hidden sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400 text-primary transition-all duration-300 hover:drop-shadow-lg hover:shadow-lg"
+                                            style={{
+                                                color:
+                                                    template?.accent ||
+                                                    "#6b7280",
+                                                filter: "drop-shadow(0 0 0 transparent)",
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.filter = `drop-shadow(0 0 8px ${
+                                                    template?.accent ||
+                                                    "#6b7280"
+                                                })`;
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.filter =
+                                                    "drop-shadow(0 0 0 transparent)";
+                                            }}
                                             onClick={handleShareModalOpen}
                                         >
                                             <span className="flex text-sm">
@@ -720,6 +875,11 @@ const Url = () => {
                                                     ? "-top-10"
                                                     : "top-0"
                                             }  right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}
+                                            style={{
+                                                color:
+                                                    template?.accent ||
+                                                    "#6b7280",
+                                            }}
                                             onClick={handleShareModalOpen}
                                         >
                                             <span className="flex text-sm">
@@ -794,11 +954,25 @@ const Url = () => {
                                     </div>
                                 ) : (
                                     <>
-                                        <span className="text-sm text-gray-700 break-words whitespace-pre-wrap sm:text-left text-center">
+                                        <span
+                                            className="text-sm break-words whitespace-pre-wrap sm:text-left text-center"
+                                            style={{
+                                                color: template?.text
+                                                    ? `${template.text}CC`
+                                                    : "#374151CC",
+                                            }}
+                                        >
                                             {description
                                                 ? description
                                                 : !previewMode && (
-                                                      <span className="text-gray-500 italic">
+                                                      <span
+                                                          className="italic"
+                                                          style={{
+                                                              color:
+                                                                  template?.secondary ||
+                                                                  "#6b7280",
+                                                          }}
+                                                      >
                                                           No Description
                                                           (optional)
                                                       </span>
@@ -814,7 +988,12 @@ const Url = () => {
                                 )}
                             </div>
                         </div>
-                        <div className="w-full h-[1px] bg-gray-200 my-5"></div>
+                        <div
+                            className="w-full h-[1px] my-5"
+                            style={{
+                                backgroundColor: template?.accent || "#e5e7eb",
+                            }}
+                        ></div>
                         <div className="flex flex-col gap-10 py-5">
                             {!previewMode && (
                                 <div className="flex justify-end">
@@ -873,6 +1052,7 @@ const Url = () => {
                                                                 ? "preview"
                                                                 : "edit"
                                                         }
+                                                        template={template}
                                                     />
                                                 ))}
                                             {/* <DragOverlay>
@@ -890,7 +1070,14 @@ const Url = () => {
                                     </div>
                                 ) : (
                                     <div className="flex justify-center items-center h-full">
-                                        <span className="text-gray-500 italic">
+                                        <span
+                                            className="italic"
+                                            style={{
+                                                color:
+                                                    template?.secondary ||
+                                                    "#6b7280",
+                                            }}
+                                        >
                                             No URLs found. Add some to get
                                             started.
                                         </span>
@@ -909,7 +1096,7 @@ const Url = () => {
                     </div>
                 </div>
             </div>
-            {/* menu */}
+
             {/* add modal */}
             {addURLModal && (
                 <Modal
@@ -988,6 +1175,7 @@ const Url = () => {
                         setShareModal(false);
                     }}
                     noButtons={true}
+                    template={template}
                     content={
                         <div className="flex flex-col gap-6">
                             {/* QR Code */}
@@ -1004,7 +1192,12 @@ const Url = () => {
                                         />
                                     </div>
                                 )}
-                                <p className="text-xs text-gray-500 text-center">
+                                <p
+                                    className="text-xs text-gray-500 text-center"
+                                    style={{
+                                        color: template?.secondary || "#6b7280",
+                                    }}
+                                >
                                     Scan to open this page
                                 </p>
                             </div>
@@ -1023,7 +1216,7 @@ const Url = () => {
                                     }
                                     endIcon={
                                         <div
-                                            className="cursor-pointer bg-white px-1 rounded-md hover:text-primary"
+                                            className="cursor-pointer bg-white px-1 rounded-md"
                                             onClick={() => {
                                                 navigator.clipboard.writeText(
                                                     shareUrl
@@ -1032,10 +1225,41 @@ const Url = () => {
                                                     "Copied to clipboard!"
                                                 );
                                             }}
+                                            onMouseEnter={(e) => {
+                                                if (template) {
+                                                    e.currentTarget.style.color = `${template?.text}`;
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (template) {
+                                                    e.currentTarget.style.color = `${template?.text}`;
+                                                }
+                                            }}
+                                            style={{
+                                                background:
+                                                    `color-mix(in srgb, ${template?.background} 80%, white 20%)` ||
+                                                    "#FFFFFF",
+                                            }}
                                         >
-                                            <Copy />
+                                            <Copy
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.opacity =
+                                                        "0.8";
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.opacity =
+                                                        "1";
+                                                }}
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6a7282",
+                                                }}
+                                            />
                                         </div>
                                     }
+                                    backgroundColor={template?.background}
+                                    textColor={template?.text}
                                 />
                             </div>
 
@@ -1053,7 +1277,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <EmailIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 Email
                                             </span>
                                         </div>
@@ -1071,7 +1302,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <FacebookIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 Facebook
                                             </span>
                                         </div>
@@ -1092,7 +1330,14 @@ const Url = () => {
                                                 size={32}
                                                 round
                                             />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 Facebook Messenger
                                             </span>
                                         </div>
@@ -1113,7 +1358,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <TwitterIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 Twitter
                                             </span>
                                         </div>
@@ -1127,7 +1379,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <LinkedinIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 LinkedIn
                                             </span>
                                         </div>
@@ -1140,7 +1399,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <WhatsappIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 WhatsApp
                                             </span>
                                         </div>
@@ -1153,7 +1419,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <TelegramIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 Telegram
                                             </span>
                                         </div>
@@ -1166,7 +1439,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <RedditIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 Reddit
                                             </span>
                                         </div>
@@ -1180,7 +1460,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <PinterestIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 Pinterest
                                             </span>
                                         </div>
@@ -1194,7 +1481,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <TumblrIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 Tumblr
                                             </span>
                                         </div>
@@ -1204,7 +1498,14 @@ const Url = () => {
                                     <VKShareButton url={shareUrl} title={title}>
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <VKIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 VK
                                             </span>
                                         </div>
@@ -1217,7 +1518,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <LineIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 Line
                                             </span>
                                         </div>
@@ -1230,7 +1538,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <ViberIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 Viber
                                             </span>
                                         </div>
@@ -1243,7 +1558,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <PocketIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 Pocket
                                             </span>
                                         </div>
@@ -1257,7 +1579,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <InstapaperIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 Instapaper
                                             </span>
                                         </div>
@@ -1270,7 +1599,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <ThreadsIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 Threads
                                             </span>
                                         </div>
@@ -1283,7 +1619,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <WorkplaceIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 Workplace
                                             </span>
                                         </div>
@@ -1296,7 +1639,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <GabIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 Gab
                                             </span>
                                         </div>
@@ -1309,7 +1659,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <HatenaIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 Hatena
                                             </span>
                                         </div>
@@ -1323,7 +1680,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <LivejournalIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 LiveJournal
                                             </span>
                                         </div>
@@ -1337,7 +1701,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <MailruIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 Mail.ru
                                             </span>
                                         </div>
@@ -1351,7 +1722,14 @@ const Url = () => {
                                     >
                                         <div className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[80px] flex-shrink-0">
                                             <OKIcon size={32} round />
-                                            <span className="text-xs text-gray-600">
+                                            <span
+                                                className="text-xs text-gray-600"
+                                                style={{
+                                                    color:
+                                                        template?.text ||
+                                                        "#6b7280",
+                                                }}
+                                            >
                                                 OK.ru
                                             </span>
                                         </div>

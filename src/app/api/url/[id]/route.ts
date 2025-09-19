@@ -96,6 +96,7 @@ export async function PUT(
         const description = formData.get("description") as string;
         const image = formData.get("image") as File | null | string;
         const externalURLs = formData.get("externalURLs") as string;
+        const template = formData.get("template") as any;
 
         // Validate required fields
         if (!title || title.trim() === "") {
@@ -163,6 +164,7 @@ export async function PUT(
                 description: description?.trim() || "",
                 image: imageUrl,
                 public: isPublic === "true",
+                template: JSON.parse(template),
                 updatedAt: new Date(),
             },
             { new: true, runValidators: true }

@@ -103,6 +103,7 @@ export async function POST(request: NextRequest) {
         const image = formData.get("image") as File | null;
         const externalURLs = formData.get("externalURLs") as string;
         const userId = (authResult as any).user.id;
+        const template = formData.get("template") as string;
         let imageUrl = "";
 
         // Handle image upload
@@ -155,6 +156,7 @@ export async function POST(request: NextRequest) {
             description,
             image: imageUrl,
             public: isPublic === "true",
+            template: JSON.parse(template),
         });
 
         const externalURLsArray = JSON.parse(externalURLs);

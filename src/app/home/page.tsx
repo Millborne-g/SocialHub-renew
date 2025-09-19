@@ -83,7 +83,6 @@ const Home = () => {
             return (searchTerm: string) => {
                 clearTimeout(timeoutId);
                 timeoutId = setTimeout(() => {
-                    setSearch(searchTerm);
                     setCurrentPage(1); // Reset to first page when searching
                 }, 500); // 500ms delay
             };
@@ -129,6 +128,7 @@ const Home = () => {
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const searchTerm = e.target.value;
+        setSearch(searchTerm);
         debouncedSearch(searchTerm);
     };
 

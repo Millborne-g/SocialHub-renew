@@ -21,11 +21,15 @@ const NavBar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const isShareRoute = pathname.startsWith("/share");
 
+    const { accessToken, logout, refreshToken } = useAuthStore();
+    const { urlPreviewMode, urlTemplate, setUrlTemplate } = useUrlStore();
+
     const navbarOptions = [
         {
             label: "Home",
             path: "/home",
             onClick: () => {
+                setUrlTemplate(null);
                 router.push("/home");
             },
         },
@@ -37,9 +41,6 @@ const NavBar = () => {
         //     },
         // },
     ];
-
-    const { accessToken, logout, refreshToken } = useAuthStore();
-    const { urlPreviewMode } = useUrlStore();
 
     // useEffect(() => {
     //     const refreshUserToken = async () => {
@@ -54,8 +55,6 @@ const NavBar = () => {
 
     useEffect(() => {
         const refreshUserToken = async () => {
-            console.log("Navbar refreshUserToken");
-
             setIsLoading(true);
             if (accessToken && !userDetails) {
                 setUserDetails(decodeToken(accessToken));
@@ -64,7 +63,10 @@ const NavBar = () => {
                 if (!isShareRoute) {
                     let res = await refreshToken();
                     if (res === null) {
-                        router.push("/");
+                        setUrlTemplate(null);
+                        if (pathname !== "/login" && pathname !== "/signup") {
+                            router.push("/");
+                        }
                     }
                 }
             }
@@ -81,6 +83,8 @@ const NavBar = () => {
             await logout();
             setIsDropdownOpen(false);
             setUserDetails(null);
+
+            setUrlTemplate(null);
             router.push("/login");
         } catch (error) {
             console.error("Logout failed:", error);
@@ -125,14 +129,44 @@ const NavBar = () => {
                     className={`w-full bg-white fixed top-0 flex justify-center items-center z-30 p-3 transition-shadow duration-200 ${
                         isScrolled ? "shadow-lg" : ""
                     }`}
+                    style={{
+                        backgroundColor: urlTemplate?.background || "#FFFFFF",
+                    }}
                 >
                     <div className="flex items-center justify-between w-full lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem] ">
                         <a href="/" className="flex items-center gap-2">
-                            {/* <Image src={logo} alt="logo" /> */}
-                            <span className="text-2xl font-black font-display">
-                                Link
-                                <span className="text-primary">LET</span>
-                            </span>
+                            {urlTemplate ? (
+                                <>
+                                    <span
+                                        className="text-2xl font-black font-display"
+                                        style={{
+                                            color:
+                                                urlTemplate?.text || "#000000",
+                                        }}
+                                    >
+                                        Link
+                                        <span
+                                            className="text-primary"
+                                            style={{
+                                                color:
+                                                    urlTemplate?.primary ||
+                                                    "#0066ff",
+                                            }}
+                                        >
+                                            LET
+                                        </span>
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    <span className="text-2xl font-black font-display">
+                                        Link
+                                        <span className="text-primary">
+                                            LET
+                                        </span>
+                                    </span>
+                                </>
+                            )}
                         </a>
                         <div className="flex items-center gap-2">
                             {userDetails ? (
@@ -160,7 +194,14 @@ const NavBar = () => {
                                                 <User className="w-6 h-6 text-gray-500" />
                                             )}
                                         </div>
-                                        <span className="text-sm hidden sm:block">
+                                        <span
+                                            className="text-sm hidden sm:block"
+                                            style={{
+                                                color:
+                                                    urlTemplate?.text ||
+                                                    "#000000",
+                                            }}
+                                        >
                                             {userDetails.user.firstName}{" "}
                                             {userDetails.user.lastName}
                                         </span>
@@ -172,7 +213,7 @@ const NavBar = () => {
                                             <div className="py-1">
                                                 <button
                                                     onClick={handleLogout}
-                                                    className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                                    className="cursor-pointer flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                                                 >
                                                     <Logout className="w-4 h-4" />
                                                     Logout
@@ -181,12 +222,35 @@ const NavBar = () => {
                                         </div>
                                     )}
                                 </div>
+                            ) : urlTemplate ? (
+                                <>
+                                    <Button
+                                        variant="ghost"
+                                        text="Login"
+                                        onClick={() => {
+                                            setUrlTemplate(null);
+                                            router.push("/login");
+                                        }}
+                                        textColor={urlTemplate?.text}
+                                    />
+                                    <Button
+                                        variant="primary"
+                                        text="Sign up"
+                                        onClick={() => {
+                                            setUrlTemplate(null);
+                                            router.push("/signup");
+                                        }}
+                                        textColor={urlTemplate?.text}
+                                        backgroundColor={urlTemplate?.primary}
+                                    />
+                                </>
                             ) : (
                                 <>
                                     <Button
                                         variant="ghost"
                                         text="Login"
                                         onClick={() => {
+                                            setUrlTemplate(null);
                                             router.push("/login");
                                         }}
                                     />
@@ -194,6 +258,7 @@ const NavBar = () => {
                                         variant="primary"
                                         text="Sign up"
                                         onClick={() => {
+                                            setUrlTemplate(null);
                                             router.push("/signup");
                                         }}
                                     />
@@ -277,6 +342,7 @@ const NavBar = () => {
                                         variant="ghost"
                                         text="Login"
                                         onClick={() => {
+                                            setUrlTemplate(null);
                                             router.push("/login");
                                         }}
                                     />
@@ -284,6 +350,7 @@ const NavBar = () => {
                                         variant="primary"
                                         text="Sign up"
                                         onClick={() => {
+                                            setUrlTemplate(null);
                                             router.push("/signup");
                                         }}
                                     />
