@@ -165,14 +165,12 @@ const Home = () => {
 
     useEffect(() => {
         const refreshUserToken = async () => {
-            setUserDetails(null);
             console.log("Home refreshUserToken", accessToken, !userDetails);
             setIsLoading(true);
-            if (accessToken && !userDetails) {
+            if (accessToken) {
                 setUserDetails(decodeToken(accessToken));
             } else {
                 let res = await refreshToken();
-                setUserDetails(null);
                 if (res === null) {
                     router.push("/");
                 }
