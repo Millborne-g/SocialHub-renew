@@ -155,7 +155,7 @@ const ExternalUrl = (props: {
                     }
                 }}
             >
-                <div className="w-full h-60 sm:h-40 flex items-center justify-center">
+                <div className="w-full h-40 flex items-center justify-center">
                     <img
                         src={getFaviconUrl(props.url)}
                         alt="image"

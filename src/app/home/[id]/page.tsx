@@ -1600,7 +1600,7 @@ const Url = () => {
                     }}
                     content={
                         <div className="flex items-center justify-center flex-col gap-4">
-                            <span className="text-2xl text-center">
+                            <span className="text-2xl text-black text-center">
                                 Are you sure you want to save?
                             </span>
                         </div>
