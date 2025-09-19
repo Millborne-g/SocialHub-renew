@@ -549,6 +549,7 @@ const Url = () => {
                 setEditMode(true);
                 setPreviewMode(false);
                 setTemplate(response.data.url.template);
+                setUrlTemplate(response.data.url.template);
 
                 // Store original values for change detection
                 setOriginalTitle(response.data.url.title);
