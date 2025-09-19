@@ -171,6 +171,7 @@ const Home = () => {
                 setUserDetails(decodeToken(accessToken));
             } else {
                 let res = await refreshToken();
+                setUserDetails(null);
                 if (res === null) {
                     router.push("/");
                 }
