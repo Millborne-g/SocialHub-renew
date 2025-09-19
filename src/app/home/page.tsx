@@ -91,7 +91,7 @@ const Home = () => {
     );
 
     useEffect(() => {
-        if (accessToken) {
+        if (accessToken && userDetails) {
             const fetchUrls = async () => {
                 try {
                     setLoading(true);
@@ -110,7 +110,7 @@ const Home = () => {
             };
             fetchUrls();
         }
-    }, [accessToken, currentPage, pageSize, filter, search, refreshTrigger]);
+    }, [accessToken, currentPage, pageSize, filter, search, refreshTrigger, userDetails]);
 
     const handlePageChange = (newPage: number) => {
         setCurrentPage(newPage);
@@ -184,8 +184,8 @@ const Home = () => {
     }, []);
 
     return (
-        <div className="h-[750px] w-full flex justify-center">
-            <div className="w-full lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem] pt-10 px-3 md:px-0">
+        <div className="sm:h-[750px] w-full flex justify-center">
+            <div className="w-full lg:max-w-[60rem] xl:max-w-[76rem] pt-10 px-3 lg:px-0">
                 <div className="flex flex-col gap-8 h-full ">
                     <div className="flex items-start justify-start sm:justify-between sm:flex-row flex-col md:items-center gap-5">
                         <div className="flex flex-col gap-2">
