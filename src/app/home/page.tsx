@@ -110,7 +110,15 @@ const Home = () => {
             };
             fetchUrls();
         }
-    }, [accessToken, currentPage, pageSize, filter, search, refreshTrigger, userDetails]);
+    }, [
+        accessToken,
+        currentPage,
+        pageSize,
+        filter,
+        search,
+        refreshTrigger,
+        userDetails,
+    ]);
 
     const handlePageChange = (newPage: number) => {
         setCurrentPage(newPage);
@@ -157,11 +165,12 @@ const Home = () => {
 
     useEffect(() => {
         const refreshUserToken = async () => {
-            console.log("Home refreshUserToken");
+            console.log("Home refreshUserToken", accessToken, userDetails);
             setIsLoading(true);
             if (accessToken && !userDetails) {
                 setUserDetails(decodeToken(accessToken));
             } else {
+                setUserDetails(null);
                 let res = await refreshToken();
                 if (res === null) {
                     router.push("/");
@@ -170,7 +179,7 @@ const Home = () => {
             setIsLoading(false);
         };
         refreshUserToken();
-    }, [accessToken, refreshToken]);
+    }, [accessToken, refreshToken, userDetails]);
 
     useEffect(() => {
         setGreeting(
