@@ -39,7 +39,7 @@ const TextField = (props: {
                     className={
                         props.className
                             ? props.className
-                            : `text-black text-base w-full border border-gray-300 rounded-md p-2 peer focus:outline-none focus:border-primary ${
+                            : `text-base w-full border border-gray-300 rounded-md p-2 peer focus:outline-none focus:border-primary ${
                                   props.startIcon
                                       ? "pl-9"
                                       : " placeholder-transparent "
@@ -54,6 +54,9 @@ const TextField = (props: {
                     value={props.value || ""}
                     onChange={props.onChange}
                     id="floating-input"
+                    style={{
+                        color: props.textColor || "#000000",
+                    }}
                 />
                 {/* Start Icon */}
                 {props.startIcon && (
