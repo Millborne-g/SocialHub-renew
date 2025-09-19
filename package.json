@@ -21,6 +21,7 @@
         "@types/qrcode": "^1.5.5",
         "axios": "^1.11.0",
         "cookies": "^0.9.1",
+        "framer-motion": "^12.23.16",
         "googleapis": "^155.0.0",
         "iconsax-reactjs": "^0.0.8",
         "js-cookie": "^3.0.5",

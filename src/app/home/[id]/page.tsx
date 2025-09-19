@@ -1063,6 +1063,9 @@ const Url = () => {
                                                 }
                                             }}
                                             rows={3}
+                                            style={{
+                                                color: template?.text || "#000000",
+                                            }}
                                         />
 
                                         <span
@@ -1607,9 +1610,12 @@ const Url = () => {
             {isLoading && <LoadingScreen />}
         </div>
     ) : (
-        <div className="h-screen w-full flex justify-center items-center">
-            <span className="text-2xl text-center">URL not found</span>
-        </div>
+        <>
+            <div className="h-screen w-full flex justify-center items-center">
+                <span className="text-2xl text-center">URL not found</span>
+            </div>
+            {isLoading && <LoadingScreen />}
+        </>
     );
 };
 

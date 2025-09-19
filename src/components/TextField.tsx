@@ -39,7 +39,7 @@ const TextField = (props: {
                     className={
                         props.className
                             ? props.className
-                            : `text-base w-full border border-gray-300 rounded-md p-2 peer focus:outline-none focus:border-primary ${
+                            : `text-black text-base w-full border border-gray-300 rounded-md p-2 peer focus:outline-none focus:border-primary ${
                                   props.startIcon
                                       ? "pl-9"
                                       : " placeholder-transparent "

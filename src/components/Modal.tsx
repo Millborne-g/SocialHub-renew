@@ -21,7 +21,7 @@ const Modal = (props: {
                 }}
             >
                 <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                    <h2 className="text-xl font-semibold">{props.title}</h2>
+                    <h2 className="text-xl font-semibold text-black">{props.title}</h2>
                     <span
                         className="text-gray-700 hover:text-gray-400 cursor-pointer"
                         onClick={props.onClose}

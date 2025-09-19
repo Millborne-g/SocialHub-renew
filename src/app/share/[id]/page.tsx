@@ -16,6 +16,7 @@ import {
     User,
 } from "iconsax-reactjs";
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import {
     DndContext,
     closestCenter,
@@ -1028,32 +1029,51 @@ const Url = () => {
                                                     (a, b) =>
                                                         a.sequence - b.sequence
                                                 )
-                                                .map((url) => (
-                                                    <ExternalUrl
-                                                        title={url.title}
-                                                        url={url.url}
-                                                        dateTime={
-                                                            url.updatedAt || ""
-                                                        }
+                                                .map((url, index) => (
+                                                    <motion.div
                                                         key={url._id}
-                                                        id={url._id}
-                                                        onDelete={() =>
-                                                            handleDeleteURL(
-                                                                url._id
-                                                            )
-                                                        }
-                                                        onEdit={() =>
-                                                            handleEditURL(
-                                                                url._id
-                                                            )
-                                                        }
-                                                        mode={
-                                                            previewMode
-                                                                ? "preview"
-                                                                : "edit"
-                                                        }
-                                                        template={template}
-                                                    />
+                                                        initial={{
+                                                            opacity: 0,
+                                                            y: 20,
+                                                            scale: 0.9,
+                                                        }}
+                                                        animate={{
+                                                            opacity: 1,
+                                                            y: 0,
+                                                            scale: 1,
+                                                        }}
+                                                        transition={{
+                                                            duration: 0.5,
+                                                            delay: index * 0.3,
+                                                            ease: "easeOut",
+                                                        }}
+                                                    >
+                                                        <ExternalUrl
+                                                            title={url.title}
+                                                            url={url.url}
+                                                            dateTime={
+                                                                url.updatedAt ||
+                                                                ""
+                                                            }
+                                                            id={url._id}
+                                                            onDelete={() =>
+                                                                handleDeleteURL(
+                                                                    url._id
+                                                                )
+                                                            }
+                                                            onEdit={() =>
+                                                                handleEditURL(
+                                                                    url._id
+                                                                )
+                                                            }
+                                                            mode={
+                                                                previewMode
+                                                                    ? "preview"
+                                                                    : "edit"
+                                                            }
+                                                            template={template}
+                                                        />
+                                                    </motion.div>
                                                 ))}
                                             {/* <DragOverlay>
                                         {activeId ? (
