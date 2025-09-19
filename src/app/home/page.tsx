@@ -165,6 +165,7 @@ const Home = () => {
 
     useEffect(() => {
         const refreshUserToken = async () => {
+            setUserDetails(null);
             console.log("Home refreshUserToken", accessToken, !userDetails);
             setIsLoading(true);
             if (accessToken) {
