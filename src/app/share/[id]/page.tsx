@@ -905,7 +905,7 @@ const Url = () => {
                                 {/* ----- share button for large screen ----- */}
                                 {previewMode && (
                                     <div
-                                        className="hidden sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400 text-primary transition-all duration-300 hover:drop-shadow-lg hover:shadow-lg"
+                                        className="hidden px-2 py-1 rounded-2xl sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400 text-primary transition-all duration-300 hover:drop-shadow-lg hover:shadow-lg"
                                         style={{
                                             color:
                                                 template?.accent || "#6b7280",
@@ -938,7 +938,7 @@ const Url = () => {
                                             imagePreview === ""
                                                 ? "-top-10"
                                                 : "top-0"
-                                        }  right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}
+                                        } px-2 py-1 rounded-2xl right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}
                                         style={{
                                             color:
                                                 template?.accent || "#6b7280",
@@ -1075,7 +1075,7 @@ const Url = () => {
                                 onDragStart={handleDragStart}
                             >
                                 {externalURLs.length > 0 ? (
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-2 gap-y-10">
+                                    <div className="grid grid-cols-3 gap-x-2 gap-y-10">
                                         <SortableContext
                                             items={externalURLs
                                                 .sort(
