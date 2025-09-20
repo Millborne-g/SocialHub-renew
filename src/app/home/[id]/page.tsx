@@ -142,6 +142,8 @@ const Url = () => {
 
     // Add ref for the scrollable container
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+    // Add refs for template items to enable scrolling
+    const templateRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
     const [template, setTemplate] = useState<any>(null);
     const [templates, setTemplates] = useState<any[]>([
@@ -1526,6 +1528,63 @@ const Url = () => {
         setTemplate(template);
     };
 
+    // Function to scroll to the selected template
+    const scrollToSelectedTemplate = () => {
+        if (!template) {
+            // If no template is selected, scroll to the default template (first item)
+            const defaultElement = templateRefs.current["default"];
+            if (defaultElement && scrollContainerRef.current) {
+                const containerRect =
+                    scrollContainerRef.current.getBoundingClientRect();
+                const templateRect = defaultElement.getBoundingClientRect();
+
+                const scrollTop =
+                    scrollContainerRef.current.scrollTop +
+                    (templateRect.top - containerRect.top) -
+                    containerRect.height / 2 +
+                    templateRect.height / 2;
+
+                scrollContainerRef.current.scrollTo({
+                    top: Math.max(0, scrollTop),
+                    behavior: "smooth",
+                });
+            } else {
+                scrollContainerRef.current?.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                });
+            }
+            return;
+        }
+
+        const templateElement = templateRefs.current[template.id];
+        if (templateElement && scrollContainerRef.current) {
+            const containerRect =
+                scrollContainerRef.current.getBoundingClientRect();
+            const templateRect = templateElement.getBoundingClientRect();
+
+            // Calculate the position to scroll to center the template in the container
+            const scrollTop =
+                scrollContainerRef.current.scrollTop +
+                (templateRect.top - containerRect.top) -
+                containerRect.height / 2 +
+                templateRect.height / 2;
+
+            scrollContainerRef.current.scrollTo({
+                top: Math.max(0, scrollTop),
+                behavior: "smooth",
+            });
+        }
+    };
+
+    // Auto-scroll to selected template when template changes
+    useEffect(() => {
+        // Small delay to ensure DOM is updated
+        setTimeout(() => {
+            scrollToSelectedTemplate();
+        }, 100);
+    }, [template]);
+
     useEffect(() => {
         const fetchUrl = async () => {
             if (id !== "create") {
@@ -2332,7 +2391,11 @@ const Url = () => {
                                 onDragStart={handleDragStart}
                             >
                                 {externalURLs.length > 0 ? (
-                                    <div className={`grid grid-cols-3 gap-x-2 ${previewMode? "gap-y-4": "gap-y-10"}`}>
+                                    <div
+                                        className={`grid grid-cols-3 gap-x-2 ${
+                                            previewMode ? "gap-y-4" : "gap-y-10"
+                                        }`}
+                                    >
                                         <SortableContext
                                             items={externalURLs
                                                 .sort(
@@ -2599,6 +2662,9 @@ const Url = () => {
                             className="flex flex-col gap-4 overflow-y-auto relative"
                         >
                             <div
+                                ref={(el) => {
+                                    templateRefs.current["default"] = el;
+                                }}
                                 className={`relative rounded-lg shadow-lg p-1 hover:shadow-xl transition-all duration-300 cursor-pointer ${
                                     template ? "bg-white" : "bg-primary"
                                 }`}
@@ -2626,6 +2692,10 @@ const Url = () => {
                             {templates.map((templateItem, index) => (
                                 <div
                                     key={index}
+                                    ref={(el) => {
+                                        templateRefs.current[templateItem.id] =
+                                            el;
+                                    }}
                                     className={`relative rounded-lg shadow-lg p-1 hover:shadow-xl transition-all duration-300 cursor-pointer ${
                                         template
                                             ? template.id === templateItem.id
