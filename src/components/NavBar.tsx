@@ -134,7 +134,10 @@ const NavBar = () => {
                     }}
                 >
                     <div className="flex items-center justify-between w-full lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem] ">
-                        <a href="/" className="flex items-center gap-2">
+                        <a
+                            href={userDetails ? "/home" : "/"}
+                            className="flex items-center gap-2"
+                        >
                             {urlTemplate ? (
                                 <>
                                     <span
@@ -278,7 +281,10 @@ const NavBar = () => {
                     } ${userDetails ? "sticky top-0" : "fixed"}`}
                 >
                     <div className="flex items-center justify-between w-full lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem] ">
-                        <a href="/" className="flex items-center gap-2">
+                        <a
+                            href={userDetails ? "/home" : "/"}
+                            className="flex items-center gap-2"
+                        >
                             {/* <Image src={logo} alt="logo" /> */}
                             {/* <span className="text-xl font-bold font-display">
                                 SocialHub
