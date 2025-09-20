@@ -97,7 +97,8 @@ export async function PUT(
         const image = formData.get("image") as File | null | string;
         const externalURLs = formData.get("externalURLs") as string;
         const template = formData.get("template") as any;
-
+        const userAlias = formData.get("userAlias") as string;
+        const userAliasImage = formData.get("userAliasImage") as File | null;
         // Validate required fields
         if (!title || title.trim() === "") {
             return NextResponse.json(
@@ -156,6 +157,61 @@ export async function PUT(
             }
         }
 
+        // Handle userAlias image upload
+        let userAliasImageUrl = "";
+        if (userAliasImage && userAliasImage instanceof File) {
+            // Validate file size (MongoDB document limit is 16MB, but we'll be conservative)
+            const maxSize = 10 * 1024 * 1024; // 10MB limit
+            if (userAliasImage.size > maxSize) {
+                return NextResponse.json(
+                    {
+                        error: "User alias image size too large. Maximum size is 10MB.",
+                    },
+                    { status: 400 }
+                );
+            }
+
+            // Validate file type
+            const allowedTypes = [
+                "image/jpeg",
+                "image/png",
+                "image/gif",
+                "image/webp",
+            ];
+            if (!allowedTypes.includes(userAliasImage.type)) {
+                return NextResponse.json(
+                    {
+                        error: "Invalid user alias image type. Only JPEG, PNG, GIF, and WebP are allowed.",
+                    },
+                    { status: 400 }
+                );
+            }
+
+            try {
+                // Convert to base64 and store as string
+                const bytes = await userAliasImage.arrayBuffer();
+                const buffer = Buffer.from(bytes);
+                const base64 = `data:${
+                    userAliasImage.type
+                };base64,${buffer.toString("base64")}`;
+                userAliasImageUrl = base64;
+            } catch (error) {
+                console.error("Error processing user alias image:", error);
+                return NextResponse.json(
+                    {
+                        error: "Failed to process user alias image. Please try again.",
+                    },
+                    { status: 500 }
+                );
+            }
+        }
+
+        // Parse userAlias and update with processed image
+        const userAliasData = JSON.parse(userAlias);
+        if (userAliasImageUrl) {
+            userAliasData.imageFile = userAliasImageUrl;
+        }
+
         // Update the URL
         const updatedUrl = await Url.findByIdAndUpdate(
             id,
@@ -165,6 +221,7 @@ export async function PUT(
                 image: imageUrl,
                 public: isPublic === "true",
                 template: JSON.parse(template),
+                userAlias: userAliasData,
                 updatedAt: new Date(),
             },
             { new: true, runValidators: true }

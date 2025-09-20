@@ -26,7 +26,7 @@ const Footer = () => {
                     color: urlTemplate?.text || "#929292",
                 }}
             >
-                © {new Date().getFullYear()} SocialHub |{" "}
+                © {new Date().getFullYear()} LinkLET |{" "}
                 <a
                     href="https://millborneportfolio.vercel.app/"
                     onMouseEnter={() => setIsHovered(true)}

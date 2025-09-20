@@ -12,6 +12,8 @@ import {
     Check,
     CloseCircle,
     Edit,
+    Link,
+    Link21,
     Magicpen,
     Save2,
     Share,
@@ -59,6 +61,14 @@ const Url = () => {
     const { setUrlPreviewMode, setUrlTemplate } = useUrlStore();
     const [userDetails, setUserDetails] = useState<any>(null);
 
+    const [userAlias, setUserAlias] = useState<{
+        name: string;
+        image: string;
+        imageFile: File | null;
+    } | null>(null);
+
+    const [userAliasEdit, setUserAliasEdit] = useState(false);
+
     const [isFromUser, setIsFromUser] = useState<boolean>(false);
 
     const [title, setTitle] = useState("");
@@ -93,6 +103,7 @@ const Url = () => {
     const [originalIsPrivate, setOriginalIsPrivate] = useState(false);
     const [originalExternalURLs, setOriginalExternalURLs] = useState<any[]>([]);
     const [originalTemplate, setOriginalTemplate] = useState<any>(null);
+    const [originalUserAlias, setOriginalUserAlias] = useState<any>(null);
     // Dropdown state for title suggestions
     const [showTitleDropdown, setShowTitleDropdown] = useState(false);
     const [generatedTitles, setGeneratedTitles] = useState<string[]>([]);
@@ -174,11 +185,13 @@ const Url = () => {
     const hasChanges = () => {
         if (id === "create") {
             // For new items, check if any field has content
+
             return (
                 title.trim() !== "" ||
                 description.trim() !== "" ||
                 image !== null ||
-                externalURLs.length > 0
+                externalURLs.length > 0 ||
+                userAlias !== null
             );
         }
 
@@ -188,6 +201,9 @@ const Url = () => {
         const imageChanged = image !== originalImage;
         const privacyChanged = isPrivate !== originalIsPrivate;
         const templateChanged = template !== originalTemplate;
+        const userAliasChanged =
+            JSON.stringify(originalUserAlias) !== JSON.stringify(userAlias);
+            
         // Check if external URLs have changed (length, content, or order)
         const urlsChanged =
             externalURLs.length !== originalExternalURLs.length ||
@@ -207,6 +223,7 @@ const Url = () => {
             imageChanged ||
             privacyChanged ||
             templateChanged ||
+            userAliasChanged ||
             urlsChanged
         );
     };
@@ -323,10 +340,16 @@ const Url = () => {
                 formData.append("externalURLs", JSON.stringify(externalURLs));
                 formData.append("public", (!isPrivate).toString());
                 formData.append("template", JSON.stringify(template));
+                formData.append("userAlias", JSON.stringify(userAlias));
 
                 // If image is a base64 string, convert it back to a file
                 if (image) {
                     formData.append("image", image);
+                }
+
+                // If userAlias has an imageFile, append it as userAliasImage
+                if (userAlias?.imageFile) {
+                    formData.append("userAliasImage", userAlias.imageFile);
                 }
 
                 const response = await api.post(`/api/url`, formData, {
@@ -344,7 +367,7 @@ const Url = () => {
                 setOriginalIsPrivate(isPrivate);
                 setOriginalExternalURLs([...externalURLs]);
                 setOriginalTemplate(template);
-
+                setOriginalUserAlias(userAlias);
                 router.push(`${response.data._id}`);
                 setIsSaving(false);
                 setUrlPreviewMode(false);
@@ -376,7 +399,7 @@ const Url = () => {
             formData.append("externalURLs", JSON.stringify(externalURLs));
             formData.append("public", (!isPrivate).toString());
             formData.append("template", JSON.stringify(template));
-
+            formData.append("userAlias", JSON.stringify(userAlias));
             // If image is a base64 string, convert it back to a file
             if (image) {
                 formData.append("image", image);
@@ -384,6 +407,10 @@ const Url = () => {
                 if (image === null) {
                     formData.append("image", null as any);
                 }
+            }
+
+            if (userAlias?.imageFile) {
+                formData.append("userAliasImage", userAlias.imageFile);
             }
 
             const response = await api.put(`/api/url/${id}`, formData, {
@@ -402,6 +429,7 @@ const Url = () => {
             setOriginalIsPrivate(isPrivate);
             setOriginalExternalURLs([...externalURLs]);
             setOriginalTemplate(template);
+            setOriginalUserAlias(userAlias);
             setIsSaving(false);
             setUrlPreviewMode(false);
             setPreviewMode(false);
@@ -555,6 +583,15 @@ const Url = () => {
                 setPreviewMode(false);
                 setTemplate(response.data.url.template);
                 setUrlTemplate(response.data.url.template);
+                console.log(response.data.url.userAlias);
+
+                if (response.data.url.userAlias) {
+                    setUserAlias({
+                        name: response.data.url.userAlias.name,
+                        image: response.data.url.userAlias.imageFile,
+                        imageFile: response.data.url.userAlias.imageFile,
+                    });
+                }
 
                 // Store original values for change detection
                 setOriginalTitle(response.data.url.title);
@@ -563,6 +600,13 @@ const Url = () => {
                 setOriginalIsPrivate(!response.data.url.public);
                 setOriginalExternalURLs(response.data.externalUrls);
                 setOriginalTemplate(response.data.url.template);
+                if (response.data.url.userAlias) {
+                    setOriginalUserAlias({
+                        name: response.data.url.userAlias.name,
+                        image: response.data.url.userAlias.imageFile,
+                        imageFile: response.data.url.userAlias.imageFile,
+                    });
+                }
                 if (response.data.url.userId === userDetails?.user?.id) {
                     setIsFromUser(true);
                 }
@@ -581,6 +625,7 @@ const Url = () => {
                 setOriginalIsPrivate(false);
                 setOriginalExternalURLs([]);
                 setOriginalTemplate(null);
+                setUserAlias(null);
             }
             setIsLoading(false);
         };
@@ -976,34 +1021,102 @@ const Url = () => {
                                                 </>
                                             )}
                                         </div>
-                                        <div className="flex items-center gap-1 sm:justify-start justify-center">
-                                            {userDetails?.user?.userImage ? (
-                                                <img
-                                                    src={
-                                                        userDetails?.user
-                                                            ?.userImage
+                                        <div className="flex items-center sm:justify-start justify-center gap-4">
+                                            <div className="flex items-center gap-1">
+                                                {userAlias && !userAliasEdit ? (
+                                                    <>
+                                                        {userAlias.image !==
+                                                        "" ? (
+                                                            <img
+                                                                src={
+                                                                    userAlias?.image
+                                                                }
+                                                                alt="user image"
+                                                                className="w-4 h-4 rounded-full"
+                                                                width={16}
+                                                                height={16}
+                                                            />
+                                                        ) : (
+                                                            <div className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">
+                                                                <User className="w-3 h-3 text-gray-500" />
+                                                            </div>
+                                                        )}
+                                                        <span
+                                                            className="text-sm"
+                                                            style={{
+                                                                color:
+                                                                    template?.secondary ||
+                                                                    "#111827",
+                                                            }}
+                                                        >
+                                                            {userAlias?.name}
+                                                        </span>
+
+                                                        {!previewMode && (
+                                                            <span
+                                                                className="text-gray-700 hover:text-gray-400 cursor-pointer text-sm"
+                                                                onClick={() =>
+                                                                    setUserAlias(
+                                                                        null
+                                                                    )
+                                                                }
+                                                            >
+                                                                <CloseCircle />
+                                                            </span>
+                                                        )}
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {userDetails?.user
+                                                            ?.userImage ? (
+                                                            <img
+                                                                src={
+                                                                    userDetails
+                                                                        ?.user
+                                                                        ?.userImage
+                                                                }
+                                                                alt="user image"
+                                                                className="w-4 h-4 rounded-full"
+                                                                width={16}
+                                                                height={16}
+                                                            />
+                                                        ) : (
+                                                            <div className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">
+                                                                <User className="w-3 h-3 text-gray-500" />
+                                                            </div>
+                                                        )}
+                                                        <span
+                                                            className="text-sm"
+                                                            style={{
+                                                                color:
+                                                                    template?.secondary ||
+                                                                    "#111827",
+                                                            }}
+                                                        >
+                                                            {
+                                                                userDetails
+                                                                    ?.user
+                                                                    ?.firstName
+                                                            }{" "}
+                                                            {
+                                                                userDetails
+                                                                    ?.user
+                                                                    ?.lastName
+                                                            }
+                                                        </span>
+                                                    </>
+                                                )}
+                                            </div>
+                                            {!previewMode && (
+                                                <span
+                                                    className="text-gray-700 hover:text-gray-400 cursor-pointer text-sm"
+                                                    onClick={() =>
+                                                        setUserAliasEdit(true)
                                                     }
-                                                    alt="user image"
-                                                    className="w-4 h-4 rounded-full"
-                                                    width={16}
-                                                    height={16}
-                                                />
-                                            ) : (
-                                                <div className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">
-                                                    <User className="w-3 h-3 text-gray-500" />
-                                                </div>
+                                                >
+                                                    <Edit />
+                                                </span>
                                             )}
-                                            <span
-                                                className="text-sm"
-                                                style={{
-                                                    color:
-                                                        template?.secondary ||
-                                                        "#111827",
-                                                }}
-                                            >
-                                                {userDetails?.user?.firstName}{" "}
-                                                {userDetails?.user?.lastName}
-                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -1413,7 +1526,7 @@ const Url = () => {
                             </div>
 
                             <div className="flex justify-start gap-2 y cursor-pointer hover:text-gray-400">
-                                <div className="flex items-center">
+                                <div className="flex items-center gap-4">
                                     <div className="flex items-center">
                                         <input
                                             type="checkbox"
@@ -1428,6 +1541,21 @@ const Url = () => {
                                             Make Public
                                         </label>
                                     </div>
+                                    {!isPrivate && (
+                                        <div className="flex items-center">
+                                            <span
+                                                className="text-sm flex items-center gap-1 underline text-gray-500 hover:text-primary cursor-pointer"
+                                                onClick={() => {
+                                                    window.open(
+                                                        `/share/${id}`,
+                                                        "_blank"
+                                                    );
+                                                }}
+                                            >
+                                                Visit <Link21 />
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -1639,6 +1767,102 @@ const Url = () => {
                                 type="text"
                                 value={newUrlTitle}
                                 onChange={(e) => setNewUrlTitle(e.target.value)}
+                            />
+                        </div>
+                    }
+                />
+            )}
+
+            {/* user alias modal */}
+            {userAliasEdit && (
+                <Modal
+                    title="User Alias"
+                    onClose={() => setUserAliasEdit(false)}
+                    onSave={() => {
+                        if (userAlias?.name && userAlias.name.length >= 5) {
+                            setUserAliasEdit(false);
+                        } else {
+                            toast.error("Name must be at least 5 characters");
+                        }
+                    }}
+                    content={
+                        <div className="flex flex-col gap-4">
+                            <div className="flex items-center justify-center">
+                                <div className="relative w-15 h-15">
+                                    <input
+                                        id="userAliasImageInput"
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden w-full shadow-sm rounded-md px-2 hover:cursor-pointer hover:color-primary"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                // Create a preview URL for the image
+                                                const imageUrl =
+                                                    URL.createObjectURL(file);
+                                                setUserAlias({
+                                                    name: userAlias?.name || "",
+                                                    image: imageUrl,
+                                                    imageFile: file,
+                                                });
+                                            }
+                                        }}
+                                    />
+                                    {userAlias?.image ? (
+                                        <div className="w-15 h-15 rounded-full">
+                                            <img
+                                                src={userAlias?.image}
+                                                alt="User Alias"
+                                                className="w-full h-full object-cover rounded-full"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="flex justify-center items-center relative">
+                                            <div className="w-15 h-15 rounded-full bg-gray-200 flex items-center justify-center">
+                                                <User className="w-8 h-8 text-gray-500" />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div
+                                        className="absolute -top-5 -right-2 rounded-full bg-white group hover:bg-gray-200 cursor-pointer shadow-md h-9 w-9 text-center flex justify-center items-center"
+                                        onClick={() => {
+                                            if (userAlias?.image) {
+                                                setUserAlias({
+                                                    name: userAlias?.name || "",
+                                                    image: "",
+                                                    imageFile: null,
+                                                });
+                                            } else {
+                                                document
+                                                    .getElementById(
+                                                        "userAliasImageInput"
+                                                    )
+                                                    ?.click();
+                                            }
+                                        }}
+                                    >
+                                        <span className="text-xs text-gray-800">
+                                            {userAlias?.image ? (
+                                                <CloseCircle />
+                                            ) : (
+                                                <Edit />
+                                            )}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <TextField
+                                placeholder="User Alias"
+                                type="text"
+                                value={userAlias?.name}
+                                onChange={(e) =>
+                                    setUserAlias({
+                                        name: e.target.value,
+                                        image: userAlias?.image || "",
+                                        imageFile: userAlias?.imageFile || null,
+                                    })
+                                }
                             />
                         </div>
                     }

@@ -90,7 +90,7 @@ const ExternalUrl = (props: {
                 }}
                 style={{
                     background: props.template?.background
-                        ? `color-mix(in srgb, ${props.template.background} 80%, white 20%)`
+                        ? `color-mix(in srgb, ${props.template.background} 90%, white 10%)`
                         : undefined,
                     // backgroundImage:
                     //     props.template?.background && props.mode !== "edit"
@@ -99,8 +99,12 @@ const ExternalUrl = (props: {
                     //         ${props.template.secondary || "#ffffff"}10,
                     //         ${props.template.accent || "#f0f0f0"}15)`
                     //         : undefined,
-                    backgroundSize: props.template?.background ? "200% 200%" : undefined,
-                    backgroundPosition: props.template?.background ? "0% 0%" : undefined,
+                    backgroundSize: props.template?.background
+                        ? "200% 200%"
+                        : undefined,
+                    backgroundPosition: props.template?.background
+                        ? "0% 0%"
+                        : undefined,
                     transition:
                         "all 0.5s ease-in-out, background-position 0.8s ease-in-out, filter 0.3s ease-in-out",
                 }}
@@ -138,10 +142,9 @@ const ExternalUrl = (props: {
                             props.template?.background &&
                             props.mode !== "edit"
                         ) {
-                            
-                            e.currentTarget.style.background = props
-                                .template?.background
-                                ? `color-mix(in srgb, ${props.template.background} 80%, white 20%)`
+                            e.currentTarget.style.background = props.template
+                                ?.background
+                                ? `color-mix(in srgb, ${props.template.background} 90%, white 10%)`
                                 : "";
                             // e.currentTarget.style.backgroundImage = `linear-gradient(135deg,
                             //     ${props.template.primary || "#0066ff"}20,
@@ -159,11 +162,12 @@ const ExternalUrl = (props: {
                     <img
                         src={getFaviconUrl(props.url)}
                         alt="image"
-                        className={`w-full h-full object-cover ${
-                            props.template?.background
-                                ? "group-hover:scale-95 transition-all duration-300 group-hover:rounded-lg "
-                                : "group-hover:scale-95 transition-all duration-300 group-hover:rounded-lg "
-                        }`}
+                        className="w-full h-full object-cover group-hover:scale-95 transition-all duration-300 group-hover:rounded-lg"
+                        style={{
+                            backgroundColor: props.template?.background
+                                ? `color-mix(in srgb, ${props.template.background} 80%, white 20%)`
+                                : undefined,
+                        }}
                     />
                 </div>
                 <div

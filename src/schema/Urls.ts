@@ -35,6 +35,10 @@ const urlSchema = new mongoose.Schema({
         type: Object,
         default: null,
     },
+    userAlias: {
+        type: Object,
+        default: null,
+    },
 });
 
 // Clear existing model to force schema update
