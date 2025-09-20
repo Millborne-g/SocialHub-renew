@@ -67,6 +67,12 @@ const Url = () => {
         imageFile: File | null;
     } | null>(null);
 
+    const [userAliasOnEdit, setUserAliasOnEdit] = useState<{
+        name: string;
+        image: string;
+        imageFile: File | null;
+    } | null>(null);
+
     const [userAliasEdit, setUserAliasEdit] = useState(false);
 
     const [isFromUser, setIsFromUser] = useState<boolean>(false);
@@ -203,7 +209,7 @@ const Url = () => {
         const templateChanged = template !== originalTemplate;
         const userAliasChanged =
             JSON.stringify(originalUserAlias) !== JSON.stringify(userAlias);
-            
+
         // Check if external URLs have changed (length, content, or order)
         const urlsChanged =
             externalURLs.length !== originalExternalURLs.length ||
@@ -1023,7 +1029,7 @@ const Url = () => {
                                         </div>
                                         <div className="flex items-center sm:justify-start justify-center gap-4">
                                             <div className="flex items-center gap-1">
-                                                {userAlias && !userAliasEdit ? (
+                                                {userAlias ? (
                                                     <>
                                                         {userAlias.image !==
                                                         "" ? (
@@ -1541,7 +1547,7 @@ const Url = () => {
                                             Make Public
                                         </label>
                                     </div>
-                                    {!isPrivate && (
+                                    {!isPrivate && !hasChanges() && (
                                         <div className="flex items-center">
                                             <span
                                                 className="text-sm flex items-center gap-1 underline text-gray-500 hover:text-primary cursor-pointer"
@@ -1777,9 +1783,20 @@ const Url = () => {
             {userAliasEdit && (
                 <Modal
                     title="User Alias"
-                    onClose={() => setUserAliasEdit(false)}
+                    onClose={() => {
+                        setUserAliasOnEdit({
+                            name: "",
+                            image: "",
+                            imageFile: null,
+                        });
+                        setUserAliasEdit(false);
+                    }}
                     onSave={() => {
-                        if (userAlias?.name && userAlias.name.length >= 5) {
+                        if (
+                            userAliasOnEdit?.name &&
+                            userAliasOnEdit.name.length >= 5
+                        ) {
+                            setUserAlias(userAliasOnEdit);
                             setUserAliasEdit(false);
                         } else {
                             toast.error("Name must be at least 5 characters");
@@ -1800,18 +1817,20 @@ const Url = () => {
                                                 // Create a preview URL for the image
                                                 const imageUrl =
                                                     URL.createObjectURL(file);
-                                                setUserAlias({
-                                                    name: userAlias?.name || "",
+                                                setUserAliasOnEdit({
+                                                    name:
+                                                        userAliasOnEdit?.name ||
+                                                        "",
                                                     image: imageUrl,
                                                     imageFile: file,
                                                 });
                                             }
                                         }}
                                     />
-                                    {userAlias?.image ? (
+                                    {userAliasOnEdit?.image ? (
                                         <div className="w-15 h-15 rounded-full">
                                             <img
-                                                src={userAlias?.image}
+                                                src={userAliasOnEdit?.image}
                                                 alt="User Alias"
                                                 className="w-full h-full object-cover rounded-full"
                                             />
@@ -1827,9 +1846,11 @@ const Url = () => {
                                     <div
                                         className="absolute -top-5 -right-2 rounded-full bg-white group hover:bg-gray-200 cursor-pointer shadow-md h-9 w-9 text-center flex justify-center items-center"
                                         onClick={() => {
-                                            if (userAlias?.image) {
-                                                setUserAlias({
-                                                    name: userAlias?.name || "",
+                                            if (userAliasOnEdit?.image) {
+                                                setUserAliasOnEdit({
+                                                    name:
+                                                        userAliasOnEdit?.name ||
+                                                        "",
                                                     image: "",
                                                     imageFile: null,
                                                 });
@@ -1843,7 +1864,7 @@ const Url = () => {
                                         }}
                                     >
                                         <span className="text-xs text-gray-800">
-                                            {userAlias?.image ? (
+                                            {userAliasOnEdit?.image ? (
                                                 <CloseCircle />
                                             ) : (
                                                 <Edit />
@@ -1855,12 +1876,13 @@ const Url = () => {
                             <TextField
                                 placeholder="User Alias"
                                 type="text"
-                                value={userAlias?.name}
+                                value={userAliasOnEdit?.name}
                                 onChange={(e) =>
-                                    setUserAlias({
+                                    setUserAliasOnEdit({
                                         name: e.target.value,
-                                        image: userAlias?.image || "",
-                                        imageFile: userAlias?.imageFile || null,
+                                        image: userAliasOnEdit?.image || "",
+                                        imageFile:
+                                            userAliasOnEdit?.imageFile || null,
                                     })
                                 }
                             />

@@ -99,6 +99,11 @@ const Url = () => {
     const { accessToken, refreshToken } = useAuthStore();
     const { setUrlPreviewMode, setUrlTemplate } = useUrlStore();
     const [userDetails, setUserDetails] = useState<any>(null);
+    const [userAlias, setUserAlias] = useState<{
+        name: string;
+        image: string;
+        imageFile: File | null;
+    } | null>(null);
 
     const [isFromUser, setIsFromUser] = useState<boolean>(false);
 
@@ -538,7 +543,13 @@ const Url = () => {
                     setPreviewMode(true);
                     setTemplate(response.data.url.template);
                     setUrlTemplate(response.data.url.template);
-
+                    if (response.data.url.userAlias) {
+                        setUserAlias({
+                            name: response.data.url.userAlias.name,
+                            image: response.data.url.userAlias.imageFile,
+                            imageFile: response.data.url.userAlias.imageFile,
+                        });
+                    }
                     // Store original values for change detection
                     setOriginalTitle(response.data.url.title);
                     setOriginalDescription(response.data.url.description);
@@ -810,29 +821,81 @@ const Url = () => {
                                             )}
                                         </div>
                                         <div className="flex items-center gap-1 sm:justify-start justify-center">
-                                            {createdBy?.userImage ? (
-                                                <img
-                                                    src={createdBy?.userImage}
-                                                    alt="user image"
-                                                    className="w-4 h-4 rounded-full"
-                                                    width={16}
-                                                    height={16}
-                                                />
-                                            ) : (
-                                                <div className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">
-                                                    <User className="w-3 h-3 text-gray-500" />
-                                                </div>
-                                            )}
-                                            <span
-                                                className="text-sm"
-                                                style={{
-                                                    color:
-                                                        template?.secondary ||
-                                                        "#111827",
-                                                }}
-                                            >
-                                                {createdBy?.fullName}
-                                            </span>
+                                            <div className="flex items-center gap-1">
+                                                {userAlias ? (
+                                                    <>
+                                                        {userAlias.image !==
+                                                        "" ? (
+                                                            <img
+                                                                src={
+                                                                    userAlias?.image
+                                                                }
+                                                                alt="user image"
+                                                                className="w-4 h-4 rounded-full"
+                                                                width={16}
+                                                                height={16}
+                                                            />
+                                                        ) : (
+                                                            <div className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">
+                                                                <User className="w-3 h-3 text-gray-500" />
+                                                            </div>
+                                                        )}
+                                                        <span
+                                                            className="text-sm"
+                                                            style={{
+                                                                color:
+                                                                    template?.secondary ||
+                                                                    "#111827",
+                                                            }}
+                                                        >
+                                                            {userAlias?.name}
+                                                        </span>
+
+                                                        {!previewMode && (
+                                                            <span
+                                                                className="text-gray-700 hover:text-gray-400 cursor-pointer text-sm"
+                                                                onClick={() =>
+                                                                    setUserAlias(
+                                                                        null
+                                                                    )
+                                                                }
+                                                            >
+                                                                <CloseCircle />
+                                                            </span>
+                                                        )}
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {createdBy?.userImage ? (
+                                                            <img
+                                                                src={
+                                                                    createdBy?.userImage
+                                                                }
+                                                                alt="user image"
+                                                                className="w-4 h-4 rounded-full"
+                                                                width={16}
+                                                                height={16}
+                                                            />
+                                                        ) : (
+                                                            <div className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">
+                                                                <User className="w-3 h-3 text-gray-500" />
+                                                            </div>
+                                                        )}
+                                                        <span
+                                                            className="text-sm"
+                                                            style={{
+                                                                color:
+                                                                    template?.secondary ||
+                                                                    "#111827",
+                                                            }}
+                                                        >
+                                                            {
+                                                                createdBy?.fullName
+                                                            }
+                                                        </span>
+                                                    </>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
