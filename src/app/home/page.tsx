@@ -170,10 +170,10 @@ const Home = () => {
             if (accessToken) {
                 setUserDetails(decodeToken(accessToken));
             } else {
-                let res = await refreshToken();
-                if (res === null) {
-                    router.push("/");
-                }
+                // let res = await refreshToken();
+                // if (res === null) {
+                //     router.push("/");
+                // }
             }
             setIsLoading(false);
         };
