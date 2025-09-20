@@ -1013,7 +1013,7 @@ const Url = () => {
             accent: "#E0BBE4",
         },
         {
-            id: "112",
+            id: "11832",
             name: "BlackPlanet",
             background: "#000000",
             text: "#FFFFFF",
@@ -1040,7 +1040,7 @@ const Url = () => {
             accent: "#888888",
         },
         {
-            id: "115",
+            id: "1152124",
             name: "Xanga",
             background: "#FDFDFD",
             text: "#222222",
@@ -1050,7 +1050,7 @@ const Url = () => {
         },
         {
             id: "111",
-            name: "Gaia Online",
+            name: "Gaia Online 2",
             background: "#FFFFFF",
             text: "#222222",
             primary: "#6A5ACD",
@@ -1067,7 +1067,7 @@ const Url = () => {
             accent: "#FF6600",
         },
         {
-            id: "113",
+            id: "113321",
             name: "Kik",
             background: "#FFFFFF",
             text: "#000000",
@@ -1076,7 +1076,7 @@ const Url = () => {
             accent: "#6B6B6B",
         },
         {
-            id: "114",
+            id: "12314",
             name: "ICQ",
             background: "#FFFFFF",
             text: "#111111",
@@ -2536,7 +2536,7 @@ const Url = () => {
                             >
                                 {externalURLs.length > 0 ? (
                                     <div
-                                        className={`grid grid-cols-3 gap-x-2 ${
+                                        className={`grid grid-cols-2 sm:grid-cols-3 gap-x-2 ${
                                             previewMode ? "gap-y-4" : "gap-y-10"
                                         }`}
                                     >
