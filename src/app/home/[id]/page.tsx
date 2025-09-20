@@ -9,6 +9,8 @@ import {
     ArrowLeft2,
     ArrowRight2,
     ArrowRotateRight,
+    ArrowUp,
+    ArrowUp2,
     Check,
     CloseCircle,
     Edit,
@@ -20,7 +22,7 @@ import {
     Trash,
     User,
 } from "iconsax-reactjs";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
     DndContext,
     closestCenter,
@@ -138,6 +140,9 @@ const Url = () => {
 
     const [isLoading, setIsLoading] = useState(false);
 
+    // Add ref for the scrollable container
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+
     const [template, setTemplate] = useState<any>(null);
     const [templates, setTemplates] = useState<any[]>([
         {
@@ -156,16 +161,16 @@ const Url = () => {
             text: "#1C1E21",
             primary: "#1877F2",
             secondary: "#5795F7",
-            accent: "#3B5998",
+            accent: "#00B4FF",
         },
         {
             id: "3",
             name: "Instagram",
-            background: "#FFFFFF",
-            text: "#000000",
-            primary: "#C32AA3",
-            secondary: "#D666C1",
-            accent: "#8A3AB9",
+            background: "#121212",
+            text: "#FFFFFF",
+            primary: "#833AB4",
+            secondary: "#C13584",
+            accent: "#FCAF45",
         },
         {
             id: "4",
@@ -174,7 +179,7 @@ const Url = () => {
             text: "#FFFFFF",
             primary: "#1DA1F2",
             secondary: "#5A9AC2",
-            accent: "#AAB8C2",
+            accent: "#4DFFFF",
         },
         {
             id: "5",
@@ -183,7 +188,7 @@ const Url = () => {
             text: "#282828",
             primary: "#FF0000",
             secondary: "#FF5252",
-            accent: "#282828",
+            accent: "#FFA07A",
         },
         {
             id: "6",
@@ -192,25 +197,7 @@ const Url = () => {
             text: "#111111",
             primary: "#E60023",
             secondary: "#FF3352",
-            accent: "#BD081C",
-        },
-        {
-            id: "7",
-            name: "LinkedIn",
-            background: "#FFFFFF",
-            text: "#000000",
-            primary: "#0077B5",
-            secondary: "#3392D6",
-            accent: "#0A66C2",
-        },
-        {
-            id: "8",
-            name: "Reddit",
-            background: "#FFFFFF",
-            text: "#1A1A1B",
-            primary: "#FF4500",
-            secondary: "#FF6B33",
-            accent: "#336699",
+            accent: "#FF4D94",
         },
         {
             id: "10",
@@ -219,9 +206,940 @@ const Url = () => {
             text: "#FFFFFF",
             primary: "#00B8FF",
             secondary: "#4DD0FF",
-            accent: "#4A154B",
+            accent: "#FFC0CB",
+        },
+        {
+            id: "11",
+            name: "Discord",
+            background: "#36393F",
+            text: "#FFFFFF",
+            primary: "#7289DA",
+            secondary: "#99AAB5",
+            accent: "#FFC0CB",
+        },
+        {
+            id: "12",
+            name: "Snapchat",
+            background: "#000000",
+            text: "#FFFFFF",
+            primary: "#FFFC00",
+            secondary: "#FFE933",
+            accent: "#33B5E5",
+        },
+        {
+            id: "13",
+            name: "WhatsApp",
+            background: "#FFFFFF",
+            text: "#000000",
+            primary: "#25D366",
+            secondary: "#128C7E",
+            accent: "#66DDAA",
+        },
+        {
+            id: "14",
+            name: "Telegram",
+            background: "#FFFFFF",
+            text: "#000000",
+            primary: "#0088CC",
+            secondary: "#2AABEE",
+            accent: "#6FB3D6",
+        },
+        {
+            id: "15",
+            name: "Twitch",
+            background: "#18181B",
+            text: "#FFFFFF",
+            primary: "#9146FF",
+            secondary: "#A970FF",
+            accent: "#EFEFF1",
+        },
+        {
+            id: "16",
+            name: "Spotify",
+            background: "#191414",
+            text: "#FFFFFF",
+            primary: "#1DB954",
+            secondary: "#1ED760",
+            accent: "#FFFFFF",
+        },
+        {
+            id: "17",
+            name: "Medium",
+            background: "#12100E",
+            text: "#FFFFFF",
+            primary: "#02B875",
+            secondary: "#00AB6B",
+            accent: "#FFFFFF",
+        },
+        {
+            id: "18",
+            name: "Quora",
+            background: "#FFFFFF",
+            text: "#1A1A1B",
+            primary: "#B92B27",
+            secondary: "#E06D6A",
+            accent: "#2B6DAD",
+        },
+        {
+            id: "19",
+            name: "Vimeo",
+            background: "#162221",
+            text: "#FFFFFF",
+            primary: "#1AB7EA",
+            secondary: "#57CFF5",
+            accent: "#FFFFFF",
+        },
+        {
+            id: "20",
+            name: "Flickr",
+            background: "#FFFFFF",
+            text: "#000000",
+            primary: "#F40083",
+            secondary: "#FF1981",
+            accent: "#006ADD",
+        },
+        {
+            id: "21",
+            name: "SoundCloud",
+            background: "#FFFFFF",
+            text: "#1A1A1A",
+            primary: "#FF5500",
+            secondary: "#FF7700",
+            accent: "#FFD9B3",
+        },
+        {
+            id: "22",
+            name: "Etsy",
+            background: "#FDF9F3",
+            text: "#222222",
+            primary: "#F16521",
+            secondary: "#E54F1C",
+            accent: "#C9D5CD",
+        },
+        {
+            id: "23",
+            name: "Behance",
+            background: "#FFFFFF",
+            text: "#191919",
+            primary: "#0057FF",
+            secondary: "#006CFF",
+            accent: "#A3A3A3",
+        },
+        {
+            id: "24",
+            name: "Dribbble",
+            background: "#F4F6F9",
+            text: "#292929",
+            primary: "#EA4C89",
+            secondary: "#EB6397",
+            accent: "#C2C4C6",
+        },
+        {
+            id: "25",
+            name: "DeviantArt",
+            background: "#141C1E",
+            text: "#E5E5E5",
+            primary: "#05CC47",
+            secondary: "#00B239",
+            accent: "#4D5B61",
+        },
+        {
+            id: "26",
+            name: "Fiverr",
+            background: "#FFFFFF",
+            text: "#404145",
+            primary: "#1DBF73",
+            secondary: "#2CDA86",
+            accent: "#CCCCCC",
+        },
+        {
+            id: "27",
+            name: "Upwork",
+            background: "#F1F2F4",
+            text: "#1A1A1A",
+            primary: "#6ACA26",
+            secondary: "#80D94A",
+            accent: "#CCCCCC",
+        },
+        {
+            id: "28",
+            name: "CodePen",
+            background: "#293238",
+            text: "#E9F1F6",
+            primary: "#48A3C5",
+            secondary: "#63BEDE",
+            accent: "#20252B",
+        },
+        {
+            id: "29",
+            name: "GitHub",
+            background: "#FFFFFF",
+            text: "#24292E",
+            primary: "#24292E",
+            secondary: "#444D56",
+            accent: "#6A737D",
+        },
+        {
+            id: "30",
+            name: "Stack Overflow",
+            background: "#FFFFFF",
+            text: "#232629",
+            primary: "#F48024",
+            secondary: "#F7A859",
+            accent: "#B3B3B3",
+        },
+        {
+            id: "31",
+            name: "Wikipedia",
+            background: "#FFFFFF",
+            text: "#000000",
+            primary: "#4C84C3",
+            secondary: "#6FAEDF",
+            accent: "#A9C1DC",
+        },
+        {
+            id: "42",
+            name: "Product Hunt",
+            background: "#FFFFFF",
+            text: "#333333",
+            primary: "#DA5A30",
+            secondary: "#EA6D45",
+            accent: "#FFC0B2",
+        },
+        {
+            id: "44",
+            name: "Mix (formerly StumbleUpon)",
+            background: "#FFFFFF",
+            text: "#1A1A1A",
+            primary: "#33C7B2",
+            secondary: "#57D2C0",
+            accent: "#CCCCCC",
+        },
+        {
+            id: "45",
+            name: "BuzzFeed",
+            background: "#FFFFFF",
+            text: "#222222",
+            primary: "#EE3322",
+            secondary: "#FF5544",
+            accent: "#C42B1D",
+        },
+        {
+            id: "47",
+            name: "Unsplash",
+            background: "#000000",
+            text: "#FFFFFF",
+            primary: "#FFFFFF",
+            secondary: "#F3F3F3",
+            accent: "#888888",
+        },
+        {
+            id: "48",
+            name: "Imgur",
+            background: "#1C1C1C",
+            text: "#DCDCDC",
+            primary: "#85BF25",
+            secondary: "#94D13C",
+            accent: "#FFFFFF",
+        },
+        {
+            id: "49",
+            name: "Meetup",
+            background: "#FFFFFF",
+            text: "#333333",
+            primary: "#ED1C40",
+            secondary: "#F24765",
+            accent: "#565656",
+        },
+        {
+            id: "50",
+            name: "Bandcamp",
+            background: "#1B1B1B",
+            text: "#FFFFFF",
+            primary: "#629AA2",
+            secondary: "#85B4BE",
+            accent: "#E89E3A",
+        },
+        {
+            id: "51",
+            name: "Giphy",
+            background: "#000000",
+            text: "#FFFFFF",
+            primary: "#D442FF",
+            secondary: "#DE66FF",
+            accent: "#FFBF00",
+        },
+        {
+            id: "52",
+            name: "Patreon",
+            background: "#FFFFFF",
+            text: "#111111",
+            primary: "#FF424D",
+            secondary: "#FF666E",
+            accent: "#999999",
+        },
+        {
+            id: "53",
+            name: "Fandom",
+            background: "#F9F9F9",
+            text: "#000000",
+            primary: "#064082",
+            secondary: "#0B60C4",
+            accent: "#C4266C",
+        },
+        {
+            id: "54",
+            name: "eBay",
+            background: "#FFFFFF",
+            text: "#333333",
+            primary: "#E53238",
+            secondary: "#E96464",
+            accent: "#0064D2",
+        },
+        {
+            id: "55",
+            name: "Zillow",
+            background: "#FFFFFF",
+            text: "#2D2D2D",
+            primary: "#0074E4",
+            secondary: "#288DF0",
+            accent: "#3D7A41",
+        },
+        {
+            id: "56",
+            name: "Duolingo",
+            background: "#FFFFFF",
+            text: "#222222",
+            primary: "#58CC02",
+            secondary: "#7CD438",
+            accent: "#FFC800",
+        },
+        {
+            id: "57",
+            name: "Slack",
+            background: "#4A154B",
+            text: "#FFFFFF",
+            primary: "#36C5F0",
+            secondary: "#58D1F6",
+            accent: "#E01E5A",
+        },
+        {
+            id: "58",
+            name: "Khan Academy",
+            background: "#F5F5F5",
+            text: "#212121",
+            primary: "#1480B2",
+            secondary: "#2890C0",
+            accent: "#FFC800",
+        },
+
+        {
+            id: "59",
+            name: "Rotten Tomatoes",
+            background: "#FFFFFF",
+            text: "#222222",
+            primary: "#9C201C",
+            secondary: "#B43F3A",
+            accent: "#61A92B",
+        },
+        {
+            id: "60",
+            name: "IMDb",
+            background: "#000000",
+            text: "#FFFFFF",
+            primary: "#E6B91E",
+            secondary: "#F5D154",
+            accent: "#3366CC",
+        },
+        {
+            id: "61",
+            name: "Goodreads",
+            background: "#F4F1E9",
+            text: "#333333",
+            primary: "#63432C",
+            secondary: "#836746",
+            accent: "#D4CCB8",
+        },
+        {
+            id: "62",
+            name: "Stack Exchange",
+            background: "#FFFFFF",
+            text: "#242424",
+            primary: "#F48024",
+            secondary: "#F7A859",
+            accent: "#CCCCCC",
+        },
+        {
+            id: "63",
+            name: "GitLab",
+            background: "#2E2E31",
+            text: "#FFFFFF",
+            primary: "#FC6D26",
+            secondary: "#FD874D",
+            accent: "#FFC0CB",
+        },
+        {
+            id: "64",
+            name: "GoFundMe",
+            background: "#FFFFFF",
+            text: "#222222",
+            primary: "#4294F4",
+            secondary: "#68A8F7",
+            accent: "#89D9D2",
+        },
+        {
+            id: "65",
+            name: "IndieGoGo",
+            background: "#F9F9F9",
+            text: "#333333",
+            primary: "#E01E5A",
+            secondary: "#EB4E7B",
+            accent: "#999999",
+        },
+        {
+            id: "66",
+            name: "Wix",
+            background: "#F0F4F7",
+            text: "#2B2A33",
+            primary: "#54198D",
+            secondary: "#6F3BA2",
+            accent: "#99A1A8",
+        },
+        {
+            id: "67",
+            name: "Squarespace",
+            background: "#F5F5F5",
+            text: "#222222",
+            primary: "#222222",
+            secondary: "#444444",
+            accent: "#00A3A3",
+        },
+        {
+            id: "68",
+            name: "Canva",
+            background: "#FFFFFF",
+            text: "#333333",
+            primary: "#00C4CC",
+            secondary: "#2CD9DF",
+            accent: "#9F65D6",
+        },
+        {
+            id: "69",
+            name: "Reddit",
+            background: "#FFFFFF",
+            text: "#1A1A1B",
+            primary: "#FF4500",
+            secondary: "#FF6A33",
+            accent: "#0079D3",
+        },
+        {
+            id: "70",
+            name: "WeChat",
+            background: "#F9F9F9",
+            text: "#1D1D1D",
+            primary: "#09B83E",
+            secondary: "#42C963",
+            accent: "#AAAAAA",
+        },
+        {
+            id: "71",
+            name: "Weibo",
+            background: "#FFFFFF",
+            text: "#333333",
+            primary: "#E6162D",
+            secondary: "#FF4C5A",
+            accent: "#F9C924",
+        },
+        {
+            id: "72",
+            name: "Line",
+            background: "#FFFFFF",
+            text: "#111111",
+            primary: "#00C300",
+            secondary: "#33D633",
+            accent: "#666666",
+        },
+        {
+            id: "73",
+            name: "VK (VKontakte)",
+            background: "#FFFFFF",
+            text: "#222222",
+            primary: "#4C75A3",
+            secondary: "#6B91C0",
+            accent: "#A8C4E1",
+        },
+        {
+            id: "74",
+            name: "QQ",
+            background: "#FFFFFF",
+            text: "#1C1C1C",
+            primary: "#12B7F5",
+            secondary: "#32C7F6",
+            accent: "#FFD700",
+        },
+        {
+            id: "75",
+            name: "Messenger",
+            background: "#FFFFFF",
+            text: "#111111",
+            primary: "#006AFF",
+            secondary: "#00B2FF",
+            accent: "#00E5FF",
+        },
+        {
+            id: "76",
+            name: "Clubhouse",
+            background: "#F1F1F1",
+            text: "#121212",
+            primary: "#FFDD00",
+            secondary: "#FFE44D",
+            accent: "#000000",
+        },
+        {
+            id: "77",
+            name: "Mastodon",
+            background: "#313543",
+            text: "#FFFFFF",
+            primary: "#6364FF",
+            secondary: "#8C8DFF",
+            accent: "#2E2F3E",
+        },
+        {
+            id: "78",
+            name: "OnlyFans",
+            background: "#F9F9F9",
+            text: "#111111",
+            primary: "#00AFF0",
+            secondary: "#29BFF7",
+            accent: "#FF4081",
+        },
+        {
+            id: "79",
+            name: "Kick",
+            background: "#0F0F0F",
+            text: "#FFFFFF",
+            primary: "#53FC18",
+            secondary: "#76FF4D",
+            accent: "#CCCCCC",
+        },
+        {
+            id: "80",
+            name: "Rumble",
+            background: "#FFFFFF",
+            text: "#1A1A1A",
+            primary: "#85C742",
+            secondary: "#A5DA6E",
+            accent: "#333333",
+        },
+        // {
+        //     id: "81",
+        //     name: "Threads",
+        //     background: "#000000",
+        //     text: "#FFFFFF",
+        //     primary: "#FFFFFF", // opposite of black background
+        //     secondary: "#AAAAAA", // softer gray for hierarchy
+        //     accent: "#833AB4", // subtle Instagram link (Meta family)
+        // },
+        {
+            id: "82",
+            name: "Bluesky",
+            background: "#FFFFFF",
+            text: "#000000",
+            primary: "#1185FE",
+            secondary: "#56A8FF",
+            accent: "#9FCBFF",
+        },
+        {
+            id: "83",
+            name: "Truth Social",
+            background: "#FFFFFF",
+            text: "#111111",
+            primary: "#1877F2",
+            secondary: "#566FFF",
+            accent: "#FF2C55",
+        },
+        {
+            id: "84",
+            name: "Lemon8",
+            background: "#FFFFFF",
+            text: "#111111",
+            primary: "#FFDC00",
+            secondary: "#FFE84D",
+            accent: "#000000",
+        },
+        {
+            id: "85",
+            name: "Hive Social",
+            background: "#F8F8F8",
+            text: "#222222",
+            primary: "#1DA1F2",
+            secondary: "#FF3D71",
+            accent: "#FFDD00",
+        },
+        {
+            id: "86",
+            name: "Club Penguin Rewritten (Fan)",
+            background: "#003366",
+            text: "#FFFFFF",
+            primary: "#0099FF",
+            secondary: "#66CCFF",
+            accent: "#FFCC00",
+        },
+        {
+            id: "87",
+            name: "Koo",
+            background: "#FFFFFF",
+            text: "#111111",
+            primary: "#FFCC00",
+            secondary: "#FFD633",
+            accent: "#333333",
+        },
+        {
+            id: "88",
+            name: "Gab",
+            background: "#FFFFFF",
+            text: "#000000",
+            primary: "#21CF7A",
+            secondary: "#4AD98F",
+            accent: "#999999",
+        },
+        {
+            id: "89",
+            name: "Parler",
+            background: "#FFFFFF",
+            text: "#222222",
+            primary: "#C51F25",
+            secondary: "#D64549",
+            accent: "#999999",
+        },
+        {
+            id: "90",
+            name: "GETTR",
+            background: "#FFFFFF",
+            text: "#111111",
+            primary: "#FF0000",
+            secondary: "#FF4D4D",
+            accent: "#1E1E1E",
+        },
+        {
+            id: "91",
+            name: "Peach",
+            background: "#FDF6F6",
+            text: "#222222",
+            primary: "#FF9B9B",
+            secondary: "#FFB5B5",
+            accent: "#FFD580",
+        },
+        {
+            id: "92",
+            name: "Ello",
+            background: "#000000",
+            text: "#FFFFFF",
+            primary: "#FFFFFF",
+            secondary: "#CCCCCC",
+            accent: "#666666",
+        },
+        {
+            id: "93",
+            name: "KakaoTalk",
+            background: "#FFFFFF",
+            text: "#111111",
+            primary: "#FFE812",
+            secondary: "#FFD633",
+            accent: "#3C1E1E",
+        },
+        {
+            id: "94",
+            name: "Douyin (TikTok China)",
+            background: "#000000",
+            text: "#FFFFFF",
+            primary: "#FE2C55",
+            secondary: "#2AF0EA",
+            accent: "#20D5EC",
+        },
+        {
+            id: "95",
+            name: "Odnoklassniki (OK.ru)",
+            background: "#FFFFFF",
+            text: "#222222",
+            primary: "#EE8208",
+            secondary: "#F29B36",
+            accent: "#999999",
+        },
+        {
+            id: "96",
+            name: "Baidu Tieba",
+            background: "#F9F9F9",
+            text: "#222222",
+            primary: "#2932E1",
+            secondary: "#4F57E9",
+            accent: "#FF5C38",
+        },
+        {
+            id: "97",
+            name: "Vero",
+            background: "#1D1F21",
+            text: "#FFFFFF",
+            primary: "#00C4B3",
+            secondary: "#00D1BF",
+            accent: "#999999",
+        },
+        {
+            id: "98",
+            name: "Minds",
+            background: "#FFFFFF",
+            text: "#1C1C1C",
+            primary: "#FCD000",
+            secondary: "#FFE352",
+            accent: "#666666",
+        },
+        {
+            id: "99",
+            name: "Dailymotion",
+            background: "#FFFFFF",
+            text: "#111111",
+            primary: "#0066DC",
+            secondary: "#3385E5",
+            accent: "#00B8F4",
+        },
+        {
+            id: "100",
+            name: "Peertube",
+            background: "#FDFDFD",
+            text: "#202020",
+            primary: "#F1680D",
+            secondary: "#F4883D",
+            accent: "#5C9EFF",
+        },
+        {
+            id: "101",
+            name: "Bilibili",
+            background: "#FFFFFF",
+            text: "#333333",
+            primary: "#00A1D6",
+            secondary: "#23B6E7",
+            accent: "#FF6EB6",
+        },
+        {
+            id: "102",
+            name: "Weverse",
+            background: "#FFFFFF",
+            text: "#111111",
+            primary: "#20C997",
+            secondary: "#3DD8B0",
+            accent: "#9F65D6",
+        },
+        {
+            id: "103",
+            name: "Kickstarter",
+            background: "#FFFFFF",
+            text: "#222222",
+            primary: "#2BDE73",
+            secondary: "#4AE88B",
+            accent: "#999999",
+        },
+        {
+            id: "104",
+            name: "AngelList",
+            background: "#000000",
+            text: "#FFFFFF",
+            primary: "#FFFFFF",
+            secondary: "#DDDDDD",
+            accent: "#666666",
+        },
+        {
+            id: "105",
+            name: "ResearchGate",
+            background: "#F5F5F5",
+            text: "#111111",
+            primary: "#00CCBB",
+            secondary: "#33D6C6",
+            accent: "#007777",
+        },
+        {
+            id: "106",
+            name: "KakaoStory",
+            background: "#FFF8DC",
+            text: "#111111",
+            primary: "#FFCD00",
+            secondary: "#FFD633",
+            accent: "#333333",
+        },
+        {
+            id: "107",
+            name: "Amino",
+            background: "#FFFFFF",
+            text: "#000000",
+            primary: "#20C997",
+            secondary: "#38D9A9",
+            accent: "#FF6B6B",
+        },
+        {
+            id: "108",
+            name: "Ravelry",
+            background: "#FFFFFF",
+            text: "#111111",
+            primary: "#DE2C6C",
+            secondary: "#F25C8D",
+            accent: "#333333",
+        },
+        {
+            id: "109",
+            name: "Letterboxd",
+            background: "#14181C",
+            text: "#FFFFFF",
+            primary: "#00D735",
+            secondary: "#40E163",
+            accent: "#FF8000",
+        },
+        {
+            id: "110",
+            name: "Last.fm",
+            background: "#FFFFFF",
+            text: "#222222",
+            primary: "#D51007",
+            secondary: "#FF4C40",
+            accent: "#888888",
+        },
+        {
+            id: "111",
+            name: "Gaia Online",
+            background: "#4B2466",
+            text: "#FFFFFF",
+            primary: "#FFB347",
+            secondary: "#FFD580",
+            accent: "#E0BBE4",
+        },
+        {
+            id: "112",
+            name: "BlackPlanet",
+            background: "#000000",
+            text: "#FFFFFF",
+            primary: "#FFD700",
+            secondary: "#FFDD44",
+            accent: "#999999",
+        },
+        {
+            id: "113",
+            name: "Care2",
+            background: "#FFFFFF",
+            text: "#111111",
+            primary: "#78BE20",
+            secondary: "#99D642",
+            accent: "#FF9933",
+        },
+        {
+            id: "114",
+            name: "Viadeo",
+            background: "#FFFFFF",
+            text: "#222222",
+            primary: "#F07355",
+            secondary: "#F48F76",
+            accent: "#888888",
+        },
+        {
+            id: "115",
+            name: "Xanga",
+            background: "#FDFDFD",
+            text: "#222222",
+            primary: "#003399",
+            secondary: "#3366CC",
+            accent: "#FFCC00",
+        },
+        {
+            id: "111",
+            name: "Gaia Online",
+            background: "#FFFFFF",
+            text: "#222222",
+            primary: "#6A5ACD",
+            secondary: "#836FFF",
+            accent: "#FFD700",
+        },
+        {
+            id: "112",
+            name: "Newgrounds",
+            background: "#1A1A1A",
+            text: "#FFFFFF",
+            primary: "#FFCC00",
+            secondary: "#FFD633",
+            accent: "#FF6600",
+        },
+        {
+            id: "113",
+            name: "Kik",
+            background: "#FFFFFF",
+            text: "#000000",
+            primary: "#82BC23",
+            secondary: "#A4D24F",
+            accent: "#6B6B6B",
+        },
+        {
+            id: "114",
+            name: "ICQ",
+            background: "#FFFFFF",
+            text: "#111111",
+            primary: "#24C100",
+            secondary: "#3ED633",
+            accent: "#FF2C55",
+        },
+        {
+            id: "115",
+            name: "MSN Messenger (Classic)",
+            background: "#F2F9FF",
+            text: "#111111",
+            primary: "#0078D7",
+            secondary: "#4AA6FF",
+            accent: "#00A300",
+        },
+        {
+            id: "116",
+            name: "Yahoo Messenger (Legacy)",
+            background: "#FFFFFF",
+            text: "#111111",
+            primary: "#720E9E",
+            secondary: "#9A3FBA",
+            accent: "#FFD700",
+        },
+        {
+            id: "117",
+            name: "Friendster (Legacy)",
+            background: "#F8F8F8",
+            text: "#222222",
+            primary: "#0091D5",
+            secondary: "#33ABE3",
+            accent: "#F58220",
+        },
+        {
+            id: "118",
+            name: "Hi5",
+            background: "#FFFFFF",
+            text: "#1A1A1A",
+            primary: "#FF8C00",
+            secondary: "#FFA733",
+            accent: "#555555",
+        },
+        {
+            id: "119",
+            name: "Orkut (Legacy)",
+            background: "#F9F9F9",
+            text: "#222222",
+            primary: "#ED2590",
+            secondary: "#F46AB6",
+            accent: "#7B1FA2",
+        },
+        {
+            id: "120",
+            name: "MySpace",
+            background: "#FFFFFF",
+            text: "#000000",
+            primary: "#003399",
+            secondary: "#3366CC",
+            accent: "#FF9900",
         },
     ]);
+
+    console.log("templates", templates.length);
+
     // Function to check if there are any changes
     const hasChanges = () => {
         if (id === "create") {
@@ -1166,7 +2084,7 @@ const Url = () => {
                                 {/* ----- for large screen ----- */}
                                 {previewMode && (
                                     <div
-                                        className="hidden sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400 text-primary transition-all duration-300 hover:drop-shadow-lg hover:shadow-lg"
+                                        className="hidden px-2 py-1 rounded-2xl sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400 text-primary transition-all duration-300 hover:drop-shadow-lg hover:shadow-lg"
                                         style={{
                                             color:
                                                 template?.accent || "#6b7280",
@@ -1198,7 +2116,7 @@ const Url = () => {
                                             imagePreview === ""
                                                 ? "-top-10"
                                                 : "top-0"
-                                        }  right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}
+                                        } px-2 py-1 rounded-2xl right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}
                                         style={{
                                             color:
                                                 template?.accent || "#6b7280",
@@ -1290,7 +2208,7 @@ const Url = () => {
                                             <CloseCircle />
                                         </span>
                                         {showDescriptionDropdown && (
-                                            <div className="z-20 absolute top-full left-0 mt-1 w-full bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-lg shadow-xl z-10 backdrop-blur-sm">
+                                            <div className="z-20 absolute top-full left-0 mt-1 w-full bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-lg shadow-xl backdrop-blur-sm">
                                                 <div className="p-2">
                                                     <div className="flex items-center justify-between gap-2 px-3 py-2 text-xs text-purple-600 font-medium border-b border-purple-100 mb-1">
                                                         <div className="flex items-center gap-2">
@@ -1414,7 +2332,7 @@ const Url = () => {
                                 onDragStart={handleDragStart}
                             >
                                 {externalURLs.length > 0 ? (
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-2 gap-y-10">
+                                    <div className="grid grid-cols-3 gap-x-2 gap-y-10">
                                         <SortableContext
                                             items={externalURLs
                                                 .sort(
@@ -1501,7 +2419,7 @@ const Url = () => {
             {/* menu */}
             {editMode && isFromUser && (
                 <div
-                    className={`fixed top-1/2 -translate-y-1/2 right-0 transition-transform duration-300 ease-in-out ${
+                    className={`z-20 fixed top-1/2 -translate-y-1/2 right-0 transition-transform duration-300 ease-in-out ${
                         isPanelOpen ? "translate-x-0" : "translate-x-full"
                     }`}
                 >
@@ -1631,7 +2549,7 @@ const Url = () => {
             {/* templates */}
             {editMode && isFromUser && (
                 <div
-                    className={`fixed h-[75vh] bottom-0 left-0 transition-transform duration-300 ease-in-out ${
+                    className={`z-20 fixed h-[75vh] bottom-0 left-0 transition-transform duration-300 ease-in-out ${
                         isPanelOpenTemplate
                             ? "translate-x-0"
                             : "-translate-x-full"
@@ -1676,9 +2594,12 @@ const Url = () => {
                                 </li> */}
                             </ul>
                         </div>
-                        <div className="flex flex-col gap-4 overflow-y-auto">
+                        <div
+                            ref={scrollContainerRef}
+                            className="flex flex-col gap-4 overflow-y-auto relative"
+                        >
                             <div
-                                className={`rounded-lg shadow-lg p-1 hover:shadow-xl transition-all duration-300 cursor-pointer ${
+                                className={`relative rounded-lg shadow-lg p-1 hover:shadow-xl transition-all duration-300 cursor-pointer ${
                                     template ? "bg-white" : "bg-primary"
                                 }`}
                                 onClick={() => {
@@ -1697,11 +2618,15 @@ const Url = () => {
                                         <CloseCircle className="text-gray-400 w-12 h-12" />
                                     </span>
                                 </div>
+
+                                <span className="absolute top-0 left-0 p-3 text-xs text-gray-600">
+                                    Default
+                                </span>
                             </div>
                             {templates.map((templateItem, index) => (
                                 <div
                                     key={index}
-                                    className={`rounded-lg shadow-lg p-1 hover:shadow-xl transition-all duration-300 cursor-pointer ${
+                                    className={`relative rounded-lg shadow-lg p-1 hover:shadow-xl transition-all duration-300 cursor-pointer ${
                                         template
                                             ? template.id === templateItem.id
                                                 ? "bg-primary"
@@ -1753,8 +2678,30 @@ const Url = () => {
                                             ></div>
                                         </div>
                                     </div>
+                                    <span
+                                        className="absolute top-0 left-0 p-3 text-xs"
+                                        style={{
+                                            color: templateItem.text,
+                                        }}
+                                    >
+                                        {templateItem.name}
+                                    </span>
                                 </div>
                             ))}
+
+                            <div className="fixed bottom-7 right-10 px-3 py-2 rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300">
+                                <span
+                                    className="text-xs text-gray-600 flex items-center gap-2 cursor-pointer"
+                                    onClick={() => {
+                                        scrollContainerRef.current?.scrollTo({
+                                            top: 0,
+                                            behavior: "smooth",
+                                        });
+                                    }}
+                                >
+                                    Top <ArrowUp />
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -90,7 +90,7 @@ const ExternalUrl = (props: {
                 }}
                 style={{
                     background: props.template?.background
-                        ? `color-mix(in srgb, ${props.template.background} 90%, white 10%)`
+                        ? `color-mix(in srgb, ${props.template.background} 80%, white 20%)`
                         : undefined,
                     // backgroundImage:
                     //     props.template?.background && props.mode !== "edit"
@@ -121,11 +121,11 @@ const ExternalUrl = (props: {
                             const accent = props.template?.accent || "#f0f0f0";
 
                             e.currentTarget.style.background = `linear-gradient(135deg, 
-                            ${primary}, 
-                            ${secondary}, 
-                            ${accent}30,
+                            ${primary}50, 
+                            ${secondary}50, 
+                            ${accent},
                             ${primary}25,
-                            ${accent}35)`;
+                            ${accent}20)`;
                             e.currentTarget.style.backgroundSize = "300% 300%";
                             e.currentTarget.style.backgroundPosition =
                                 "100% 100%";
@@ -144,7 +144,7 @@ const ExternalUrl = (props: {
                         ) {
                             e.currentTarget.style.background = props.template
                                 ?.background
-                                ? `color-mix(in srgb, ${props.template.background} 90%, white 10%)`
+                                ? `color-mix(in srgb, ${props.template.background} 80%, white 20%)`
                                 : "";
                             // e.currentTarget.style.backgroundImage = `linear-gradient(135deg,
                             //     ${props.template.primary || "#0066ff"}20,
@@ -162,10 +162,10 @@ const ExternalUrl = (props: {
                     <img
                         src={getFaviconUrl(props.url)}
                         alt="image"
-                        className="w-full h-full object-cover group-hover:scale-95 transition-all duration-300 group-hover:rounded-lg"
+                        className="w-full h-full object-cover group-hover:scale-92 transition-all duration-300 group-hover:rounded-lg"
                         style={{
                             backgroundColor: props.template?.background
-                                ? `color-mix(in srgb, ${props.template.background} 80%, white 20%)`
+                                ? `color-mix(in srgb, ${props.template.background} 90%, white 10%)`
                                 : undefined,
                         }}
                     />
