@@ -107,10 +107,15 @@ const Url = () => {
     const [isGeneratingDescription, setIsGeneratingDescription] =
         useState(false);
 
-    // Panel puller state
+    // Panel puller state menu
     const [isPanelOpen, setIsPanelOpen] = useState(true);
     const [isDragging, setIsDragging] = useState(false);
     const [dragStartY, setDragStartY] = useState(0);
+
+    // Panel puller state template
+    const [isPanelOpenTemplate, setIsPanelOpenTemplate] = useState(true);
+    const [isDraggingTemplate, setIsDraggingTemplate] = useState(false);
+    const [dragStartYTemplate, setDragStartYTemplate] = useState(0);
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -639,7 +644,35 @@ const Url = () => {
     };
 
     const togglePanel = () => {
+        setIsPanelOpenTemplate(!isPanelOpenTemplate);
         setIsPanelOpen(!isPanelOpen);
+    };
+
+    // Template panel puller drag handlers
+    const handlePanelDragStartTemplate = (e: React.MouseEvent) => {
+        setIsDraggingTemplate(true);
+        setDragStartYTemplate(e.clientY);
+        e.preventDefault();
+    };
+
+    const handlePanelDragMoveTemplate = (e: MouseEvent) => {
+        if (!isDraggingTemplate) return;
+
+        const deltaY = e.clientY - dragStartYTemplate;
+        const threshold = 50; // Minimum drag distance to trigger toggle
+
+        if (Math.abs(deltaY) > threshold) {
+            setIsPanelOpenTemplate(deltaY < 0); // Open if dragged up, close if dragged down
+            setIsDraggingTemplate(false);
+        }
+    };
+
+    const handlePanelDragEndTemplate = () => {
+        setIsDraggingTemplate(false);
+    };
+
+    const togglePanelTemplate = () => {
+        setIsPanelOpenTemplate(!isPanelOpenTemplate);
     };
 
     // Add event listeners for drag
@@ -653,6 +686,24 @@ const Url = () => {
             };
         }
     }, [isDragging, dragStartY]);
+
+    // Add event listeners for template panel drag
+    React.useEffect(() => {
+        if (isDraggingTemplate) {
+            document.addEventListener("mousemove", handlePanelDragMoveTemplate);
+            document.addEventListener("mouseup", handlePanelDragEndTemplate);
+            return () => {
+                document.removeEventListener(
+                    "mousemove",
+                    handlePanelDragMoveTemplate
+                );
+                document.removeEventListener(
+                    "mouseup",
+                    handlePanelDragEndTemplate
+                );
+            };
+        }
+    }, [isDraggingTemplate, dragStartYTemplate]);
 
     return isUrlFound ? (
         <div
@@ -957,77 +1008,72 @@ const Url = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex-col gap-2 flex">
-                                    {/* ----- for large screen ----- */}
-                                    {previewMode && (
-                                        <div
-                                            className="hidden sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400 text-primary transition-all duration-300 hover:drop-shadow-lg hover:shadow-lg"
-                                            style={{
-                                                color:
-                                                    template?.accent ||
-                                                    "#6b7280",
-                                                filter: "drop-shadow(0 0 0 transparent)",
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.currentTarget.style.filter = `drop-shadow(0 0 8px ${
-                                                    template?.accent ||
-                                                    "#6b7280"
-                                                })`;
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.filter =
-                                                    "drop-shadow(0 0 0 transparent)";
-                                            }}
-                                        >
-                                            <span className="flex text-sm">
-                                                Share
-                                            </span>
-                                            <span className="text-sm cursor-pointer">
-                                                <Share />
-                                            </span>
-                                        </div>
-                                    )}
+                                {/* ----- for large screen ----- */}
+                                {previewMode && (
+                                    <div
+                                        className="hidden sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400 text-primary transition-all duration-300 hover:drop-shadow-lg hover:shadow-lg"
+                                        style={{
+                                            color:
+                                                template?.accent || "#6b7280",
+                                            filter: "drop-shadow(0 0 0 transparent)",
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.filter = `drop-shadow(0 0 8px ${
+                                                template?.accent || "#6b7280"
+                                            })`;
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.filter =
+                                                "drop-shadow(0 0 0 transparent)";
+                                        }}
+                                    >
+                                        <span className="flex text-sm">
+                                            Share
+                                        </span>
+                                        <span className="text-sm cursor-pointer">
+                                            <Share />
+                                        </span>
+                                    </div>
+                                )}
 
-                                    {/* ----- for small screen ----- */}
-                                    {previewMode && (
-                                        <div
-                                            className={`absolute ${
-                                                imagePreview === ""
-                                                    ? "-top-10"
-                                                    : "top-0"
-                                            }  right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}
-                                            style={{
-                                                color:
-                                                    template?.accent ||
-                                                    "#6b7280",
-                                            }}
-                                        >
-                                            <span className="flex text-sm">
-                                                Share
-                                            </span>
-                                            <span className="text-sm cursor-pointer">
-                                                <Share />
-                                            </span>
-                                        </div>
-                                    )}
+                                {/* ----- for small screen ----- */}
+                                {previewMode && (
+                                    <div
+                                        className={`absolute ${
+                                            imagePreview === ""
+                                                ? "-top-10"
+                                                : "top-0"
+                                        }  right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}
+                                        style={{
+                                            color:
+                                                template?.accent || "#6b7280",
+                                        }}
+                                    >
+                                        <span className="flex text-sm">
+                                            Share
+                                        </span>
+                                        <span className="text-sm cursor-pointer">
+                                            <Share />
+                                        </span>
+                                    </div>
+                                )}
 
-                                    {isFromUser && !editMode && (
-                                        <div
-                                            className="items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary sm:flex absolute top-0 right-0"
-                                            onClick={() => {
-                                                setPreviewMode(false);
-                                                setEditMode(true);
-                                            }}
-                                        >
-                                            <span className="flex text-sm">
-                                                Edit
-                                            </span>
-                                            <span className="text-sm cursor-pointer">
-                                                <Edit />
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
+                                {isFromUser && !editMode && (
+                                    <div
+                                        className="items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary sm:flex absolute top-0 right-0"
+                                        onClick={() => {
+                                            setPreviewMode(false);
+                                            setEditMode(true);
+                                        }}
+                                    >
+                                        <span className="flex text-sm">
+                                            Edit
+                                        </span>
+                                        <span className="text-sm cursor-pointer">
+                                            <Edit />
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                             <div className="flex flex-col gap-2">
                                 {!previewMode && !descriptionEdit && (
@@ -1064,7 +1110,8 @@ const Url = () => {
                                             }}
                                             rows={3}
                                             style={{
-                                                color: template?.text || "#000000",
+                                                color:
+                                                    template?.text || "#000000",
                                             }}
                                         />
 
@@ -1305,7 +1352,9 @@ const Url = () => {
                 >
                     {/* Puller Handle */}
                     <div
-                        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 w-6 h-16 bg-primary hover:bg-gray-300 rounded-l-lg cursor-pointer flex items-center justify-center group transition-colors duration-200"
+                        className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 w-6 h-16 ${
+                            !hasChanges() ? "bg-gray-600" : "bg-primary"
+                        }  hover:bg-gray-300 rounded-l-lg cursor-pointer flex items-center justify-center group transition-colors duration-200`}
                         onMouseDown={handlePanelDragStart}
                         onClick={togglePanel}
                     >
@@ -1403,15 +1452,19 @@ const Url = () => {
             {/* templates */}
             {editMode && isFromUser && (
                 <div
-                    className={`fixed h-[75vh] bottom-0 left-0 transition-transform duration-300 ease-in-out`}
+                    className={`fixed h-[75vh] bottom-0 left-0 transition-transform duration-300 ease-in-out ${
+                        isPanelOpenTemplate
+                            ? "translate-x-0"
+                            : "-translate-x-full"
+                    }`}
                 >
                     {/* Puller Handle */}
                     <div
-                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 w-6 h-16 bg-primary hover:bg-gray-300 rounded-r-lg cursor-pointer flex items-center justify-center group transition-colors duration-200"
-                        onMouseDown={handlePanelDragStart}
-                        onClick={togglePanel}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 w-6 h-16 bg-gray-600 hover:bg-gray-300 rounded-r-lg cursor-pointer flex items-center justify-center group transition-colors duration-200"
+                        onMouseDown={handlePanelDragStartTemplate}
+                        onClick={togglePanelTemplate}
                     >
-                        {isPanelOpen ? (
+                        {!isPanelOpenTemplate ? (
                             <ArrowRight2 className="text-white" />
                         ) : (
                             <ArrowLeft2 className="text-white" />
@@ -1419,29 +1472,29 @@ const Url = () => {
                     </div>
 
                     <div
-                        className="w-fit h-full bg-white rounded-xl shadow-md p-4 flex flex-col"
+                        className="w-[250px] h-full bg-red-500 rounded-xl shadow-md p-4 flex flex-col"
                         style={{ backgroundColor: "#ffffff" }}
                     >
                         <div className="text-sm font-medium text-center text-gray-500 border-b border-gray-200 mb-3 flex-shrink-0">
-                            <ul className="flex flex-wrap -mb-px">
-                                <li className="me-2">
+                            <ul className="flex flex-wrap ">
+                                <li className="w-full">
                                     <a
                                         href="#"
-                                        className="inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active"
+                                        className="w-full inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active"
                                         aria-current="page"
                                     >
                                         Templates
                                     </a>
                                 </li>
 
-                                <li className="me-2">
+                                {/* <li className="me-2">
                                     <a
                                         href="#"
                                         className="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300"
                                     >
                                         Customize
                                     </a>
-                                </li>
+                                </li> */}
                             </ul>
                         </div>
                         <div className="flex flex-col gap-4 overflow-y-auto">

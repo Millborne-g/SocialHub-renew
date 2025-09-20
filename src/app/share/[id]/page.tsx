@@ -836,79 +836,75 @@ const Url = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className=" flex-col gap-2 flex ">
-                                    {/* ----- share button for large screen ----- */}
-                                    {previewMode && (
-                                        <div
-                                            className="hidden sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400 text-primary transition-all duration-300 hover:drop-shadow-lg hover:shadow-lg"
-                                            style={{
-                                                color:
-                                                    template?.accent ||
-                                                    "#6b7280",
-                                                filter: "drop-shadow(0 0 0 transparent)",
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.currentTarget.style.filter = `drop-shadow(0 0 8px ${
-                                                    template?.accent ||
-                                                    "#6b7280"
-                                                })`;
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.filter =
-                                                    "drop-shadow(0 0 0 transparent)";
-                                            }}
-                                            onClick={handleShareModalOpen}
-                                        >
-                                            <span className="flex text-sm">
-                                                Share
-                                            </span>
-                                            <span className="text-sm cursor-pointer">
-                                                <Share />
-                                            </span>
-                                        </div>
-                                    )}
 
-                                    {/* ----- share button for small screen ----- */}
-                                    {previewMode && (
-                                        <div
-                                            className={`absolute ${
-                                                imagePreview === ""
-                                                    ? "-top-10"
-                                                    : "top-0"
-                                            }  right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}
-                                            style={{
-                                                color:
-                                                    template?.accent ||
-                                                    "#6b7280",
-                                            }}
-                                            onClick={handleShareModalOpen}
-                                        >
-                                            <span className="flex text-sm">
-                                                Share
-                                            </span>
-                                            <span className="text-sm cursor-pointer">
-                                                <Share />
-                                            </span>
-                                        </div>
-                                    )}
+                                {/* ----- share button for large screen ----- */}
+                                {previewMode && (
+                                    <div
+                                        className="hidden sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400 text-primary transition-all duration-300 hover:drop-shadow-lg hover:shadow-lg"
+                                        style={{
+                                            color:
+                                                template?.accent || "#6b7280",
+                                            filter: "drop-shadow(0 0 0 transparent)",
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.filter = `drop-shadow(0 0 8px ${
+                                                template?.accent || "#6b7280"
+                                            })`;
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.filter =
+                                                "drop-shadow(0 0 0 transparent)";
+                                        }}
+                                        onClick={handleShareModalOpen}
+                                    >
+                                        <span className="flex text-sm">
+                                            Share
+                                        </span>
+                                        <span className="text-sm cursor-pointer">
+                                            <Share />
+                                        </span>
+                                    </div>
+                                )}
 
-                                    {isFromUser && !editMode && (
-                                        <div
-                                            className="items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary sm:flex absolute top-0 right-0"
-                                            onClick={() => {
-                                                setPreviewMode(false);
-                                                setEditMode(true);
-                                            }}
-                                        >
-                                            <span className="flex text-sm">
-                                                Edit
-                                            </span>
-                                            <span className="text-sm cursor-pointer">
-                                                <Edit />
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
+                                {/* ----- share button for small screen ----- */}
+                                {previewMode && (
+                                    <div
+                                        className={`absolute ${
+                                            imagePreview === ""
+                                                ? "-top-10"
+                                                : "top-0"
+                                        }  right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}
+                                        style={{
+                                            color:
+                                                template?.accent || "#6b7280",
+                                        }}
+                                        onClick={handleShareModalOpen}
+                                    >
+                                        <span className="flex text-sm">
+                                            Share
+                                        </span>
+                                        <span className="text-sm cursor-pointer">
+                                            <Share />
+                                        </span>
+                                    </div>
+                                )}
+
+                                {isFromUser && !editMode && (
+                                    <div
+                                        className="items-center gap-2 y cursor-pointer hover:text-gray-400  text-primary sm:flex absolute top-0 right-0"
+                                        onClick={() => {
+                                            setPreviewMode(false);
+                                            setEditMode(true);
+                                        }}
+                                    >
+                                        <span className="flex text-sm">
+                                            Edit
+                                        </span>
+                                        <span className="text-sm cursor-pointer">
+                                            <Edit />
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                             <div className="flex flex-col gap-2">
                                 {!previewMode && (

@@ -117,8 +117,8 @@ const ExternalUrl = (props: {
                             const accent = props.template?.accent || "#f0f0f0";
 
                             e.currentTarget.style.background = `linear-gradient(135deg, 
-                            ${primary}40, 
-                            ${secondary}20, 
+                            ${primary}, 
+                            ${secondary}, 
                             ${accent}30,
                             ${primary}25,
                             ${accent}35)`;
