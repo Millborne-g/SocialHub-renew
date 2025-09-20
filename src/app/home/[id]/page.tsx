@@ -644,7 +644,6 @@ const Url = () => {
     };
 
     const togglePanel = () => {
-        setIsPanelOpenTemplate(!isPanelOpenTemplate);
         setIsPanelOpen(!isPanelOpen);
     };
 
