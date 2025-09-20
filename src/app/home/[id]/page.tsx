@@ -868,7 +868,7 @@ const Url = () => {
                                                         <CloseCircle />
                                                     </span>
                                                     {showTitleDropdown && (
-                                                        <div className="absolute top-full left-0 mt-1 w-full bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-lg shadow-xl z-10 backdrop-blur-sm">
+                                                        <div className="z-20 absolute top-full left-0 mt-1 w-full bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-lg shadow-xl backdrop-blur-sm">
                                                             <div className="p-2">
                                                                 <div className="flex items-center justify-between gap-2 px-3 py-2 text-xs text-purple-600 font-medium border-b border-purple-100 mb-1">
                                                                     <div className="flex items-center gap-2">
@@ -1134,7 +1134,7 @@ const Url = () => {
                                             <CloseCircle />
                                         </span>
                                         {showDescriptionDropdown && (
-                                            <div className="absolute top-full left-0 mt-1 w-full bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-lg shadow-xl z-10 backdrop-blur-sm">
+                                            <div className="z-20 absolute top-full left-0 mt-1 w-full bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-lg shadow-xl z-10 backdrop-blur-sm">
                                                 <div className="p-2">
                                                     <div className="flex items-center justify-between gap-2 px-3 py-2 text-xs text-purple-600 font-medium border-b border-purple-100 mb-1">
                                                         <div className="flex items-center gap-2">

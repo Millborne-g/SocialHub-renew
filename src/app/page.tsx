@@ -33,7 +33,7 @@ export default function Home() {
         <div className="flex items-center justify-center h-screen p-3">
             {/* lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem]  */}
             <div className="flex w-full lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem] items-center gap-15 ">
-                <div className="flex-1 flex flex-col gap-4 px-10 md:px-0">
+                <div className="flex-1 flex flex-col gap-4  md:px-0">
                     <span className="text-4xl font-bold font-display leading-tight text-center md:text-left">
                         Your One-Stop Link Storage Solution:{" "}
                         <span className="bg-[#F9ED32]">
@@ -49,13 +49,13 @@ export default function Home() {
                         <div className="bg-primary p-1 rounded-lg grid grid-cols-12 gap-2 hover:bg-primary/85 ">
                             <input
                                 type="text"
-                                className="text-base w-full p-3 rounded-lg bg-white font-display md:col-span-9 col-span-8"
+                                className="text-base w-full p-3 rounded-lg bg-white font-display col-span-9"
                                 placeholder="Enter your email..."
                                 value={userEmail}
                                 onChange={(e) => setUserEmail(e.target.value)}
                             />
                             <div
-                                className="flex items-center justify-center gap-2 md:col-span-3 col-span-4 cursor-pointer font-display"
+                                className="flex items-center justify-center gap-2 col-span-3 cursor-pointer font-display"
                                 onClick={() => {
                                     router.push(
                                         `/signup${
