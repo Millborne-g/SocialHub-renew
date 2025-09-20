@@ -1392,6 +1392,13 @@ const Url = () => {
 
                                                 if (!previewMode) {
                                                     togglePanel();
+                                                    setIsPanelOpenTemplate(
+                                                        false
+                                                    );
+                                                } else {
+                                                    setIsPanelOpenTemplate(
+                                                        true
+                                                    );
                                                 }
                                             }}
                                         />
