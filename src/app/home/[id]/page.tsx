@@ -67,6 +67,8 @@ const Url = () => {
         imageFile: File | null;
     } | null>(null);
 
+    console.log(userAlias);
+
     const [userAliasOnEdit, setUserAliasOnEdit] = useState<{
         name: string;
         image: string;
@@ -1032,7 +1034,9 @@ const Url = () => {
                                                 {userAlias ? (
                                                     <>
                                                         {userAlias.image !==
-                                                        "" ? (
+                                                            "" &&
+                                                        userAlias.image !==
+                                                            null ? (
                                                             <img
                                                                 src={
                                                                     userAlias?.image
@@ -1547,21 +1551,23 @@ const Url = () => {
                                             Make Public
                                         </label>
                                     </div>
-                                    {!isPrivate && !hasChanges() && id !== "create" && (
-                                        <div className="flex items-center">
-                                            <span
-                                                className="text-sm flex items-center gap-1 underline text-gray-500 hover:text-primary cursor-pointer"
-                                                onClick={() => {
-                                                    window.open(
-                                                        `/share/${id}`,
-                                                        "_blank"
-                                                    );
-                                                }}
-                                            >
-                                                Visit <Link21 />
-                                            </span>
-                                        </div>
-                                    )}
+                                    {!isPrivate &&
+                                        !hasChanges() &&
+                                        id !== "create" && (
+                                            <div className="flex items-center">
+                                                <span
+                                                    className="text-sm flex items-center gap-1 underline text-gray-500 hover:text-primary cursor-pointer"
+                                                    onClick={() => {
+                                                        window.open(
+                                                            `/share/${id}`,
+                                                            "_blank"
+                                                        );
+                                                    }}
+                                                >
+                                                    Visit <Link21 />
+                                                </span>
+                                            </div>
+                                        )}
                                 </div>
                             </div>
 
@@ -1797,6 +1803,11 @@ const Url = () => {
                             userAliasOnEdit.name.length >= 5
                         ) {
                             setUserAlias(userAliasOnEdit);
+                            setUserAliasOnEdit({
+                                name: "",
+                                image: "",
+                                imageFile: null,
+                            });
                             setUserAliasEdit(false);
                         } else {
                             toast.error("Name must be at least 5 characters");

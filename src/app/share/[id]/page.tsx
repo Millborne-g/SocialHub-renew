@@ -825,7 +825,9 @@ const Url = () => {
                                                 {userAlias ? (
                                                     <>
                                                         {userAlias.image !==
-                                                        "" ? (
+                                                            "" &&
+                                                        userAlias.image !==
+                                                            null ? (
                                                             <img
                                                                 src={
                                                                     userAlias?.image
