@@ -1548,9 +1548,15 @@ const Url = () => {
                 setIsSaving(false);
                 setUrlPreviewMode(false);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.log("Save error:", error);
-            toast.error("Failed to save profile. Please try again.");
+            // toast.error("Failed to update URL. Please try again.");
+            const errorMessage =
+                error?.response?.data?.error?.message ||
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to save URL. Please try again.";
+            toast.error(errorMessage);
         } finally {
             setIsSaving(false);
             setOnSave(false);
@@ -1610,9 +1616,15 @@ const Url = () => {
             setUrlPreviewMode(false);
             setPreviewMode(false);
             setOnSave(false);
-        } catch (error) {
+        } catch (error: any) {
             console.log("Update error:", error);
-            toast.error("Failed to update URL. Please try again.");
+            // toast.error("Failed to update URL. Please try again.");
+            const errorMessage =
+                error?.response?.data?.error?.message ||
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to update URL. Please try again.";
+            toast.error(errorMessage);
         } finally {
             setIsSaving(false);
             setIsLoading(false);
