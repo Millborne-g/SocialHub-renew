@@ -20,6 +20,7 @@ export async function GET(
 
         const url = await Url.findById(id);
         const externalUrls = await ExternalUrl.find({ urlParentId: id });
+
         return NextResponse.json({ url, externalUrls });
     } catch (error) {
         return NextResponse.json(
@@ -243,6 +244,7 @@ export async function PUT(
                             title: item.title,
                             sequence: item.sequence,
                             urlParentId: id,
+                            image: item.image,
                         })
                     );
 

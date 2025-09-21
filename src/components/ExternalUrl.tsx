@@ -1,10 +1,11 @@
 import { Edit, Trash } from "iconsax-reactjs";
-import React from "react";
+import React, { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 
 const ExternalUrl = (props: {
     title: string;
     url: string;
+    image: string;
     dateTime: string;
     mode?: "edit" | "preview";
     onEdit?: () => void;
@@ -12,6 +13,9 @@ const ExternalUrl = (props: {
     id: string; // Add id prop for useSortable
     template?: any;
 }) => {
+    const [isTouchActive, setIsTouchActive] = useState(false);
+    const [isDebugMode, setIsDebugMode] = useState(false);
+
     const {
         attributes,
         listeners,
@@ -43,6 +47,48 @@ const ExternalUrl = (props: {
             return url;
         }
     };
+
+    // Touch event handlers for mobile drag functionality
+    const handleTouchStart = (e: React.TouchEvent) => {
+        setIsTouchActive(true);
+        // Prevent default to avoid scrolling while dragging
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        setIsTouchActive(false);
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        // Prevent scrolling while dragging
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    // Mouse event handlers for testing scenarios and desktop
+    const handleMouseDown = (e: React.MouseEvent) => {
+        setIsTouchActive(true);
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleMouseUp = (e: React.MouseEvent) => {
+        setIsTouchActive(false);
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleMouseLeave = () => {
+        setIsTouchActive(false);
+    };
+
+    // Debug mode toggle (for testing)
+    // const toggleDebugMode = () => {
+    //     setIsDebugMode(!isDebugMode);
+    // };
 
     const style = {
         transform: transform
@@ -160,7 +206,7 @@ const ExternalUrl = (props: {
             >
                 <div className="w-full h-40 flex items-center justify-center">
                     <img
-                        src={getFaviconUrl(props.url)}
+                        src={props.image || getFaviconUrl(props.url)}
                         alt="image"
                         className="w-full h-full object-cover group-hover:scale-92 transition-all duration-300 group-hover:rounded-lg"
                         style={{
@@ -207,22 +253,81 @@ const ExternalUrl = (props: {
                                         </span>
                                     </div>
 
-                                    <div className="relative group ">
+                                    <div className="relative group">
                                         <div className="w-[85px] absolute hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 -top-8 -right-9 transform -translate-x-1/2">
                                             <span className="text-center">
                                                 Click & drag
                                             </span>
                                         </div>
-                                        <span
+                                        {/* Mobile-specific tooltip */}
+                                        {/* <div className="w-[100px] absolute hidden group-hover:block sm:hidden bg-gray-800 text-white text-xs rounded px-2 py-1 -top-8 -right-9 transform -translate-x-1/2">
+                                            <span className="text-center">
+                                                Touch & drag
+                                            </span>
+                                        </div> */}
+                                        {/* Debug mode indicator */}
+                                        {isDebugMode && (
+                                            <div className="absolute -top-12 -right-2 bg-red-500 text-white text-xs rounded px-2 py-1 z-50">
+                                                DEBUG: Drag Active
+                                            </div>
+                                        )}
+                                        <div
                                             {...listeners}
                                             {...attributes}
-                                            className="text-lg text-gray-600 hover:bg-gray-300 px-1 rounded-sm cursor-pointer"
+                                            onTouchStart={handleTouchStart}
+                                            onTouchEnd={handleTouchEnd}
+                                            onTouchMove={handleTouchMove}
+                                            onMouseDown={handleMouseDown}
+                                            onMouseUp={handleMouseUp}
+                                            onMouseLeave={handleMouseLeave}
+                                            // onDoubleClick={toggleDebugMode}
+                                            className={`
+                                                text-lg text-gray-600 hover:bg-gray-300 px-2 py-2 rounded-sm cursor-grab
+                                                transition-all duration-200 ease-in-out
+                                                ${
+                                                    isTouchActive
+                                                        ? "bg-gray-400 scale-110 cursor-grabbing"
+                                                        : ""
+                                                }
+                                                ${
+                                                    isDragging
+                                                        ? "bg-gray-500 scale-105 cursor-grabbing"
+                                                        : ""
+                                                }
+                                                min-w-[44px] min-h-[44px] flex items-center justify-center
+                                                touch-manipulation select-none
+                                                active:bg-gray-400 active:scale-110 active:cursor-grabbing
+                                                sm:min-w-[32px] sm:min-h-[32px] sm:px-1 sm:py-1
+                                                border-2 border-transparent hover:border-gray-300
+                                                ${
+                                                    isTouchActive
+                                                        ? "border-gray-400"
+                                                        : ""
+                                                }
+                                                ${
+                                                    isDragging
+                                                        ? "border-gray-500"
+                                                        : ""
+                                                }
+                                                ${
+                                                    isDebugMode
+                                                        ? "ring-2 ring-red-500 ring-opacity-50"
+                                                        : ""
+                                                }
+                                            `}
                                             style={{
                                                 color: props.template?.text,
+                                                WebkitTouchCallout: "none",
+                                                WebkitUserSelect: "none",
+                                                userSelect: "none",
+                                                touchAction: "none",
                                             }}
+                                            title="Drag to reorder"
                                         >
-                                            ⋮⋮
-                                        </span>
+                                            <span className="text-xl leading-none pointer-events-none">
+                                                ⋮⋮
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </>

@@ -1112,6 +1112,7 @@ const Url = () => {
                                                         <ExternalUrl
                                                             title={url.title}
                                                             url={url.url}
+                                                            image={url.image}
                                                             dateTime={
                                                                 url.updatedAt ||
                                                                 ""

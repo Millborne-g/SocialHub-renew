@@ -91,7 +91,7 @@ const Home = () => {
     );
 
     useEffect(() => {
-        if (accessToken && userDetails) {
+        if (accessToken) {
             const fetchUrls = async () => {
                 try {
                     setLoading(true);

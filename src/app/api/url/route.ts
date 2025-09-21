@@ -224,6 +224,7 @@ export async function POST(request: NextRequest) {
             title: item.title,
             sequence: item.sequence,
             urlParentId: createdUrl._id.toString(),
+            image: item.image,
         }));
 
         await ExternalUrl.create(externalUrlData);

@@ -25,8 +25,15 @@ const externalUrlSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    image: {
+        type: String,
+        required: false,
+        default: null,
+    },
 });
 
-const ExternalUrl = mongoose.models.ExternalUrl || mongoose.model("ExternalUrl", externalUrlSchema);
+const ExternalUrl =
+    mongoose.models.ExternalUrl ||
+    mongoose.model("ExternalUrl", externalUrlSchema);
 
 export default ExternalUrl;

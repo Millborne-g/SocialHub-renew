@@ -93,6 +93,14 @@ const Url = () => {
     const [editURLModal, setEditURLModal] = useState(false);
     const [newUrlTitle, setNewUrlTitle] = useState("");
     const [newUrl, setNewUrl] = useState("");
+    const [newUrlImage, setNewUrlImage] = useState<{
+        preview: string;
+        file: File;
+    } | null>(null);
+    const [editUrlImage, setEditUrlImage] = useState<{
+        preview: string;
+        file: File;
+    } | null>(null);
     const [activeId, setActiveId] = useState("");
 
     const [editMode, setEditMode] = useState(true);
@@ -1284,7 +1292,17 @@ const Url = () => {
         },
     ]);
 
-    console.log("templates", templates.length);
+    // Function to convert URL to Google favicon service format
+    const getFaviconUrl = (url: string): string => {
+        try {
+            const urlObj = new URL(url);
+            const domain = urlObj.hostname;
+            return `https://www.google.com/s2/favicons?sz=256&domain=${domain}`;
+        } catch (error) {
+            // Fallback if URL is invalid
+            return "https://www.google.com/s2/favicons?sz=256&domain=google.com";
+        }
+    };
 
     // Function to check if there are any changes
     const hasChanges = () => {
@@ -1318,7 +1336,8 @@ const Url = () => {
                     !originalUrl ||
                     url.title !== originalUrl.title ||
                     url.url !== originalUrl.url ||
-                    url.sequence !== originalUrl.sequence
+                    url.sequence !== originalUrl.sequence ||
+                    url.image !== originalUrl.image
                 );
             });
 
@@ -1333,7 +1352,7 @@ const Url = () => {
         );
     };
 
-    const handleAddURL = () => {
+    const handleAddURL = async () => {
         if (newUrl.trim()) {
             let newUrlTitleString = "";
             if (newUrlTitle.trim()) {
@@ -1353,17 +1372,37 @@ const Url = () => {
                     return domain.charAt(0).toUpperCase() + domain.slice(1);
                 })();
             }
+            let newImageUrl = getFaviconUrl(newUrl.trim()); // Default to favicon
+
+            // Convert newUrlImage file to base64 string if it exists
+            if (newUrlImage?.file) {
+                try {
+                    const bytes = await newUrlImage.file.arrayBuffer();
+                    const buffer = Buffer.from(bytes);
+                    const base64 = `data:${
+                        newUrlImage.file.type
+                    };base64,${buffer.toString("base64")}`;
+                    newImageUrl = base64;
+                } catch (error) {
+                    console.error("Error processing new URL image:", error);
+                    // Fall back to favicon if conversion fails
+                    newImageUrl = getFaviconUrl(newUrl.trim());
+                }
+            }
+
             const newURLItem = {
                 _id: Date.now().toString(),
                 title: newUrlTitleString,
                 url: newUrl.trim(),
                 updatedAt: new Date().toISOString(),
                 sequence: externalURLs.length + 1,
+                image: newImageUrl,
             };
 
             setExternalUrls((prev) => [...prev, newURLItem]);
             setNewUrlTitle("");
             setNewUrl("");
+            setNewUrlImage(null); // Clear the image state
             setAddURLModal(false);
         } else {
             toast.error("Please enter a URL");
@@ -1386,12 +1425,16 @@ const Url = () => {
         if (urlToEdit) {
             setNewUrlTitle(urlToEdit.title);
             setNewUrl(urlToEdit.url);
+            setEditUrlImage({
+                preview: urlToEdit.image || getFaviconUrl(urlToEdit.url),
+                file: null as any,
+            });
             setActiveId(id);
             setEditURLModal(true);
         }
     };
 
-    const handleUpdateURL = () => {
+    const handleUpdateURL = async () => {
         let newUrlTitleString = "";
         if (newUrlTitle.trim()) {
             newUrlTitleString = newUrlTitle.trim();
@@ -1408,10 +1451,37 @@ const Url = () => {
                 return domain.charAt(0).toUpperCase() + domain.slice(1);
             })();
         }
+
+        let newImageUrl = getFaviconUrl(newUrl.trim()); // Default to favicon
+
+        // Convert editUrlImage file to base64 string if it exists
+        if (editUrlImage?.file) {
+            try {
+                const bytes = await editUrlImage.file.arrayBuffer();
+                const buffer = Buffer.from(bytes);
+                const base64 = `data:${
+                    editUrlImage.file.type
+                };base64,${buffer.toString("base64")}`;
+                newImageUrl = base64;
+            } catch (error) {
+                console.error("Error processing edit URL image:", error);
+                // Fall back to favicon if conversion fails
+                newImageUrl = getFaviconUrl(newUrl.trim());
+            }
+        } else if (editUrlImage?.preview && !editUrlImage?.file) {
+            // If there's a preview but no file, it means it's the existing image or favicon
+            newImageUrl = editUrlImage.preview;
+        }
+
         setExternalUrls((prev) => {
             const updated = prev.map((url) =>
                 url._id === activeId
-                    ? { ...url, title: newUrlTitleString, url: newUrl }
+                    ? {
+                          ...url,
+                          title: newUrlTitleString,
+                          url: newUrl,
+                          image: newImageUrl,
+                      }
                     : url
             );
             return updated;
@@ -1419,6 +1489,7 @@ const Url = () => {
         setEditURLModal(false);
         setNewUrlTitle("");
         setNewUrl("");
+        setEditUrlImage(null); // Clear the image state
         setActiveId("");
     };
 
@@ -2563,6 +2634,7 @@ const Url = () => {
                                                         }
                                                         key={url._id}
                                                         id={url._id}
+                                                        image={url.image}
                                                         onDelete={() =>
                                                             handleDeleteURL(
                                                                 url._id
@@ -2933,11 +3005,89 @@ const Url = () => {
                     onSave={handleAddURL}
                     content={
                         <div className="flex flex-col gap-4">
+                            <div className="flex items-center justify-center">
+                                <div className="relative w-20 h-20 rounded-sm">
+                                    <input
+                                        id="newUrlImageInput"
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden w-full shadow-sm rounded-md px-2 hover:cursor-pointer hover:color-primary"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                setNewUrlImage({
+                                                    preview:
+                                                        URL.createObjectURL(
+                                                            file
+                                                        ),
+                                                    file: file,
+                                                });
+                                            }
+                                        }}
+                                    />
+                                    {newUrlImage?.preview ? (
+                                        <div className="w-20 h-20 rounded-sm border border-gray-200">
+                                            <img
+                                                src={newUrlImage?.preview}
+                                                alt="URL Image"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="w-20 h-20 rounded-sm border border-gray-200">
+                                            <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-200">
+                                                <span className="text-sm">
+                                                    No Image
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div
+                                        className="absolute -top-5 -right-2 rounded-full bg-white group hover:bg-gray-200 cursor-pointer shadow-md h-9 w-9 text-center flex justify-center items-center"
+                                        onClick={() => {
+                                            if (newUrlImage?.file == null) {
+                                                document
+                                                    .getElementById(
+                                                        "newUrlImageInput"
+                                                    )
+                                                    ?.click();
+                                            } else {
+                                                setNewUrlImage({
+                                                    preview:
+                                                        getFaviconUrl(newUrl),
+                                                    file: null as any,
+                                                });
+                                            }
+                                        }}
+                                    >
+                                        <span className="text-xs text-gray-800">
+                                            {/* {newUrlImage?.preview ? (
+                                                <CloseCircle />
+                                            ) : (
+                                                <Edit />
+                                            )} */}
+
+                                            {newUrlImage?.file == null ? (
+                                                <Edit />
+                                            ) : (
+                                                <CloseCircle />
+                                            )}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                             <TextField
                                 placeholder="URL"
                                 type="text"
                                 value={newUrl}
-                                onChange={(e) => setNewUrl(e.target.value)}
+                                onChange={(e) => {
+                                    setNewUrl(e.target.value);
+                                    setNewUrlImage({
+                                        preview: getFaviconUrl(e.target.value),
+                                        file: null as any,
+                                    });
+                                }}
                             />
                             <TextField
                                 placeholder="Title (Optional)"
@@ -2957,16 +3107,89 @@ const Url = () => {
                     onClose={() => {
                         setNewUrl("");
                         setNewUrlTitle("");
+                        setEditUrlImage(null);
                         setEditURLModal(false);
                     }}
                     onSave={handleUpdateURL}
                     content={
                         <div className="flex flex-col gap-4">
+                            <div className="flex items-center justify-center">
+                                <div className="relative w-20 h-20 rounded-sm">
+                                    <input
+                                        id="editUrlImageInput"
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden w-full shadow-sm rounded-md px-2 hover:cursor-pointer hover:color-primary"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                setEditUrlImage({
+                                                    preview:
+                                                        URL.createObjectURL(
+                                                            file
+                                                        ),
+                                                    file: file,
+                                                });
+                                            }
+                                        }}
+                                    />
+                                    {editUrlImage?.preview ? (
+                                        <div className="w-20 h-20 rounded-sm border border-gray-200">
+                                            <img
+                                                src={editUrlImage?.preview}
+                                                alt="URL Image"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="w-20 h-20 rounded-sm border border-gray-200">
+                                            <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-200">
+                                                <span className="text-sm">
+                                                    No Image
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div
+                                        className="absolute -top-5 -right-2 rounded-full bg-white group hover:bg-gray-200 cursor-pointer shadow-md h-9 w-9 text-center flex justify-center items-center"
+                                        onClick={() => {
+                                            if (editUrlImage?.file == null) {
+                                                document
+                                                    .getElementById(
+                                                        "editUrlImageInput"
+                                                    )
+                                                    ?.click();
+                                            } else {
+                                                setEditUrlImage({
+                                                    preview:
+                                                        getFaviconUrl(newUrl),
+                                                    file: null as any,
+                                                });
+                                            }
+                                        }}
+                                    >
+                                        <span className="text-xs text-gray-800">
+                                            {editUrlImage?.file == null ? (
+                                                <Edit />
+                                            ) : (
+                                                <CloseCircle />
+                                            )}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                             <TextField
                                 placeholder="URL"
                                 type="text"
                                 value={newUrl}
-                                onChange={(e) => setNewUrl(e.target.value)}
+                                onChange={(e) => {
+                                    setNewUrl(e.target.value);
+                                    setEditUrlImage({
+                                        preview: getFaviconUrl(e.target.value),
+                                        file: null as any,
+                                    });
+                                }}
                             />
                             <TextField
                                 placeholder="Title (Optional)"
