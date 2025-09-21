@@ -75,7 +75,7 @@ const SignupContent = ({ email }: { email: string }) => {
             toast.success("User created successfully");
             // router.push("/home");
         } catch (Error: any) {
-            toast.error("User creation failed");
+            toast.error(Error.response.data.message);
             console.log(Error.response.data.message, "test");
         } finally {
             setIsLoading(false);

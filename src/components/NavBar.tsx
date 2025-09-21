@@ -32,6 +32,15 @@ const NavBar = () => {
                 setUrlTemplate(null);
                 router.push("/home");
             },
+            
+        },
+        {
+            label: "Settings",
+            path: "/settings",
+            onClick: () => {
+                setUrlTemplate(null);
+                router.push("/settings");
+            },
         },
         // {
         //     label: "Templates",
