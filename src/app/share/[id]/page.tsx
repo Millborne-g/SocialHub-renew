@@ -595,7 +595,7 @@ const Url = () => {
             if (accessToken && !userDetails) {
                 setUserDetails(decodeToken(accessToken));
             } else {
-                // let res = await refreshToken();
+                let res = await refreshToken();
                 // if (res === null) {
                 //     router.push("/");
                 // }
@@ -1112,7 +1112,6 @@ const Url = () => {
                                                         <ExternalUrl
                                                             title={url.title}
                                                             url={url.url}
-                                                            image={url.image}
                                                             dateTime={
                                                                 url.updatedAt ||
                                                                 ""
