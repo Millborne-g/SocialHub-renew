@@ -488,12 +488,12 @@ const SettingsPage = () => {
     };
 
     return (
-        <div className="h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto py-8 h-full">
+        <div className="h-screen bg-gray-50 px-3">
+            <div className="lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem] mx-auto py-8 h-full">
                 <div className="bg-white rounded-lg overflow-hidden h-full ">
                     <div className="flex">
                         {/* Sidebar */}
-                        <div className="w-16 md:w-64 bg-gray-50 border-r border-gray-200 p-2 md:p-6 h-screen">
+                        <div className="w-16 md:w-64 bg-gray-50 border-r border-gray-200 px-2 md:px-6 h-screen">
                             <nav className="space-y-2">
                                 {sidebarItems.map((item) => {
                                     const Icon = item.icon;

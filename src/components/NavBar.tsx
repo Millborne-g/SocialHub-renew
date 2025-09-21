@@ -32,7 +32,6 @@ const NavBar = () => {
                 setUrlTemplate(null);
                 router.push("/home");
             },
-            
         },
         {
             label: "Settings",
@@ -42,6 +41,14 @@ const NavBar = () => {
                 router.push("/settings");
             },
         },
+        // {
+        //     label: "Pricing",
+        //     path: "/pricing",
+        //     onClick: () => {
+        //         setUrlTemplate(null);
+        //         router.push("/pricing");
+        //     },
+        // },
         // {
         //     label: "Templates",
         //     path: "/templates",
