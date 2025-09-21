@@ -91,34 +91,24 @@ const Home = () => {
     );
 
     useEffect(() => {
-        if (accessToken) {
-            const fetchUrls = async () => {
-                try {
-                    setLoading(true);
-                    const response = await api.get(
-                        `/api/url?page=${currentPage}&limit=${pageSize}&filter=${filter}&search=${encodeURIComponent(
-                            search
-                        )}`
-                    );
-                    setUrls(response.data.urls);
-                    setPagination(response.data.pagination);
-                } catch (error) {
-                    console.error("Error fetching URLs:", error);
-                } finally {
-                    setLoading(false);
-                }
-            };
-            fetchUrls();
-        }
-    }, [
-        accessToken,
-        currentPage,
-        pageSize,
-        filter,
-        search,
-        refreshTrigger,
-        userDetails,
-    ]);
+        const fetchUrls = async () => {
+            try {
+                setLoading(true);
+                const response = await api.get(
+                    `/api/url?page=${currentPage}&limit=${pageSize}&filter=${filter}&search=${encodeURIComponent(
+                        search
+                    )}`
+                );
+                setUrls(response.data.urls);
+                setPagination(response.data.pagination);
+            } catch (error) {
+                console.error("Error fetching URLs:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchUrls();
+    }, [currentPage, pageSize, filter, search, refreshTrigger]);
 
     const handlePageChange = (newPage: number) => {
         setCurrentPage(newPage);
