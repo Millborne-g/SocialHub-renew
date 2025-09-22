@@ -498,7 +498,7 @@ const SettingsPage = () => {
                 <div className="bg-white rounded-lg overflow-hidden h-full ">
                     <div className="flex">
                         {/* Sidebar */}
-                        <div className="w-16 md:w-64 bg-gray-50 border-r border-gray-200 px-2 md:px-6 h-screen">
+                        <div className="w-16 md:w-64 bg-gray-50 border-r border-gray-200 pr-2 md:pr-6 h-screen">
                             <nav className="space-y-2">
                                 {sidebarItems.map((item) => {
                                     const Icon = item.icon;

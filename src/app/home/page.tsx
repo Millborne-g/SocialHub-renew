@@ -213,7 +213,7 @@ const Home = () => {
 
     return (
         <div className="min-h-[calc(90vh-100px)] w-full bg-gradient-to-br from-gray-50 to-white">
-            <div className="lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="lg:max-w-[60rem] xl:max-w-[76rem] mx-auto px-4 sm:px-6 lg:px-0 py-8">
                 <div className="flex flex-col gap-8">
                     {/* Enhanced Header Section */}
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
@@ -297,7 +297,7 @@ const Home = () => {
                                     </span>
                                 </div>
                                 <select
-                                    className="px-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 bg-white min-w-[120px]"
+                                    className="px-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 bg-white min-w-[120px] w-full"
                                     value={filter}
                                     onChange={(e) =>
                                         handleFilterChange(e.target.value)
