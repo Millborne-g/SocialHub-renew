@@ -911,7 +911,19 @@ const Url = () => {
 
                                 {isPrivate ? (
                                     <>
-                                        <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
+                                        {/* ----- for large screen ----- */}
+                                        <span className="hidden sm:flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
+                                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                            Private
+                                        </span>
+                                        {/* ----- for small screen ----- */}
+                                        <span
+                                            className={`absolute ${
+                                                imagePreview === ""
+                                                    ? "-top-10"
+                                                    : "top-0"
+                                            } right-0 sm:hidden flex justify-center items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800`}
+                                        >
                                             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                                             Private
                                         </span>

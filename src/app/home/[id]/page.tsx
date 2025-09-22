@@ -1994,6 +1994,28 @@ const Url = () => {
         }
     }, [isDraggingTemplate, dragStartYTemplate]);
 
+    // Close panels on small screens
+    React.useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 768) {
+                // md breakpoint
+                setIsPanelOpen(false);
+                setIsPanelOpenTemplate(false);
+            }
+        };
+
+        // Check initial screen size
+        handleResize();
+
+        // Add event listener
+        window.addEventListener("resize", handleResize);
+
+        // Cleanup
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+    }, []);
+
     return isUrlFound ? (
         <div
             className="w-full flex justify-center relative px-3 md:px-0"
@@ -2367,54 +2389,83 @@ const Url = () => {
                                         </div>
                                     </div>
                                 </div>
-                                {/* ----- for large screen ----- */}
-                                {previewMode && (
-                                    <div
-                                        className="hidden px-2 py-1 rounded-2xl sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400 text-primary transition-all duration-300 hover:drop-shadow-lg hover:shadow-lg"
-                                        style={{
-                                            color:
-                                                template?.accent || "#6b7280",
-                                            filter: "drop-shadow(0 0 0 transparent)",
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.filter = `drop-shadow(0 0 8px ${
-                                                template?.accent || "#6b7280"
-                                            })`;
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.filter =
-                                                "drop-shadow(0 0 0 transparent)";
-                                        }}
-                                    >
-                                        <span className="flex text-sm">
-                                            Share
-                                        </span>
-                                        <span className="text-sm cursor-pointer">
-                                            <Share />
-                                        </span>
-                                    </div>
-                                )}
 
-                                {/* ----- for small screen ----- */}
-                                {previewMode && (
-                                    <div
-                                        className={`absolute ${
-                                            imagePreview === ""
-                                                ? "-top-10"
-                                                : "top-0"
-                                        } px-2 py-1 rounded-2xl right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}
-                                        style={{
-                                            color:
-                                                template?.accent || "#6b7280",
-                                        }}
-                                    >
-                                        <span className="flex text-sm">
-                                            Share
-                                        </span>
-                                        <span className="text-sm cursor-pointer">
-                                            <Share />
-                                        </span>
-                                    </div>
+                                {isPrivate ? (
+                                    previewMode && (
+                                        <>
+                                            {/* ----- for large screen ----- */}
+                                            <span className="hidden sm:flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
+                                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                Private
+                                            </span>
+                                            {/* ----- for small screen ----- */}
+                                            <span
+                                                className={`absolute ${
+                                                    imagePreview === ""
+                                                        ? "-top-10"
+                                                        : "top-0"
+                                                } right-0 sm:hidden flex justify-center items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800`}
+                                            >
+                                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                Private
+                                            </span>
+                                        </>
+                                    )
+                                ) : (
+                                    <>
+                                        {/* ----- for large screen ----- */}
+                                        {previewMode && (
+                                            <div
+                                                className="hidden px-2 py-1 rounded-2xl sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400 text-primary transition-all duration-300 hover:drop-shadow-lg hover:shadow-lg"
+                                                style={{
+                                                    color:
+                                                        template?.accent ||
+                                                        "#6b7280",
+                                                    filter: "drop-shadow(0 0 0 transparent)",
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.filter = `drop-shadow(0 0 8px ${
+                                                        template?.accent ||
+                                                        "#6b7280"
+                                                    })`;
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.filter =
+                                                        "drop-shadow(0 0 0 transparent)";
+                                                }}
+                                            >
+                                                <span className="flex text-sm">
+                                                    Share
+                                                </span>
+                                                <span className="text-sm cursor-pointer">
+                                                    <Share />
+                                                </span>
+                                            </div>
+                                        )}
+
+                                        {/* ----- for small screen ----- */}
+                                        {previewMode && (
+                                            <div
+                                                className={`absolute ${
+                                                    imagePreview === ""
+                                                        ? "-top-10"
+                                                        : "top-0"
+                                                } px-2 py-1 rounded-2xl right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}
+                                                style={{
+                                                    color:
+                                                        template?.accent ||
+                                                        "#6b7280",
+                                                }}
+                                            >
+                                                <span className="flex text-sm">
+                                                    Share
+                                                </span>
+                                                <span className="text-sm cursor-pointer">
+                                                    <Share />
+                                                </span>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
 
                                 {isFromUser && !editMode && (
@@ -2793,22 +2844,21 @@ const Url = () => {
                                             Make Public
                                         </label>
                                     </div>
-                                    {!isPrivate &&
-                                        !hasChanges() && (
-                                            <div className="flex items-center">
-                                                <span
-                                                    className="text-sm flex items-center gap-1 underline text-gray-500 hover:text-primary cursor-pointer"
-                                                    onClick={() => {
-                                                        window.open(
-                                                            `/share/${id}`,
-                                                            "_blank"
-                                                        );
-                                                    }}
-                                                >
-                                                    Visit <Link21 />
-                                                </span>
-                                            </div>
-                                        )}
+                                    {!isPrivate && !hasChanges() && (
+                                        <div className="flex items-center">
+                                            <span
+                                                className="text-sm flex items-center gap-1 underline text-gray-500 hover:text-primary cursor-pointer"
+                                                onClick={() => {
+                                                    window.open(
+                                                        `/share/${id}`,
+                                                        "_blank"
+                                                    );
+                                                }}
+                                            >
+                                                Visit <Link21 />
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
