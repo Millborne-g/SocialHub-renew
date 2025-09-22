@@ -455,7 +455,16 @@ const Home = () => {
                                             >
                                                 <th
                                                     scope="row"
-                                                    className="px-6 py-4 font-semibold text-gray-900 whitespace-nowrap group-hover:text-blue-600 transition-colors"
+                                                    className="cursor-pointer px-6 py-4 font-semibold text-gray-900 whitespace-nowrap group-hover:text-blue-600 transition-colors"
+                                                    onClick={() => {
+                                                        // window.open(
+                                                        //     `/share/${url._id}`,
+                                                        //     "_blank"
+                                                        // );
+                                                        router.push(
+                                                            `/share/${url._id}`
+                                                        );
+                                                    }}
                                                 >
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center overflow-hidden">
@@ -553,6 +562,18 @@ const Home = () => {
                                                 <td className="px-6 py-4 text-center">
                                                     <div className="flex items-center justify-start gap-1">
                                                         <button
+                                                            className="cursor-pointer p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                                                            onClick={() => {
+                                                                window.open(
+                                                                    `/share/${url._id}`,
+                                                                    "_blank"
+                                                                );
+                                                            }}
+                                                            title="Visit"
+                                                        >
+                                                            <Export className="w-4 h-4" />
+                                                        </button>
+                                                        <button
                                                             className="cursor-pointer p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
                                                             onClick={() => {
                                                                 router.push(
@@ -577,20 +598,6 @@ const Home = () => {
                                                         >
                                                             <Trash className="w-4 h-4" />
                                                         </button>
-                                                        {url.public && (
-                                                            <button
-                                                                className="cursor-pointer p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
-                                                                onClick={() => {
-                                                                    window.open(
-                                                                        `/share/${url._id}`,
-                                                                        "_blank"
-                                                                    );
-                                                                }}
-                                                                title="Visit"
-                                                            >
-                                                                <Export className="w-4 h-4" />
-                                                            </button>
-                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>
