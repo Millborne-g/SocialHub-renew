@@ -67,8 +67,13 @@ const LoginContent = () => {
             await login(data.email, data.password);
             toast.success("Login successful");
             router.push("/home");
-        } catch (error) {
-            toast.error("Login failed");
+        } catch (error: any) {
+            console.log("Login error:", error);
+            console.log(
+                "Response data message:",
+                error?.response?.data?.message
+            );
+            toast.error(error?.response?.data?.message || "Login failed");
         } finally {
             setIsLoading(false);
         }

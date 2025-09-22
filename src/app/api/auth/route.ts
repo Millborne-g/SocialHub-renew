@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
 
         if (!user) {
             return NextResponse.json(
-                { message: "User not found" },
+                { message: "Account not found, please sign up" },
                 { status: 404 }
             );
         }
