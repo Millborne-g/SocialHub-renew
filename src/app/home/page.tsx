@@ -48,6 +48,7 @@ const Home = () => {
     const [loading, setLoading] = useState(false);
     const [filter, setFilter] = useState("all");
     const [search, setSearch] = useState("");
+    const [searchInput, setSearchInput] = useState("");
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [onDelete, setOnDelete] = useState(false);
     const [onDeleteId, setOnDeleteId] = useState("");
@@ -97,6 +98,7 @@ const Home = () => {
             return (searchTerm: string) => {
                 clearTimeout(timeoutId);
                 timeoutId = setTimeout(() => {
+                    setSearch(searchTerm); // Update actual search state
                     setCurrentPage(1); // Reset to first page when searching
                 }, 500); // 500ms delay
             };
@@ -108,11 +110,26 @@ const Home = () => {
         const fetchUrls = async () => {
             try {
                 setLoading(true);
+
+                setUrls([]);
+                setPagination({
+                    page: 1,
+                    limit: 10,
+                    total: 0,
+                    totalPages: 0,
+                    hasNextPage: false,
+                    hasPrevPage: false,
+                });
                 const response = await api.get(
                     `/api/url?page=${currentPage}&limit=${pageSize}&filter=${filter}&search=${encodeURIComponent(
                         search
                     )}`
                 );
+
+                console.log("search", search);
+                console.log(encodeURIComponent(search));
+
+                console.log("response", response.data);
                 setUrls(response.data.urls);
                 setPagination(response.data.pagination);
             } catch (error) {
@@ -140,8 +157,8 @@ const Home = () => {
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const searchTerm = e.target.value;
-        setSearch(searchTerm);
-        debouncedSearch(searchTerm);
+        setSearchInput(searchTerm); // Update input immediately for responsive typing
+        debouncedSearch(searchTerm); // Debounce the actual search
     };
 
     const handleDeleteURL = async (id: string) => {
@@ -252,15 +269,16 @@ const Home = () => {
                                             <SearchNormal1 className="w-5 h-5 text-gray-400" />
                                         }
                                         type="search"
-                                        value={search}
+                                        value={searchInput}
                                         onChange={handleSearchChange}
                                         width="full"
                                         className="w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
                                     />
-                                    {search && (
+                                    {searchInput && (
                                         <button
                                             onClick={() => {
                                                 setSearch("");
+                                                setSearchInput("");
                                                 setCurrentPage(1);
                                             }}
                                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
@@ -319,6 +337,7 @@ const Home = () => {
                                 <button
                                     onClick={() => {
                                         setSearch("");
+                                        setSearchInput("");
                                         setCurrentPage(1);
                                     }}
                                     className="text-blue-600 hover:text-blue-800 transition-colors px-3 py-1 rounded-lg hover:bg-blue-100 text-sm font-medium"
