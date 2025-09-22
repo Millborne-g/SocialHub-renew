@@ -6,6 +6,7 @@ import connectMongo from "@/lib/mongodb";
 import {
     uploadImageToCloudinary,
     processExternalUrlImages,
+    processExternalUrlImagesFromFiles,
 } from "@/lib/cloudinary";
 
 export async function GET(request: NextRequest) {
@@ -219,9 +220,10 @@ export async function POST(request: NextRequest) {
 
         const externalURLsArray = JSON.parse(externalURLs);
 
-        // Process external URL images and upload to Cloudinary
-        const processedExternalURLs = await processExternalUrlImages(
-            externalURLsArray
+        // Process external URL images from separate file uploads
+        const processedExternalURLs = await processExternalUrlImagesFromFiles(
+            externalURLsArray,
+            formData
         );
 
         const externalUrlData = processedExternalURLs.map((item: any) => ({

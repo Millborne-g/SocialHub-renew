@@ -82,6 +82,71 @@ export const processExternalUrlImages = async (
     return processedURLs;
 };
 
+// Helper function to process external URL images from separate file uploads
+export const processExternalUrlImagesFromFiles = async (
+    externalURLs: any[],
+    formData: FormData,
+    subfolder: string = "external-url-images"
+): Promise<any[]> => {
+    const processedURLs = await Promise.all(
+        externalURLs.map(async (item, index) => {
+            // Check if there's a corresponding file upload for this URL
+            const imageFile = formData.get(
+                `externalUrlImage_${index}`
+            ) as File | null;
+
+            if (imageFile && imageFile instanceof File) {
+                try {
+                    // Validate file size (10MB limit)
+                    const maxSize = 10 * 1024 * 1024; // 10MB limit
+                    if (imageFile.size > maxSize) {
+                        console.error(
+                            `External URL image ${index} too large: ${imageFile.size} bytes`
+                        );
+                        return item; // Keep original image if file is too large
+                    }
+
+                    // Validate file type
+                    const allowedTypes = [
+                        "image/jpeg",
+                        "image/png",
+                        "image/gif",
+                        "image/webp",
+                    ];
+                    if (!allowedTypes.includes(imageFile.type)) {
+                        console.error(
+                            `Invalid external URL image type: ${imageFile.type}`
+                        );
+                        return item; // Keep original image if type is invalid
+                    }
+
+                    // Upload file to Cloudinary
+                    const result = await uploadImageToCloudinary(
+                        imageFile,
+                        subfolder
+                    );
+                    return {
+                        ...item,
+                        image: result,
+                    };
+                } catch (error) {
+                    console.error(
+                        `Error uploading external URL image ${index} to Cloudinary:`,
+                        error
+                    );
+                    // Keep original image if upload fails
+                    return item;
+                }
+            }
+
+            // If no file upload, keep the existing image (could be favicon or existing URL)
+            return item;
+        })
+    );
+
+    return processedURLs;
+};
+
 // Helper function to clean up old external URL images from Cloudinary
 export const cleanupOldExternalUrlImages = async (
     oldExternalURLs: any[],

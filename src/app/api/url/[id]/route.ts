@@ -7,6 +7,7 @@ import {
     uploadImageToCloudinary,
     deleteImageFromCloudinary,
     processExternalUrlImages,
+    processExternalUrlImagesFromFiles,
     cleanupOldExternalUrlImages,
 } from "@/lib/cloudinary";
 
@@ -359,9 +360,12 @@ export async function PUT(
 
                 // Create new external URLs
                 if (externalURLsArray.length > 0) {
-                    // Process external URL images and upload to Cloudinary
+                    // Process external URL images from separate file uploads
                     const processedExternalURLs =
-                        await processExternalUrlImages(externalURLsArray);
+                        await processExternalUrlImagesFromFiles(
+                            externalURLsArray,
+                            formData
+                        );
 
                     const externalUrlData = processedExternalURLs.map(
                         (item: any) => ({
