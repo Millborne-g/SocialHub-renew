@@ -41,6 +41,87 @@ export const uploadImageToCloudinary = async (
     }
 };
 
+// Helper function to process external URL images and upload to Cloudinary
+export const processExternalUrlImages = async (
+    externalURLs: any[],
+    subfolder: string = "external-url-images"
+): Promise<any[]> => {
+    const processedURLs = await Promise.all(
+        externalURLs.map(async (item) => {
+            // If the image is a base64 data URI, upload it to Cloudinary
+            if (item.image && item.image.startsWith("data:image/")) {
+                try {
+                    // Upload base64 image to Cloudinary
+                    const result = await cloudinary.uploader.upload(
+                        item.image,
+                        {
+                            resource_type: "auto",
+                            folder: `LinkLet/${subfolder}`,
+                            quality: "auto",
+                            fetch_format: "auto",
+                        }
+                    );
+                    return {
+                        ...item,
+                        image: result.secure_url,
+                    };
+                } catch (error) {
+                    console.error(
+                        "Error uploading external URL image to Cloudinary:",
+                        error
+                    );
+                    // Keep original image if upload fails
+                    return item;
+                }
+            }
+            // If it's already a URL or favicon, keep it as is
+            return item;
+        })
+    );
+
+    return processedURLs;
+};
+
+// Helper function to clean up old external URL images from Cloudinary
+export const cleanupOldExternalUrlImages = async (
+    oldExternalURLs: any[],
+    newExternalURLs: any[]
+): Promise<void> => {
+    // Find images that were removed or changed
+    const imagesToDelete: string[] = [];
+
+    for (const oldItem of oldExternalURLs) {
+        if (oldItem.image && oldItem.image.startsWith("http")) {
+            // Check if this item still exists in the new URLs with the same image
+            const stillExists = newExternalURLs.some(
+                (newItem) =>
+                    newItem._id === oldItem._id &&
+                    newItem.image === oldItem.image
+            );
+
+            if (!stillExists) {
+                imagesToDelete.push(oldItem.image);
+            }
+        }
+    }
+
+    // Delete old images from Cloudinary
+    for (const imageUrl of imagesToDelete) {
+        try {
+            console.log(
+                "Deleting old external URL image from Cloudinary:",
+                imageUrl
+            );
+            await deleteImageFromCloudinary(imageUrl);
+        } catch (error) {
+            console.error(
+                "Error deleting old external URL image from Cloudinary:",
+                error
+            );
+        }
+    }
+};
+
 // Helper function to delete image from Cloudinary
 export const deleteImageFromCloudinary = async (
     imageUrl: string

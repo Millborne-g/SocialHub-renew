@@ -6,6 +6,8 @@ import connectMongo from "@/lib/mongodb";
 import {
     uploadImageToCloudinary,
     deleteImageFromCloudinary,
+    processExternalUrlImages,
+    cleanupOldExternalUrlImages,
 } from "@/lib/cloudinary";
 
 export async function GET(
@@ -347,12 +349,21 @@ export async function PUT(
             try {
                 const externalURLsArray = JSON.parse(externalURLs);
 
+                // Get existing external URLs before deleting them
+                const existingExternalURLs = await ExternalUrl.find({
+                    urlParentId: id,
+                });
+
                 // Delete existing external URLs for this URL
                 await ExternalUrl.deleteMany({ urlParentId: id });
 
                 // Create new external URLs
                 if (externalURLsArray.length > 0) {
-                    const externalUrlData = externalURLsArray.map(
+                    // Process external URL images and upload to Cloudinary
+                    const processedExternalURLs =
+                        await processExternalUrlImages(externalURLsArray);
+
+                    const externalUrlData = processedExternalURLs.map(
                         (item: any) => ({
                             url: item.url,
                             title: item.title,
@@ -363,6 +374,15 @@ export async function PUT(
                     );
 
                     await ExternalUrl.create(externalUrlData);
+
+                    // Clean up old external URL images from Cloudinary
+                    await cleanupOldExternalUrlImages(
+                        existingExternalURLs,
+                        processedExternalURLs
+                    );
+                } else {
+                    // If no new external URLs, clean up all old images
+                    await cleanupOldExternalUrlImages(existingExternalURLs, []);
                 }
             } catch (parseError) {
                 console.error("Error parsing external URLs:", parseError);

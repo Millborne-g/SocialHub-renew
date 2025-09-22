@@ -3,7 +3,10 @@ import Url from "@/schema/Urls";
 import { requireAuth } from "@/middlewares/auth";
 import ExternalUrl from "@/schema/ExternalUrl";
 import connectMongo from "@/lib/mongodb";
-import { uploadImageToCloudinary } from "@/lib/cloudinary";
+import {
+    uploadImageToCloudinary,
+    processExternalUrlImages,
+} from "@/lib/cloudinary";
 
 export async function GET(request: NextRequest) {
     try {
@@ -216,7 +219,12 @@ export async function POST(request: NextRequest) {
 
         const externalURLsArray = JSON.parse(externalURLs);
 
-        const externalUrlData = externalURLsArray.map((item: any) => ({
+        // Process external URL images and upload to Cloudinary
+        const processedExternalURLs = await processExternalUrlImages(
+            externalURLsArray
+        );
+
+        const externalUrlData = processedExternalURLs.map((item: any) => ({
             url: item.url,
             title: item.title,
             sequence: item.sequence,
