@@ -37,14 +37,14 @@ const Home = () => {
     const [urls, setUrls] = useState<any>([]);
     const [pagination, setPagination] = useState({
         page: 1,
-        limit: 10,
+        limit: 5,
         total: 0,
         totalPages: 0,
         hasNextPage: false,
         hasPrevPage: false,
     });
     const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(5);
     const [loading, setLoading] = useState(false);
     const [filter, setFilter] = useState("all");
     const [search, setSearch] = useState("");
@@ -114,7 +114,7 @@ const Home = () => {
                 setUrls([]);
                 setPagination({
                     page: 1,
-                    limit: 10,
+                    limit: 5,
                     total: 0,
                     totalPages: 0,
                     hasNextPage: false,
