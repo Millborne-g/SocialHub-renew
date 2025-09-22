@@ -587,7 +587,7 @@ const Url = () => {
             setIsLoading(false);
         };
         fetchUrl();
-    }, [id, userDetails]);
+    }, [id]);
 
     useEffect(() => {
         const refreshUserToken = async () => {
