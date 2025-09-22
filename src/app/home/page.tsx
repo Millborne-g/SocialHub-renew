@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { decodeToken } from "@/lib/jwt";
 import api from "@/lib/axios";
-import Button from "@/components/Button";
+import CustomButton from "@/components/CustomButton";
 import {
     Add,
     Edit,
@@ -242,16 +242,12 @@ const Home = () => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <Button
+                                <CustomButton
                                     text="Create New"
-                                    rounded="full"
-                                    variant="primary"
                                     icon={<Add className="w-5 h-5" />}
-                                    size="lg"
                                     onClick={() => {
                                         router.push("/home/create");
                                     }}
-                                    // className="shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                                 />
                             </div>
                         </div>

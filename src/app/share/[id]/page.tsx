@@ -528,64 +528,72 @@ const Url = () => {
 
     useEffect(() => {
         const fetchUrl = async () => {
-            setUrlPreviewMode(true);
-            console.log("fetching url", isLoading);
-            if (id !== "create") {
-                setIsLoading(true);
-                const response = await api.get(`/api/share/${id}`);
-                if (response) {
-                    setTitle(response.data.url.title);
-                    setDescription(response.data.url.description);
-                    setImage(response.data.url.image);
-                    setImagePreview(response.data.url.image);
-                    setExternalUrls(response.data.externalUrls);
-                    setIsPrivate(!response.data.url.public);
-                    setEditMode(true);
-                    setPreviewMode(true);
-                    setTemplate(response.data.url.template);
-                    setUrlTemplate(response.data.url.template);
-                    if (response.data.url.userAlias) {
-                        setUserAlias({
-                            name: response.data.url.userAlias.name,
-                            image: response.data.url.userAlias.imageFile,
-                            imageFile: response.data.url.userAlias.imageFile,
-                        });
-                    }
-                    // Store original values for change detection
-                    setOriginalTitle(response.data.url.title);
-                    setOriginalDescription(response.data.url.description);
-                    setOriginalImage(response.data.url.image);
-                    setOriginalIsPrivate(!response.data.url.public);
-                    setOriginalExternalURLs(response.data.externalUrls);
-                    setOriginalTemplate(response.data.url.template);
-                    setCreatedBy(response.data.createdBy);
+            try {
+                setUrlPreviewMode(true);
+                console.log("fetching url", isLoading);
+                if (id !== "create") {
+                    setIsLoading(true);
+                    const response = await api.get(`/api/share/${id}`);
+                    if (response) {
+                        setTitle(response.data.url.title);
+                        setDescription(response.data.url.description);
+                        setImage(response.data.url.image);
+                        setImagePreview(response.data.url.image);
+                        setExternalUrls(response.data.externalUrls);
+                        setIsPrivate(!response.data.url.public);
+                        setEditMode(true);
+                        setPreviewMode(true);
+                        setTemplate(response.data.url.template);
+                        setUrlTemplate(response.data.url.template);
+                        if (response.data.url.userAlias) {
+                            setUserAlias({
+                                name: response.data.url.userAlias.name,
+                                image: response.data.url.userAlias.imageFile,
+                                imageFile:
+                                    response.data.url.userAlias.imageFile,
+                            });
+                        }
+                        // Store original values for change detection
+                        setOriginalTitle(response.data.url.title);
+                        setOriginalDescription(response.data.url.description);
+                        setOriginalImage(response.data.url.image);
+                        setOriginalIsPrivate(!response.data.url.public);
+                        setOriginalExternalURLs(response.data.externalUrls);
+                        setOriginalTemplate(response.data.url.template);
+                        setCreatedBy(response.data.createdBy);
 
-                    if (response.data.url.userId === userDetails?.user?.id) {
-                        setIsFromUser(true);
-                    }
+                        if (
+                            response.data.url.userId === userDetails?.user?.id
+                        ) {
+                            setIsFromUser(true);
+                        }
 
-                    setIsUrlFound(true);
+                        setIsUrlFound(true);
+                    } else {
+                        console.log(response);
+
+                        setIsUrlFound(true);
+                    }
                 } else {
-                    console.log(response);
-
                     setIsUrlFound(true);
+                    setEditMode(true);
+                    setPreviewMode(false);
+                    setIsFromUser(true);
+                    setIsPrivate(true);
+                    // Initialize original values for new items
+                    setOriginalTitle("");
+                    setOriginalDescription("");
+                    setOriginalImage(null);
+                    setOriginalIsPrivate(false);
+                    setOriginalExternalURLs([]);
+                    setOriginalTemplate(null);
+                    setCreatedBy(null);
                 }
-            } else {
-                setIsUrlFound(true);
-                setEditMode(true);
-                setPreviewMode(false);
-                setIsFromUser(true);
-                setIsPrivate(true);
-                // Initialize original values for new items
-                setOriginalTitle("");
-                setOriginalDescription("");
-                setOriginalImage(null);
-                setOriginalIsPrivate(false);
-                setOriginalExternalURLs([]);
-                setOriginalTemplate(null);
-                setCreatedBy(null);
+                setIsLoading(false);
+            } catch (error) {
+                console.log(error);
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
         fetchUrl();
     }, [id]);
@@ -901,56 +909,70 @@ const Url = () => {
                                     </div>
                                 </div>
 
-                                {/* ----- share button for large screen ----- */}
-                                {previewMode && (
-                                    <div
-                                        className="hidden sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400 text-primary transition-all duration-300 hover:drop-shadow-lg hover:shadow-lg"
-                                        style={{
-                                            color:
-                                                template?.accent || "#6b7280",
-                                            filter: "drop-shadow(0 0 0 transparent)",
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.filter = `drop-shadow(0 0 8px ${
-                                                template?.accent || "#6b7280"
-                                            })`;
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.filter =
-                                                "drop-shadow(0 0 0 transparent)";
-                                        }}
-                                        onClick={handleShareModalOpen}
-                                    >
-                                        <span className="flex text-sm">
-                                            Share
+                                {isPrivate ? (
+                                    <>
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
+                                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                            Private
                                         </span>
-                                        <span className="text-sm cursor-pointer">
-                                            <Share />
-                                        </span>
-                                    </div>
-                                )}
+                                    </>
+                                ) : (
+                                    <>
+                                        {/* ----- share button for large screen ----- */}
+                                        {previewMode && (
+                                            <div
+                                                className="hidden sm:flex items-center gap-2 y cursor-pointer hover:text-gray-400 text-primary transition-all duration-300 hover:drop-shadow-lg hover:shadow-lg"
+                                                style={{
+                                                    color:
+                                                        template?.accent ||
+                                                        "#6b7280",
+                                                    filter: "drop-shadow(0 0 0 transparent)",
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.filter = `drop-shadow(0 0 8px ${
+                                                        template?.accent ||
+                                                        "#6b7280"
+                                                    })`;
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.filter =
+                                                        "drop-shadow(0 0 0 transparent)";
+                                                }}
+                                                onClick={handleShareModalOpen}
+                                            >
+                                                <span className="flex text-sm">
+                                                    Share
+                                                </span>
+                                                <span className="text-sm cursor-pointer">
+                                                    <Share />
+                                                </span>
+                                            </div>
+                                        )}
 
-                                {/* ----- share button for small screen ----- */}
-                                {previewMode && (
-                                    <div
-                                        className={`absolute ${
-                                            imagePreview === ""
-                                                ? "-top-10"
-                                                : "top-0"
-                                        }  right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}
-                                        style={{
-                                            color:
-                                                template?.accent || "#6b7280",
-                                        }}
-                                        onClick={handleShareModalOpen}
-                                    >
-                                        <span className="flex text-sm">
-                                            Share
-                                        </span>
-                                        <span className="text-sm cursor-pointer">
-                                            <Share />
-                                        </span>
-                                    </div>
+                                        {/* ----- share button for small screen ----- */}
+                                        {previewMode && (
+                                            <div
+                                                className={`absolute ${
+                                                    imagePreview === ""
+                                                        ? "-top-10"
+                                                        : "top-0"
+                                                }  right-0 gap-2 y cursor-pointer hover:text-gray-400 flex justify-center items-center text-primary sm:hidden`}
+                                                style={{
+                                                    color:
+                                                        template?.accent ||
+                                                        "#6b7280",
+                                                }}
+                                                onClick={handleShareModalOpen}
+                                            >
+                                                <span className="flex text-sm">
+                                                    Share
+                                                </span>
+                                                <span className="text-sm cursor-pointer">
+                                                    <Share />
+                                                </span>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
 
                                 {isFromUser && !editMode && (

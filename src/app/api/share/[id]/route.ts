@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import ExternalUrl from "@/schema/ExternalUrl";
 import User from "@/schema/Users";
 import connectMongo from "@/lib/mongodb";
+import { verifyAccessToken } from "@/lib/jwt";
 
 export async function GET(
     request: NextRequest,
@@ -14,11 +15,53 @@ export async function GET(
         const { id } = await params;
 
         const url = await Url.findById(id);
-        if (url?.public === false) {
+        if (!url) {
             return NextResponse.json(
-                { message: "Url is private" },
-                { status: 401 }
+                { message: "Url not found" },
+                { status: 404 }
             );
+        }
+
+        // Check if URL is private
+        if (url.public === false) {
+            // Get authorization token from headers
+            const authHeader = request.headers.get("authorization");
+            if (!authHeader) {
+                return NextResponse.json(
+                    { message: "Authorization token required for private URL" },
+                    { status: 401 }
+                );
+            }
+
+            const token = authHeader.split(" ")[1];
+            if (!token) {
+                return NextResponse.json(
+                    { message: "Invalid authorization format" },
+                    { status: 401 }
+                );
+            }
+
+            try {
+                // Verify the token and get user information
+                const payload = verifyAccessToken(token) as any;
+                const userId = payload.user?.id;
+
+                // Check if the authenticated user owns this URL
+                if (userId !== url.userId) {
+                    return NextResponse.json(
+                        {
+                            message:
+                                "Access denied. You can only view your own private URLs",
+                        },
+                        { status: 403 }
+                    );
+                }
+            } catch (error) {
+                return NextResponse.json(
+                    { message: "Invalid or expired token" },
+                    { status: 401 }
+                );
+            }
         }
 
         let createdBy = null;
@@ -32,7 +75,12 @@ export async function GET(
         }
 
         const externalUrls = await ExternalUrl.find({ urlParentId: id });
-        return NextResponse.json({ url, externalUrls, createdBy });
+        return NextResponse.json({
+            url,
+            externalUrls,
+            createdBy,
+            isPrivate: url.public === false,
+        });
     } catch (error) {
         console.log(error);
         return NextResponse.json(
