@@ -176,7 +176,12 @@ const SettingsPage = () => {
     };
 
     if (isLoading) {
-        return <LoadingScreen />;
+        return (
+            <>
+                <div className="h-screen bg-gray-50 px-3"></div>
+                <LoadingScreen />
+            </>
+        );
     }
 
     if (!userDetails) {
