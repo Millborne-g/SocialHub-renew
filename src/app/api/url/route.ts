@@ -53,16 +53,16 @@ export async function GET(request: NextRequest) {
             .limit(limit)
             .sort({ createdAt: -1 }); // Sort by creation date, newest first
 
-        // Fetch ExternalUrl data for each URL
+        // Fetch ExternalUrl count for each URL
         const urlsWithExternalUrls = await Promise.all(
             urls.map(async (url) => {
-                const externalUrls = await ExternalUrl.find({
+                const externalUrlsCount = await ExternalUrl.countDocuments({
                     urlParentId: url._id.toString(),
-                }).sort({ sequence: 1 }); // Sort by sequence number
+                });
 
                 return {
                     ...url.toObject(),
-                    externalUrls,
+                    externalUrlsCount,
                 };
             })
         );

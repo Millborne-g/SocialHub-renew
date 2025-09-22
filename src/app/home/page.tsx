@@ -522,13 +522,12 @@ const Home = () => {
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
-                                                    {url.externalUrls.length >
+                                                    {url.externalUrlsCount >
                                                     0 ? (
                                                         <span className="inline-flex items-center gap-1 text-blue-600 font-medium">
                                                             <Link className="w-4 h-4" />
                                                             {
-                                                                url.externalUrls
-                                                                    .length
+                                                                url.externalUrlsCount
                                                             }
                                                         </span>
                                                     ) : (
