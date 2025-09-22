@@ -529,6 +529,7 @@ const Url = () => {
     useEffect(() => {
         const fetchUrl = async () => {
             setUrlPreviewMode(true);
+            console.log("fetching url", isLoading);
             if (id !== "create") {
                 setIsLoading(true);
                 const response = await api.get(`/api/share/${id}`);
@@ -591,7 +592,6 @@ const Url = () => {
 
     useEffect(() => {
         const refreshUserToken = async () => {
-            setIsLoading(true);
             if (accessToken && !userDetails) {
                 setUserDetails(decodeToken(accessToken));
             } else {
@@ -600,7 +600,6 @@ const Url = () => {
                 //     router.push("/");
                 // }
             }
-            setIsLoading(false);
         };
         refreshUserToken();
     }, [accessToken]);
