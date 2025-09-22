@@ -186,7 +186,6 @@ const Home = () => {
 
     useEffect(() => {
         const refreshUserToken = async () => {
-            console.log("Home refreshUserToken", accessToken, !userDetails);
             setIsLoading(true);
             if (accessToken) {
                 setUserDetails(decodeToken(accessToken));
@@ -214,7 +213,7 @@ const Home = () => {
 
     return (
         <div className="min-h-[calc(90vh-100px)] w-full bg-gradient-to-br from-gray-50 to-white">
-            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="lg:max-w-[60rem] lg:px-0 xl:max-w-[76rem] mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex flex-col gap-8">
                     {/* Enhanced Header Section */}
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
@@ -463,8 +462,18 @@ const Home = () => {
                                                     className="px-6 py-4 font-semibold text-gray-900 whitespace-nowrap group-hover:text-blue-600 transition-colors"
                                                 >
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
-                                                            <Link2 className="w-4 h-4 text-blue-600" />
+                                                        <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center overflow-hidden">
+                                                            {url.image ? (
+                                                                <img
+                                                                    src={
+                                                                        url.image
+                                                                    }
+                                                                    alt="URL Image"
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <Link2 className="w-4 h-4 text-blue-600" />
+                                                            )}
                                                         </div>
                                                         <span className="truncate max-w-[200px]">
                                                             {url.title}
