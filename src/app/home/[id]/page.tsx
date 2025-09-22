@@ -2794,8 +2794,7 @@ const Url = () => {
                                         </label>
                                     </div>
                                     {!isPrivate &&
-                                        !hasChanges() &&
-                                        id !== "create" && (
+                                        !hasChanges() && (
                                             <div className="flex items-center">
                                                 <span
                                                     className="text-sm flex items-center gap-1 underline text-gray-500 hover:text-primary cursor-pointer"
