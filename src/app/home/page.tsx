@@ -381,6 +381,12 @@ const Home = () => {
                                         </th>
                                         <th
                                             scope="col"
+                                            className="px-6 py-4 font-semibold tracking-wider text-center"
+                                        >
+                                            Template Status
+                                        </th>
+                                        <th
+                                            scope="col"
                                             className="px-6 py-4 font-semibold tracking-wider"
                                         >
                                             Created
@@ -397,7 +403,7 @@ const Home = () => {
                                     {loading ? (
                                         <tr>
                                             <td
-                                                colSpan={7}
+                                                colSpan={8}
                                                 className="px-6 py-12 text-center"
                                             >
                                                 <div className="flex flex-col items-center justify-center gap-4">
@@ -411,7 +417,7 @@ const Home = () => {
                                     ) : urls.length === 0 ? (
                                         <tr>
                                             <td
-                                                colSpan={7}
+                                                colSpan={8}
                                                 className="px-6 py-12 text-center"
                                             >
                                                 <div className="flex flex-col items-center justify-center gap-4">
@@ -529,6 +535,21 @@ const Home = () => {
                                                         <span className="text-gray-400 italic text-sm">
                                                             No URLs
                                                         </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 text-center">
+                                                    {url.template ? (
+                                                        <div className="inline-flex items-center justify-center w-12 h-6 bg-gradient-to-r from-green-500 to-emerald-500 rounded-md">
+                                                            <span className="text-white text-xs font-medium">
+                                                                Yes
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="inline-flex items-center justify-center w-12 h-6 bg-gradient-to-r from-gray-400 to-gray-500 rounded-md">
+                                                            <span className="text-white text-xs font-medium">
+                                                                No
+                                                            </span>
+                                                        </div>
                                                     )}
                                                 </td>
                                                 <td className="px-6 py-4">
