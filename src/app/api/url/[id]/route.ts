@@ -3,6 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/middlewares/auth";
 import ExternalUrl from "@/schema/ExternalUrl";
 import connectMongo from "@/lib/mongodb";
+import {
+    uploadImageToCloudinary,
+    deleteImageFromCloudinary,
+} from "@/lib/cloudinary";
 
 export async function GET(
     request: NextRequest,
@@ -42,14 +46,55 @@ export async function DELETE(
         }
         const userId = (authResult as any).user.id;
         const { id } = await params;
-        const url = await Url.findByIdAndDelete(id);
+
+        // Find the URL first to get image URLs before deleting
+        const url = await Url.findById(id);
+        if (!url) {
+            return NextResponse.json(
+                { message: "URL not found" },
+                { status: 404 }
+            );
+        }
+
+        // Check if user owns this URL
+        if (url.userId !== userId) {
+            return NextResponse.json(
+                { message: "Unauthorized to delete this URL" },
+                { status: 403 }
+            );
+        }
+
+        // Delete images from Cloudinary if they exist
+        if (url.image && url.image.startsWith("http")) {
+            console.log("Deleting main image from Cloudinary:", url.image);
+            await deleteImageFromCloudinary(url.image);
+        }
+
+        // Delete user alias image from Cloudinary if it exists
+        if (
+            url.userAlias?.imageFile &&
+            url.userAlias.imageFile.startsWith("http")
+        ) {
+            console.log(
+                "Deleting user alias image from Cloudinary:",
+                url.userAlias.imageFile
+            );
+            await deleteImageFromCloudinary(url.userAlias.imageFile);
+        }
+
+        // Delete the URL from database
+        await Url.findByIdAndDelete(id);
+
+        // Delete associated external URLs
         const externalUrls = await ExternalUrl.find({ urlParentId: id });
         await ExternalUrl.deleteMany({ urlParentId: id });
+
         return NextResponse.json(
             { message: "Url deleted successfully", externalUrls },
             { status: 200 }
         );
     } catch (error) {
+        console.error("Error deleting URL:", error);
         return NextResponse.json(
             { message: "Error deleting url" },
             { status: 500 }
@@ -109,14 +154,23 @@ export async function PUT(
         }
 
         let imageUrl = existingUrl.image; // Keep existing image by default
+        let oldImageUrl = existingUrl.image; // Store old image URL for potential deletion
 
         if (image === "null") {
+            // Delete old image from Cloudinary if it exists when removing image
+            if (oldImageUrl && oldImageUrl.startsWith("http")) {
+                console.log(
+                    "Deleting main image from Cloudinary (image being removed):",
+                    oldImageUrl
+                );
+                await deleteImageFromCloudinary(oldImageUrl);
+            }
             imageUrl = "";
         }
 
         // Handle image upload if new image is provided
         if (image && image instanceof File) {
-            // Validate file size (MongoDB document limit is 16MB, but we'll be conservative)
+            // Validate file size (Cloudinary has a 100MB limit, but we'll be conservative)
             const maxSize = 10 * 1024 * 1024; // 10MB limit
             if (image.size > maxSize) {
                 return NextResponse.json(
@@ -142,17 +196,25 @@ export async function PUT(
             }
 
             try {
-                // Convert to base64 and store as string
-                const bytes = await image.arrayBuffer();
-                const buffer = Buffer.from(bytes);
-                const base64 = `data:${image.type};base64,${buffer.toString(
-                    "base64"
-                )}`;
-                imageUrl = base64;
+                // Upload image to Cloudinary in 'url-images' subfolder
+                imageUrl = await uploadImageToCloudinary(image, "url-images");
+
+                // Delete old image from Cloudinary if it exists and is different from new one
+                if (
+                    oldImageUrl &&
+                    oldImageUrl !== imageUrl &&
+                    oldImageUrl.startsWith("http")
+                ) {
+                    console.log(
+                        "Deleting old main image from Cloudinary:",
+                        oldImageUrl
+                    );
+                    await deleteImageFromCloudinary(oldImageUrl);
+                }
             } catch (error) {
-                console.error("Error processing image:", error);
+                console.error("Error uploading image to Cloudinary:", error);
                 return NextResponse.json(
-                    { error: "Failed to process image. Please try again." },
+                    { error: "Failed to upload image. Please try again." },
                     { status: 500 }
                 );
             }
@@ -160,8 +222,10 @@ export async function PUT(
 
         // Handle userAlias image upload
         let userAliasImageUrl = "";
+        let oldUserAliasImageUrl = existingUrl.userAlias?.imageFile || ""; // Store old user alias image URL
+
         if (userAliasImage && userAliasImage instanceof File) {
-            // Validate file size (MongoDB document limit is 16MB, but we'll be conservative)
+            // Validate file size (Cloudinary has a 100MB limit, but we'll be conservative)
             const maxSize = 10 * 1024 * 1024; // 10MB limit
             if (userAliasImage.size > maxSize) {
                 return NextResponse.json(
@@ -189,18 +253,32 @@ export async function PUT(
             }
 
             try {
-                // Convert to base64 and store as string
-                const bytes = await userAliasImage.arrayBuffer();
-                const buffer = Buffer.from(bytes);
-                const base64 = `data:${
-                    userAliasImage.type
-                };base64,${buffer.toString("base64")}`;
-                userAliasImageUrl = base64;
+                // Upload user alias image to Cloudinary in 'user-alias-image' subfolder
+                userAliasImageUrl = await uploadImageToCloudinary(
+                    userAliasImage,
+                    "user-alias-image"
+                );
+
+                // Delete old user alias image from Cloudinary if it exists and is different from new one
+                if (
+                    oldUserAliasImageUrl &&
+                    oldUserAliasImageUrl !== userAliasImageUrl &&
+                    oldUserAliasImageUrl.startsWith("http")
+                ) {
+                    console.log(
+                        "Deleting old user alias image from Cloudinary:",
+                        oldUserAliasImageUrl
+                    );
+                    await deleteImageFromCloudinary(oldUserAliasImageUrl);
+                }
             } catch (error) {
-                console.error("Error processing user alias image:", error);
+                console.error(
+                    "Error uploading user alias image to Cloudinary:",
+                    error
+                );
                 return NextResponse.json(
                     {
-                        error: "Failed to process user alias image. Please try again.",
+                        error: "Failed to upload user alias image. Please try again.",
                     },
                     { status: 500 }
                 );
@@ -208,9 +286,45 @@ export async function PUT(
         }
 
         // Parse userAlias and update with processed image
-        const userAliasData = JSON.parse(userAlias);
-        if (userAliasImageUrl) {
-            userAliasData.imageFile = userAliasImageUrl;
+        let userAliasData = null;
+        try {
+            userAliasData = userAlias ? JSON.parse(userAlias) : null;
+        } catch (parseError) {
+            console.error("Error parsing userAlias:", parseError);
+            userAliasData = null;
+        }
+
+        if (userAliasData) {
+            if (userAliasImageUrl) {
+                userAliasData.imageFile = userAliasImageUrl;
+            } else if (
+                userAliasData.imageFile === null ||
+                userAliasData.imageFile === ""
+            ) {
+                // If userAlias image is being removed, delete old image from Cloudinary
+                if (
+                    oldUserAliasImageUrl &&
+                    oldUserAliasImageUrl.startsWith("http")
+                ) {
+                    console.log(
+                        "Deleting user alias image from Cloudinary (image being removed):",
+                        oldUserAliasImageUrl
+                    );
+                    await deleteImageFromCloudinary(oldUserAliasImageUrl);
+                }
+            }
+        } else {
+            // If userAlias is being completely removed, delete old image from Cloudinary
+            if (
+                oldUserAliasImageUrl &&
+                oldUserAliasImageUrl.startsWith("http")
+            ) {
+                console.log(
+                    "Deleting user alias image from Cloudinary (userAlias being removed):",
+                    oldUserAliasImageUrl
+                );
+                await deleteImageFromCloudinary(oldUserAliasImageUrl);
+            }
         }
 
         // Update the URL

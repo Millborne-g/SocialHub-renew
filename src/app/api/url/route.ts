@@ -3,6 +3,7 @@ import Url from "@/schema/Urls";
 import { requireAuth } from "@/middlewares/auth";
 import ExternalUrl from "@/schema/ExternalUrl";
 import connectMongo from "@/lib/mongodb";
+import { uploadImageToCloudinary } from "@/lib/cloudinary";
 
 export async function GET(request: NextRequest) {
     try {
@@ -109,7 +110,7 @@ export async function POST(request: NextRequest) {
 
         // Handle image upload
         if (image && image instanceof File) {
-            // Validate file size (MongoDB document limit is 16MB, but we'll be conservative)
+            // Validate file size (Cloudinary has a 100MB limit, but we'll be conservative)
             const maxSize = 10 * 1024 * 1024; // 10MB limit
             if (image.size > maxSize) {
                 return NextResponse.json(
@@ -135,17 +136,12 @@ export async function POST(request: NextRequest) {
             }
 
             try {
-                // Convert to base64 and store as string
-                const bytes = await image.arrayBuffer();
-                const buffer = Buffer.from(bytes);
-                const base64 = `data:${image.type};base64,${buffer.toString(
-                    "base64"
-                )}`;
-                imageUrl = base64;
+                // Upload image to Cloudinary in 'main-images' subfolder
+                imageUrl = await uploadImageToCloudinary(image, "url-images");
             } catch (error) {
-                console.error("Error processing image:", error);
+                console.error("Error uploading image to Cloudinary:", error);
                 return NextResponse.json(
-                    { error: "Failed to process image. Please try again." },
+                    { error: "Failed to upload image. Please try again." },
                     { status: 500 }
                 );
             }
@@ -155,7 +151,7 @@ export async function POST(request: NextRequest) {
         let userAliasImageUrl = "";
         const userAliasImage = formData.get("userAliasImage") as File | null;
         if (userAliasImage && userAliasImage instanceof File) {
-            // Validate file size (MongoDB document limit is 16MB, but we'll be conservative)
+            // Validate file size (Cloudinary has a 100MB limit, but we'll be conservative)
             const maxSize = 10 * 1024 * 1024; // 10MB limit
             if (userAliasImage.size > maxSize) {
                 return NextResponse.json(
@@ -183,18 +179,19 @@ export async function POST(request: NextRequest) {
             }
 
             try {
-                // Convert to base64 and store as string
-                const bytes = await userAliasImage.arrayBuffer();
-                const buffer = Buffer.from(bytes);
-                const base64 = `data:${
-                    userAliasImage.type
-                };base64,${buffer.toString("base64")}`;
-                userAliasImageUrl = base64;
+                // Upload user alias image to Cloudinary in 'user-avatars' subfolder
+                userAliasImageUrl = await uploadImageToCloudinary(
+                    userAliasImage,
+                    "user-alias-image"
+                );
             } catch (error) {
-                console.error("Error processing user alias image:", error);
+                console.error(
+                    "Error uploading user alias image to Cloudinary:",
+                    error
+                );
                 return NextResponse.json(
                     {
-                        error: "Failed to process user alias image. Please try again.",
+                        error: "Failed to upload user alias image. Please try again.",
                     },
                     { status: 500 }
                 );
