@@ -96,11 +96,13 @@ const NavBar = () => {
 
     const handleLogout = async () => {
         try {
+            setIsLoading(true);
             await logout();
             setIsDropdownOpen(false);
             setUserDetails(null);
 
             setUrlTemplate(null);
+            
             router.push("/login");
         } catch (error) {
             console.error("Logout failed:", error);
@@ -408,7 +410,7 @@ const NavBar = () => {
                 </div>
             )}
 
-            {/* {isLoading && <LoadingScreen />} */}
+            {isLoading && <LoadingScreen />}
         </>
     );
 };
