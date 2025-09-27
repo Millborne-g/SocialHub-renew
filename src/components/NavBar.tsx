@@ -41,6 +41,14 @@ const NavBar = () => {
                 router.push("/settings");
             },
         },
+        {
+            label: "Xendit Demo",
+            path: "/sample",
+            onClick: () => {
+                setUrlTemplate(null);
+                router.push("/sample");
+            },
+        },
         // {
         //     label: "Pricing",
         //     path: "/pricing",

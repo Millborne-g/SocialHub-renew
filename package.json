@@ -38,6 +38,7 @@
         "react-hook-form": "^7.62.0",
         "react-hot-toast": "^2.5.2",
         "react-share": "^5.2.2",
+        "xendit-node": "^7.0.0",
         "yup": "^1.7.0",
         "zustand": "^5.0.7"
     },
