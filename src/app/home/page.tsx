@@ -52,7 +52,7 @@ const Home = () => {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [onDelete, setOnDelete] = useState(false);
     const [onDeleteId, setOnDeleteId] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const greetingsRandom = [
         "Hello",
         "Hi",
@@ -186,7 +186,6 @@ const Home = () => {
 
     useEffect(() => {
         const refreshUserToken = async () => {
-            setIsLoading(true);
             if (accessToken) {
                 setUserDetails(decodeToken(accessToken));
             } else {
@@ -197,6 +196,7 @@ const Home = () => {
             }
             setIsLoading(false);
         };
+        setIsLoading(true);
         refreshUserToken();
     }, [accessToken, refreshToken]);
 
