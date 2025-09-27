@@ -70,8 +70,6 @@ const Url = () => {
         imageFile: File | null;
     } | null>(null);
 
-    console.log(userAlias);
-
     const [userAliasOnEdit, setUserAliasOnEdit] = useState<{
         name: string;
         image: string;
@@ -1324,13 +1322,6 @@ const Url = () => {
             const scrollHeight = scrollContainer.scrollHeight;
             const clientHeight = scrollContainer.clientHeight;
 
-            console.log("Scroll debug:", {
-                scrollTop,
-                scrollHeight,
-                clientHeight,
-                isScrollable: scrollHeight > clientHeight,
-            });
-
             setIsAtTop(scrollTop <= 10); // Small threshold for better UX
         };
 
@@ -1342,7 +1333,7 @@ const Url = () => {
         return () => {
             scrollContainer.removeEventListener("scroll", handleScroll);
         };
-    }, [filteredTemplates]); // Re-run when templates change
+    }, [filteredTemplates, template]); // Re-run when templates change
 
     // Function to convert URL to Google favicon service format
     const getFaviconUrl = (url: string): string => {
