@@ -85,12 +85,6 @@ const Home = () => {
     const [greeting, setGreeting] = useState("");
     const [greetingsMessage, setGreetingsMessage] = useState("");
 
-    useEffect(() => {
-        if (accessToken) {
-            setUserDetails(decodeToken(accessToken));
-        }
-    }, [accessToken]);
-
     // Debounced search function
     const debouncedSearch = useCallback(
         (() => {
@@ -198,7 +192,7 @@ const Home = () => {
         };
         setIsLoading(true);
         refreshUserToken();
-    }, [accessToken, refreshToken]);
+    }, [accessToken]);
 
     useEffect(() => {
         setGreeting(
