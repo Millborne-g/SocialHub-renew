@@ -18,6 +18,7 @@ import {
     Link21,
     Magicpen,
     Save2,
+    SearchNormal1,
     Share,
     Trash,
     User,
@@ -152,6 +153,9 @@ const Url = () => {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     // Add refs for template items to enable scrolling
     const templateRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+    // State to track if scroll container is at the top
+    const [isAtTop, setIsAtTop] = useState(true);
 
     const [template, setTemplate] = useState<any>(null);
     const [templates, setTemplates] = useState<any[]>([
@@ -1291,6 +1295,54 @@ const Url = () => {
             accent: "#3A16C4", // Bloomberg purple
         },
     ]);
+
+    // Search state for templates
+    const [templateSearchQuery, setTemplateSearchQuery] = useState("");
+    const [filteredTemplates, setFilteredTemplates] = useState<any[]>([]);
+
+    // Filter templates based on search query
+    useEffect(() => {
+        if (!templateSearchQuery.trim()) {
+            setFilteredTemplates(templates);
+        } else {
+            const filtered = templates.filter((template) =>
+                template.name
+                    .toLowerCase()
+                    .includes(templateSearchQuery.toLowerCase())
+            );
+            setFilteredTemplates(filtered);
+        }
+    }, [templateSearchQuery, templates]);
+
+    // Handle scroll events to track if container is at top
+    useEffect(() => {
+        const scrollContainer = scrollContainerRef.current;
+        if (!scrollContainer) return;
+
+        const handleScroll = () => {
+            const scrollTop = scrollContainer.scrollTop;
+            const scrollHeight = scrollContainer.scrollHeight;
+            const clientHeight = scrollContainer.clientHeight;
+
+            console.log("Scroll debug:", {
+                scrollTop,
+                scrollHeight,
+                clientHeight,
+                isScrollable: scrollHeight > clientHeight,
+            });
+
+            setIsAtTop(scrollTop <= 10); // Small threshold for better UX
+        };
+
+        scrollContainer.addEventListener("scroll", handleScroll);
+
+        // Initial check
+        handleScroll();
+
+        return () => {
+            scrollContainer.removeEventListener("scroll", handleScroll);
+        };
+    }, [filteredTemplates]); // Re-run when templates change
 
     // Function to convert URL to Google favicon service format
     const getFaviconUrl = (url: string): string => {
@@ -2955,9 +3007,26 @@ const Url = () => {
                                 </li> */}
                             </ul>
                         </div>
+
+                        {/* Search Bar */}
+                        <div className="mb-4 flex-shrink-0">
+                            <div className="relative">
+                                <SearchNormal1 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                <input
+                                    type="text"
+                                    placeholder="Search templates..."
+                                    value={templateSearchQuery}
+                                    onChange={(e) =>
+                                        setTemplateSearchQuery(e.target.value)
+                                    }
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                />
+                            </div>
+                        </div>
+
                         <div
                             ref={scrollContainerRef}
-                            className="flex flex-col gap-4 overflow-y-auto relative"
+                            className="flex flex-col gap-4 overflow-y-auto relative flex-1 min-h-0"
                         >
                             <div
                                 ref={(el) => {
@@ -2987,7 +3056,7 @@ const Url = () => {
                                     Default
                                 </span>
                             </div>
-                            {templates.map((templateItem, index) => (
+                            {filteredTemplates.map((templateItem, index) => (
                                 <div
                                     key={index}
                                     ref={(el) => {
@@ -3057,19 +3126,23 @@ const Url = () => {
                                 </div>
                             ))}
 
-                            <div className="fixed bottom-7 right-10 px-3 py-2 rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300">
-                                <span
-                                    className="text-xs text-gray-600 flex items-center gap-2 cursor-pointer"
-                                    onClick={() => {
-                                        scrollContainerRef.current?.scrollTo({
-                                            top: 0,
-                                            behavior: "smooth",
-                                        });
-                                    }}
-                                >
-                                    Top <ArrowUp />
-                                </span>
-                            </div>
+                            {!isAtTop && (
+                                <div className="fixed bottom-7 right-10 px-3 py-2 rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300">
+                                    <span
+                                        className="text-xs text-gray-600 flex items-center gap-2 cursor-pointer"
+                                        onClick={() => {
+                                            scrollContainerRef.current?.scrollTo(
+                                                {
+                                                    top: 0,
+                                                    behavior: "smooth",
+                                                }
+                                            );
+                                        }}
+                                    >
+                                        Top <ArrowUp />
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
